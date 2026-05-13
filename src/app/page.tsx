@@ -158,8 +158,8 @@ export default function Home() {
         });
 
         // Seguimiento del scroll para activar la tarjeta correspondiente
-        masterTL.eventCallback("onUpdate", function() {
-          const t = this.time();
+        masterTL.eventCallback("onUpdate", () => {
+          const t = masterTL.time();
           let nextIdx = null;
           // Los tiempos coinciden con el inicio del enfoque de cada tarjeta (startTime + 0.5)
           if (t >= 12.0) nextIdx = 3;
