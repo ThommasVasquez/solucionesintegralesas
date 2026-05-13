@@ -1,0 +1,124 @@
+.footer {
+  background-color: #0f0f0f;
+  padding: 4rem 0 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+  z-index: 30;  /* above fixed cards (z-index 20) */
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+.brand { max-width: 360px; }
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.footerLogo {
+  height: 70px;
+  width: auto;
+  object-fit: contain;
+}
+
+.icon { color: #5b5ef4; }
+
+.description {
+  color: #555;
+  line-height: 1.6;
+  font-size: 0.875rem;
+}
+
+.title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.links ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.links a {
+  color: #555;
+  transition: color 0.3s ease;
+  font-size: 0.875rem;
+}
+
+.links a:hover { color: #fff; }
+
+.contactList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.contactList li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.contactIcon { color: #5b5ef4; width: 14px; height: 14px; }
+
+.bottom {
+  text-align: center;
+  padding: 1.25rem 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  color: #444;
+  font-size: 0.8rem;
+  display: flex;
+  justify-content: center;
+}
+
+.copyrightLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  color: #666;
+}
+
+.separator {
+  margin: 0 0.2rem;
+  opacity: 0.5;
+}
+
+.energyLogo {
+  height: 20px;
+  width: auto;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.energyLogo:hover {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
