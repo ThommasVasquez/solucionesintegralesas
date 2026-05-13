@@ -13,7 +13,7 @@ export default auth((req) => {
     if (isAuthenticated) {
       return NextResponse.redirect(new URL('/dashboard', nextUrl));
     }
-    return null;
+    return;
   }
 
   if (!isAuthenticated && nextUrl.pathname !== '/') {
@@ -23,7 +23,7 @@ export default auth((req) => {
     }
   }
 
-  return null;
+  return;
 });
 
 export const config = {
