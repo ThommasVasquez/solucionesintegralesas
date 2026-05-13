@@ -15,7 +15,7 @@ interface SheetViewerProps {
 }
 
 export function SheetViewer({ sheetName, role, initialData = [] }: SheetViewerProps) {
-  const hotRef = useRef<HotTable>(null);
+  const hotRef = useRef<any>(null);
   const [data, setData] = useState<any[][]>(initialData);
   const [loading, setLoading] = useState(!initialData.length);
   const [error, setError] = useState<string | null>(null);
