@@ -13,7 +13,7 @@
     "@auth/prisma-adapter": "^2.11.2",
     "@gsap/react": "^2.1.2",
     "@handsontable/react": "^16.2.0",
-    "@prisma/client": "^7.8.0",
+    "@prisma/client": "^5.21.0",
     "@studio-freight/lenis": "^1.0.42",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
@@ -38,7 +38,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.5",
-    "prisma": "^7.8.0",
+    "prisma": "^5.21.0",
     "ts-node": "^10.9.2",
     "typescript": "^5"
   }
