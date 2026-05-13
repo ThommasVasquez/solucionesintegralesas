@@ -45,7 +45,7 @@ export function SheetViewer({ sheetName, role, initialData = [] }: SheetViewerPr
   const handleSave = async () => {
     if (!hotRef.current) return;
     
-    const hotInstance = hotRef.current.hotInstance;
+    const hotInstance = (hotRef.current as any).hotInstance;
     if (!hotInstance) return;
 
     const currentData = hotInstance.getData();
