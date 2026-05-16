@@ -4,10 +4,30 @@ import { authConfig } from './lib/auth.config';
 
 const { auth } = NextAuth(authConfig);
 
+// ── Brand domain → landing page mapping ──────────────────────────────────────
+// Add new brand domains here as they are registered.
+const BRAND_DOMAINS: Record<string, string> = {
+  'ingenova.com.co':     '/empresas/ingenova',
+  'www.ingenova.com.co': '/empresas/ingenova',
+  // Future:
+  // 'clubhousecol.com':   '/empresas/clubhouse',
+  // 'promascotas.com.co': '/empresas/promascotas',
+};
+
 export default auth((req) => {
   const { nextUrl } = req;
+  const hostname = req.headers.get('host') ?? '';
   const isAuthenticated = !!req.auth;
-  
+
+  // 0. Brand-domain rewrite — serve brand landing page at root
+  //    The visitor's URL stays as ingenova.com.co, no redirect.
+  const brandPath = BRAND_DOMAINS[hostname];
+  if (brandPath && nextUrl.pathname === '/') {
+    const url = nextUrl.clone();
+    url.pathname = brandPath;
+    return NextResponse.rewrite(url);
+  }
+
   // 1. Si está en el login y ya está autenticado, mandarlo al dashboard
   if (nextUrl.pathname.startsWith('/login') && isAuthenticated) {
     return NextResponse.redirect(new URL('/dashboard', nextUrl));
