@@ -408,8 +408,8 @@ export default function Home() {
             <div className={styles.nosotrosText}>
               <span className={styles.sectionLabel}>Nuestra Historia</span>
               <h2>Más de 10 años brindando soluciones de confianza</h2>
-              <p>En **Soluciones Integrales AS SAS**, nacimos con una misión clara: simplificar la vida de nuestros clientes a través de servicios técnicos de alta calidad y un respaldo corporativo inigualable.</p>
-              <p>Lo que comenzó como una especialización en zonas húmedas con **Ingenova**, ha evolucionado hasta convertirse en un ecosistema de servicios que abarca desde la administración de nado con **ClubHouse** hasta la salud animal con **ProMascotas**.</p>
+              <p>En <strong>Soluciones Integrales AS SAS</strong>, nacimos con una misión clara: simplificar la vida de nuestros clientes a través de servicios técnicos de alta calidad y un respaldo corporativo inigualable.</p>
+              <p>Lo que comenzó como una especialización en zonas húmedas con <strong>Ingenova</strong>, ha evolucionado hasta convertirse en un ecosistema de servicios que abarca desde la administración de nado con <strong>ClubHouse</strong> hasta la salud animal con <strong>ProMascotas</strong>.</p>
               <div className={styles.stats}>
                 <div className={styles.statItem}>
                   <span className={styles.statNum}>+2k</span>
@@ -432,6 +432,8 @@ export default function Home() {
                 width={600}
                 height={400}
                 className={styles.roundedImg}
+                sizes="(max-width: 900px) 100vw, 50vw"
+                style={{ width: '100%', height: 'auto' }}
               />
             </div>
           </div>

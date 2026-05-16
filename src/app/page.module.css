@@ -377,6 +377,24 @@
   }
   .nosotrosImage {
     order: -1;
+    width: 100%;
+    overflow: hidden;
+  }
+  .roundedImg {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 20px;
+  }
+  .nosotros {
+    padding: 4rem 1rem;
+    overflow: hidden;
+  }
+  .cobertura {
+    padding: 4rem 1rem;
+    overflow: hidden;
+  }
+  .coberturaP {
+    padding: 0 1rem;
   }
 }
 
