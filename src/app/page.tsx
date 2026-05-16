@@ -199,9 +199,11 @@ export default function Home() {
           { opacity: 1, y: 0 },
           { opacity: 0, y: -80, duration: 1 }, 0);
           
-        masterTL.fromTo(animationRef.current?.parentElement, 
-          { opacity: 1 }, 
-          { opacity: 0, duration: 1 }, 0);
+        if (animationRef.current?.parentElement) {
+          masterTL.fromTo(animationRef.current.parentElement, 
+            { opacity: 1 }, 
+            { opacity: 0, duration: 1 }, 0);
+        }
 
         masterTL.fromTo(texts[0], 
           { opacity: 0, y: 30 },
