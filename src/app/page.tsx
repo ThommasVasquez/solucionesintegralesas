@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -116,7 +116,7 @@ export default function Home() {
     return () => clearInterval(id);
   }, [activeCardIdx]);
 
-  // THREE.JS HYPERREALISTIC WATER EFFECT
+  // THREE.JS HYPERREALISTIC WATER EFFECT (NO PHOTO - PURE SHADER)
   useEffect(() => {
     if (!canvasContainerRef.current) return;
 
@@ -126,20 +126,15 @@ export default function Home() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     canvasContainerRef.current.appendChild(renderer.domElement);
 
-    const loader = new THREE.TextureLoader();
-    // Hyperrealistic water texture (pool caustics)
-    const texture = loader.load('https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2000&auto=format&fit=crop');
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-
     const geometry = new THREE.PlaneGeometry(20, 20, 128, 128);
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-        uTexture: { value: texture },
       },
       vertexShader: `
         varying vec2 vUv;
+        varying float vElevation;
         uniform float uTime;
         uniform vec2 uMouse;
         void main() {
@@ -147,24 +142,28 @@ export default function Home() {
           vec3 pos = position;
           float dist = distance(uv, uMouse);
           float ripple = sin(dist * 40.0 - uTime * 5.0) * exp(-dist * 5.0) * 0.15;
-          pos.z += ripple;
+          // Add subtle ambient waves
+          float waves = sin(uv.x * 10.0 + uTime) * cos(uv.y * 10.0 + uTime) * 0.05;
+          pos.z += ripple + waves;
+          vElevation = ripple + waves;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
       `,
       fragmentShader: `
         varying vec2 vUv;
-        uniform sampler2D uTexture;
+        varying float vElevation;
         uniform float uTime;
-        uniform vec2 uMouse;
         void main() {
-          float dist = distance(vUv, uMouse);
-          float ripple = sin(dist * 40.0 - uTime * 5.0) * exp(-dist * 5.0) * 0.03;
-          vec2 distortedUv = vUv + ripple;
-          vec4 color = texture2D(uTexture, distortedUv);
-          // Add a subtle blue tint and brightness
-          color.rgb *= vec3(0.95, 1.0, 1.1);
-          color.a = 0.9;
-          gl_FragColor = color;
+          // Subtle blue gradient colors
+          vec3 colorLow = vec3(0.96, 0.96, 0.98); // Very light grey/blue
+          vec3 colorHigh = vec3(0.85, 0.92, 0.98); // Light soft blue
+          vec3 finalColor = mix(colorLow, colorHigh, vElevation * 2.0 + 0.5);
+          
+          // Add subtle specular highlights based on elevation
+          float highlight = smoothstep(0.05, 0.15, vElevation);
+          finalColor += highlight * 0.1;
+          
+          gl_FragColor = vec4(finalColor, 1.0);
         }
       `,
       transparent: true,
@@ -184,7 +183,7 @@ export default function Home() {
     window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
-      material.uniforms.uTime.value += 0.05;
+      material.uniforms.uTime.value += 0.03;
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
