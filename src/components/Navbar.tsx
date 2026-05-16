@@ -86,12 +86,10 @@ export default function Navbar() {
               </button>
               
               <div className={`${styles.dropdownMenu} ${isAuthMenuOpen ? styles.menuVisible : ''}`}>
-                {!isHomePage && (
-                  <Link href="/dashboard" className={styles.menuItem}>
-                    <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Ir al Dashboard</span>
-                    <span className={styles.brandDesc}>Panel principal</span>
-                  </Link>
-                )}
+                <Link href="/dashboard" className={styles.menuItem}>
+                  <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Ir al Dashboard</span>
+                  <span className={styles.brandDesc}>Panel principal</span>
+                </Link>
                 <div className={styles.menuItem} onClick={() => signOut({ callbackUrl: '/' })}>
                   <span className={styles.brandTitle} style={{ color: '#ff4d4d' }}>Cerrar Sesión</span>
                   <span className={styles.brandDesc}>Finalizar sesión actual</span>
