@@ -7,23 +7,21 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const { nextUrl } = req;
   const isAuthenticated = !!req.auth;
-  const isAuthPage = nextUrl.pathname.startsWith('/login');
-
-  if (isAuthPage) {
-    if (isAuthenticated) {
-      return NextResponse.redirect(new URL('/dashboard', nextUrl));
-    }
-    return;
+  
+  // 1. Si está en el login y ya está autenticado, mandarlo al dashboard
+  if (nextUrl.pathname.startsWith('/login') && isAuthenticated) {
+    return NextResponse.redirect(new URL('/dashboard', nextUrl));
   }
 
-  if (!isAuthenticated && nextUrl.pathname !== '/') {
-    // Only protect /dashboard and other routes, allow home
-    if (nextUrl.pathname.startsWith('/dashboard') || nextUrl.pathname.startsWith('/api/sheets')) {
-      return NextResponse.redirect(new URL('/login', nextUrl));
-    }
+  // 2. Proteger RUTAS CRÍTICAS: Dashboard y API de hojas
+  const isProtectedRoute = nextUrl.pathname.startsWith('/dashboard') || 
+                           nextUrl.pathname.startsWith('/api/sheets');
+
+  if (isProtectedRoute && !isAuthenticated) {
+    return NextResponse.redirect(new URL('/login', nextUrl));
   }
 
-  return;
+  return NextResponse.next();
 });
 
 export const config = {
