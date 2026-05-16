@@ -218,6 +218,8 @@
   background: #fff;
   position: relative;
   z-index: 30;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px;
 }
 
 .nosotrosGrid {
@@ -298,6 +300,8 @@
   background: #f8f9fa;
   position: relative;
   z-index: 30;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
 }
 
 .coberturaP {

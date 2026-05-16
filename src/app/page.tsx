@@ -26,9 +26,9 @@ const businessLines = [
     color: BRAND_COLORS.INGENOVA,
     desc: 'Somos expertos en el corazón de sus zonas húmedas. Ofrecemos mantenimiento preventivo y correctivo, venta de motobombas, filtros y químicos de alta calidad para garantizar aguas cristalinas y sistemas eficientes.',
     images: [
-      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1595113316349-9fa4eb24f884?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?q=80&w=1200&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1595113316349-9fa4eb24f884?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
@@ -38,9 +38,9 @@ const businessLines = [
     color: BRAND_COLORS.CLUBHOUSE,
     desc: 'Llevamos la gestión de complejos acuáticos a otro nivel. Desde la administración operativa de clubes y conjuntos hasta escuelas de natación para todas las edades con instructores certificados por la federación.',
     images: [
-      'https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1530549387634-e7a5bc2a6132?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1530549387634-e7a5bc2a6132?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
@@ -50,9 +50,9 @@ const businessLines = [
     color: BRAND_COLORS.PROMASCOTAS,
     desc: 'La sonrisa de su mejor amigo es nuestra prioridad. Realizamos limpieza dental profunda sin anestesia general (según evaluación), eliminando sarro y mal aliento directamente en la comodidad de su hogar.',
     images: [
-      'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=1200&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
@@ -62,9 +62,9 @@ const businessLines = [
     color: BRAND_COLORS.SOLUCIONES,
     desc: 'Más que un servicio, somos su aliado estratégico. Soluciones Integrales AS SAS centraliza la excelencia operativa para brindar confianza, garantía y profesionalismo en cada intervención técnica.',
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1200&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=70&w=800&auto=format&fit=crop'
     ]
   },
 ];
@@ -122,11 +122,12 @@ export default function Home() {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     canvasContainerRef.current.appendChild(renderer.domElement);
 
-    const geometry = new THREE.PlaneGeometry(20, 20, 128, 128);
+    const geometry = new THREE.PlaneGeometry(20, 20, 64, 64);
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -411,7 +412,7 @@ export default function Home() {
             </div>
             <div className={styles.nosotrosImage}>
               <Image 
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=70&w=800&auto=format&fit=crop"
                 alt="Nuestro Equipo Profesional"
                 width={600}
                 height={400}
