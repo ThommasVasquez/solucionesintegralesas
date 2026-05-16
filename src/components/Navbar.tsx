@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import styles from './Navbar.module.css';
 
 const COLORS = {
@@ -18,6 +19,9 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
   const { data: session } = useSession();
+  const pathname = usePathname();
+
+  const isHomePage = pathname === '/';
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -45,7 +49,7 @@ export default function Navbar() {
         </Link>
         
         <nav className={styles.links} aria-label="Navegación principal">
-          {!session ? (
+          {isHomePage ? (
             <>
               <Link href="/#servicios" className={styles.link}>Líneas de Negocio</Link>
               <Link href="/#nosotros" className={styles.link}>Nosotros</Link>
@@ -82,6 +86,12 @@ export default function Navbar() {
               </button>
               
               <div className={`${styles.dropdownMenu} ${isAuthMenuOpen ? styles.menuVisible : ''}`}>
+                {!isHomePage && (
+                  <Link href="/dashboard" className={styles.menuItem}>
+                    <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Ir al Dashboard</span>
+                    <span className={styles.brandDesc}>Panel principal</span>
+                  </Link>
+                )}
                 <div className={styles.menuItem} onClick={() => signOut({ callbackUrl: '/' })}>
                   <span className={styles.brandTitle} style={{ color: '#ff4d4d' }}>Cerrar Sesión</span>
                   <span className={styles.brandDesc}>Finalizar sesión actual</span>
