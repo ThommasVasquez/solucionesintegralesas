@@ -174,7 +174,7 @@
 
 @media (max-width: 900px) {
   .links { display: none; }
-  .actions { margin-left: auto; gap: 1rem; }
+  .actions { margin-left: auto; gap: 1.5rem; }
   
   .fullLogo { display: none; }
   .iconLogo { display: block; }
@@ -201,7 +201,7 @@
 
 @media (max-width: 480px) {
   .logo { margin-right: 0.5rem; }
-  .actions { gap: 0.5rem; }
+  .actions { gap: 1rem; }
   .ctaBtn { padding: 0.6rem 0.8rem; }
   .dropdownMenu { min-width: 200px; right: -5px; }
 }

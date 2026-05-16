@@ -203,6 +203,7 @@
   .textBlock { 
     max-width: 90%; 
     align-items: center;
+    padding-bottom: 2rem;
   }
   .card {
     width: 180px;

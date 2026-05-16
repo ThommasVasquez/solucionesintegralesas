@@ -297,8 +297,8 @@ export default function Home() {
         });
 
         const focusX = isDesktop ? 260 : 0;
-        const focusY = isDesktop ? 0 : -140;
-        const textYOffset = isDesktop ? 0 : 120;
+        const focusY = isDesktop ? 0 : 120; // Shift cards DOWN on mobile
+        const textYOffset = isDesktop ? 0 : -160; // Shift text UP on mobile
 
         businessLines.forEach((_, i) => {
           const startTime = 2.5 + i * 3;
