@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Link } from 'next-view-transitions';
 import { BRAND_COLORS } from '@/app/page';
+import styles from './login.module.css';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -39,44 +40,44 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#f8fafc] p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-8 border border-slate-100">
-        <div className="flex flex-col items-center space-y-4">
+    <main className={styles.main}>
+      <div className={styles.card}>
+        <div className={styles.header}>
           <Link href="/">
             <Image src="/logo.png" alt="Logo" width={180} height={55} priority />
           </Link>
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-900">Bienvenido de nuevo</h1>
-            <p className="text-slate-500 mt-1">Ingresa a tu cuenta administrativa</p>
+          <div className={styles.title}>
+            <h1>Bienvenido de nuevo</h1>
+            <p>Ingresa a tu cuenta administrativa</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className={styles.form}>
           {error && (
-            <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm border border-red-100 animate-shake">
+            <div className={styles.error}>
               {error}
             </div>
           )}
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 ml-1">Correo electrónico</label>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Correo electrónico</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className={styles.input}
               placeholder="nombre@empresa.com"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 ml-1">Contraseña</label>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Contraseña</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className={styles.input}
               placeholder="••••••••"
               required
             />
@@ -85,7 +86,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all active:scale-[0.98] disabled:opacity-70"
+            className={styles.submitBtn}
             style={{ 
               backgroundColor: BRAND_COLORS.SOLUCIONES,
               boxShadow: `0 10px 15px -3px ${BRAND_COLORS.SOLUCIONES}40`
@@ -95,23 +96,12 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="text-center pt-4">
-          <Link href="/" className="text-sm text-slate-500 hover:text-blue-600 transition-colors">
+        <div className={styles.footer}>
+          <Link href="/" className={styles.backLink}>
             ← Volver al inicio
           </Link>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
-        }
-        .animate-shake {
-          animation: shake 0.4s ease-in-out;
-        }
-      `}</style>
     </main>
   );
 }
