@@ -235,7 +235,8 @@ export default function Home() {
 
         const fanStates = isDesktop 
           ? [ { x: -180, y: 185, rotation: -17 }, { x: -60,  y: 145, rotation: -5 }, { x: 60,   y: 145, rotation: 5 }, { x: 180,  y: 185, rotation: 17 } ]
-          : [ { x: -90, y: 120, rotation: -12 }, { x: -30,  y: 90, rotation: -4 }, { x: 30,   y: 90, rotation: 4 }, { x: 90,  y: 120, rotation: 12 } ];
+          // Mobile: cards anchor at 65% screen, fan spreads around that point
+          : [ { x: -90, y: 30, rotation: -12 }, { x: -30,  y: 0, rotation: -4 }, { x: 30, y: 0, rotation: 4 }, { x: 90, y: 30, rotation: 12 } ];
 
         gsap.set(cards, { opacity: 0, y: 350, scale: isDesktop ? 0.8 : 0.6, x: 0, rotation: 0 });
         gsap.set(texts, { opacity: 0, y: 30, pointerEvents: 'none' });
@@ -288,7 +289,8 @@ export default function Home() {
         
         const gridPos = isDesktop
           ? [{ x: -120, y: -150 }, { x: 120, y: -150 }, { x: -120, y: 150 }, { x: 120, y: 150 }]
-          : [{ x: -70, y: -100 }, { x: 70, y: -100 }, { x: -70, y: 100 }, { x: 70, y: 100 }];
+          // Mobile: keep all 4 cards within lower zone (around the 65% anchor)
+          : [{ x: -65, y: -80 }, { x: 65, y: -80 }, { x: -65, y: 80 }, { x: 65, y: 80 }];
 
         cards.forEach((card, i) => {
           masterTL.fromTo(card, 
@@ -297,12 +299,13 @@ export default function Home() {
         });
 
         const focusX = isDesktop ? 260 : 0;
-        const focusY = isDesktop ? 0 : 120; // Shift cards DOWN on mobile
-        const textYOffset = isDesktop ? 0 : -160; // Shift text UP on mobile
+        // Mobile: CSS handles text at top, cards at bottom — GSAP y=0 keeps both in their CSS zones
+        const focusY = isDesktop ? 0 : 0;
+        const textYOffset = 0; // CSS positioning handles separation, no GSAP y needed
 
         businessLines.forEach((_, i) => {
           const startTime = 2.5 + i * 3;
-          masterTL.to(texts[i], { opacity: 0, y: -30, duration: 0.8, pointerEvents: 'none' }, startTime);
+          masterTL.to(texts[i], { opacity: 0, y: -20, duration: 0.8, pointerEvents: 'none' }, startTime);
           
           if (i > 0) {
             masterTL.to(cards[i-1], { x: isDesktop ? '100vw' : 0, y: isDesktop ? 0 : '100vh', opacity: 0, duration: 1 }, startTime);
@@ -311,11 +314,11 @@ export default function Home() {
           }
 
           masterTL.fromTo(texts[i+1], 
-            { opacity: 0, y: textYOffset + 30 },
-            { opacity: 1, y: textYOffset, duration: 1, pointerEvents: 'auto' }, startTime + 0.5);
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 1, pointerEvents: 'auto' }, startTime + 0.5);
             
           masterTL.to(cards[i], { 
-            x: focusX, y: focusY, scale: isDesktop ? 1.4 : 1.15, opacity: 1, duration: 1.2, ease: 'power3.out' 
+            x: focusX, y: focusY, scale: isDesktop ? 1.4 : 1.1, opacity: 1, duration: 1.2, ease: 'power3.out' 
           }, startTime + 0.5);
         });
 

@@ -199,17 +199,35 @@
 
 @media (max-width: 768px) {
   .hero { padding-top: 15vh; }
-  .fixedTexts { justify-content: center; text-align: center; }
-  .textBlock { 
-    max-width: 90%; 
-    align-items: center;
-    padding-bottom: 2rem;
+
+  /* Anchor cards to bottom 65% of screen, text to top 20% */
+  .fixedCards {
+    top: 65%;
   }
+
+  .fixedTexts {
+    align-items: flex-start;
+    padding-top: 18vh;
+    padding-left: 5%;
+    padding-right: 5%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .textBlock {
+    max-width: 90%;
+    align-items: center;
+    position: relative; /* override absolute so it flows inside fixedTexts */
+    left: auto;
+    top: auto;
+    transform: none !important;
+  }
+
   .card {
-    width: 180px;
-    height: 240px;
-    top: -120px;
-    left: -90px;
+    width: 160px;
+    height: 210px;
+    top: -105px;
+    left: -80px;
   }
 }
 
