@@ -3,6 +3,7 @@ import { Link } from 'next-view-transitions';
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import gsap from 'gsap';
+import { useSession, signOut } from 'next-auth/react';
 import styles from './Navbar.module.css';
 
 const COLORS = {
@@ -15,6 +16,8 @@ const COLORS = {
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -40,16 +43,52 @@ export default function Navbar() {
             priority
           />
         </Link>
+        
         <nav className={styles.links} aria-label="Navegación principal">
-          <Link href="#servicios" className={styles.link}>Líneas de Negocio</Link>
-          <Link href="#nosotros" className={styles.link}>Nosotros</Link>
-          <Link href="#cobertura" className={styles.link}>Cobertura</Link>
-          <Link href="#contacto" className={styles.link}>Contacto</Link>
+          {!session ? (
+            <>
+              <Link href="/#servicios" className={styles.link}>Líneas de Negocio</Link>
+              <Link href="/#nosotros" className={styles.link}>Nosotros</Link>
+              <Link href="/#cobertura" className={styles.link}>Cobertura</Link>
+              <Link href="/#contacto" className={styles.link}>Contacto</Link>
+            </>
+          ) : (
+            <>
+              <Link href="/" className={styles.link}>Inicio Web</Link>
+              <Link href="/dashboard" className={styles.link}>Dashboard</Link>
+              <Link href="/dashboard/promascotas" className={styles.link}>ProMascotas</Link>
+              <Link href="/dashboard/clubhouse" className={styles.link}>ClubHouse</Link>
+              <span className={styles.link} style={{ opacity: 0.5, cursor: 'not-allowed' }}>Ingenova</span>
+            </>
+          )}
         </nav>
+
         <div className={styles.actions}>
-          <Link href="/login" className={styles.loginBtn} aria-label="Ingresar a mi cuenta">
-            Ingresar
-          </Link>
+          {!session ? (
+            <Link href="/login" className={styles.loginBtn}>
+              Ingresar
+            </Link>
+          ) : (
+            <div 
+              className={styles.dropdownContainer}
+              onMouseEnter={() => setIsAuthMenuOpen(true)}
+              onMouseLeave={() => setIsAuthMenuOpen(false)}
+            >
+              <button className={styles.loginBtn} style={{ backgroundColor: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                {session.user?.name?.split(' ')[0]}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={styles.chevron}>
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              
+              <div className={`${styles.dropdownMenu} ${isAuthMenuOpen ? styles.menuVisible : ''}`}>
+                <div className={styles.menuItem} onClick={() => signOut({ callbackUrl: '/' })}>
+                  <span className={styles.brandTitle} style={{ color: '#ff4d4d' }}>Cerrar Sesión</span>
+                  <span className={styles.brandDesc}>Finalizar sesión actual</span>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div 
             className={styles.dropdownContainer}

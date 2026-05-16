@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
+import Providers from '@/components/Providers';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -19,7 +21,9 @@ export default function RootLayout({
     <ViewTransitions>
       <html lang="es" className={inter.className} suppressHydrationWarning>
         <body suppressHydrationWarning>
-          {children}
+          <Providers>
+            {children}
+          </Providers>
         </body>
       </html>
     </ViewTransitions>
