@@ -206,28 +206,28 @@
   }
 
   .fixedTexts {
+    padding: 0 5%;
     align-items: flex-start;
-    padding-top: 18vh;
-    padding-left: 5%;
-    padding-right: 5%;
-    justify-content: center;
+    justify-content: flex-start;
+  }
+
+  /* Force text blocks into the top zone on mobile */
+  .textBlock {
+    position: absolute;
+    top: 12vh;
+    left: 5%;
+    right: 5%;
+    width: 90%;
+    max-width: 90%;
+    align-items: center;
     text-align: center;
   }
 
-  .textBlock {
-    max-width: 90%;
-    align-items: center;
-    position: relative; /* override absolute so it flows inside fixedTexts */
-    left: auto;
-    top: auto;
-    transform: none !important;
-  }
-
   .card {
-    width: 160px;
-    height: 210px;
-    top: -105px;
-    left: -80px;
+    width: 155px;
+    height: 205px;
+    top: -102px;
+    left: -77px;
   }
 }
 
