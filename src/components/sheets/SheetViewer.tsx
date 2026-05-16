@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
-import 'handsontable/dist/handsontable.full.min.css';
+import 'handsontable/styles/handsontable.min.css';
 // Removed UserRole import from prisma
 interface SheetViewerProps {
   sheetName: string;
