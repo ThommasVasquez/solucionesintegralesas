@@ -200,9 +200,9 @@
 @media (max-width: 768px) {
   .hero { padding-top: 15vh; }
 
-  /* Anchor cards to bottom 65% of screen, text to top 20% */
+  /* Anchor cards to bottom 74% of screen, text to top 12% */
   .fixedCards {
-    top: 65%;
+    top: 74%;
   }
 
   .fixedTexts {
