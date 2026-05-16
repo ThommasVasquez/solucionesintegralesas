@@ -141,12 +141,12 @@ export default function Home() {
           vUv = uv;
           vec3 pos = position;
           float dist = distance(uv, uMouse);
-          // Balanced ripple amplitude
-          float ripple = sin(dist * 35.0 - uTime * 4.0) * exp(-dist * 4.5) * 0.2;
-          // Subtler ambient waves
-          float waves = sin(uv.x * 6.0 + uTime * 0.4) * cos(uv.y * 6.0 + uTime * 0.4) * 0.04;
-          pos.z += ripple + waves;
-          vElevation = ripple + waves;
+          
+          // Localized ripples around cursor with sharp falloff
+          float ripple = sin(dist * 30.0 - uTime * 4.0) * exp(-dist * 10.0) * 0.25;
+          
+          pos.z += ripple;
+          vElevation = ripple;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
       `,
@@ -155,18 +155,22 @@ export default function Home() {
         varying float vElevation;
         uniform float uTime;
         void main() {
-          // Soft, elegant blue palette
-          vec3 colorLow = vec3(0.94, 0.97, 1.0);   // Very soft blue-white
-          vec3 colorHigh = vec3(0.6, 0.8, 0.95);    // Delicate sky blue
+          // Pure white base
+          vec3 baseColor = vec3(1.0, 1.0, 1.0);
           
-          float mixVal = vElevation * 1.5 + 0.5;
-          vec3 finalColor = mix(colorLow, colorHigh, mixVal);
+          // Subtle blue tint for the ripple itself
+          vec3 rippleColor = vec3(0.1, 0.4, 0.7); // Brand blue
           
-          // Subtle specular highlights
-          float highlight = smoothstep(0.04, 0.2, vElevation);
-          finalColor += highlight * 0.15;
+          // Mix based on localized elevation
+          // We only want color where there is movement
+          float mask = abs(vElevation) * 15.0;
+          vec3 finalColor = mix(baseColor, baseColor - (rippleColor * 0.1), mask);
           
-          gl_FragColor = vec4(finalColor, 0.85); 
+          // Add a subtle specular highlight on the crest
+          float highlight = smoothstep(0.01, 0.15, vElevation);
+          finalColor += highlight * 0.05;
+          
+          gl_FragColor = vec4(finalColor, 1.0); 
         }
       `,
       transparent: true,
