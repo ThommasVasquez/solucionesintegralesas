@@ -81,8 +81,7 @@ export default function Home() {
   const cardsRef     = useRef<HTMLDivElement[]>([]);
   const textsRef     = useRef<HTMLDivElement[]>([]);
   const heroRef      = useRef<HTMLElement>(null);
-  const animationRef = useRef<HTMLDivElement>(null);
-  const mouseRef     = useRef({ x: 0, y: 0 });
+  const canvasRef    = useRef<HTMLCanvasElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
 
   const [activeCardIdx, setActiveCardIdx] = useState<number | null>(null);
@@ -116,28 +115,79 @@ export default function Home() {
     return () => clearInterval(id);
   }, [activeCardIdx]);
 
-  // Mouse move animation
+  // WATER EFFECT (CANVAS RIPPLES)
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const ripples: { x: number; y: number; r: number; opacity: number }[] = [];
+
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+      ripples.push({
+        x: e.clientX,
+        y: e.clientY,
+        r: 0,
+        opacity: 0.5
+      });
     };
+
     window.addEventListener('mousemove', handleMouseMove);
 
-    const animateMouse = () => {
-      if (animationRef.current) {
-        gsap.to(animationRef.current, {
-          x: mouseRef.current.x,
-          y: mouseRef.current.y,
-          duration: 2,
-          ease: 'power3.out'
-        });
-      }
-      requestAnimationFrame(animateMouse);
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+      
+      // Background gradient
+      const grad = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
+      grad.addColorStop(0, '#f5f5f3');
+      grad.addColorStop(1, '#e2e8f0');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, width, height);
+
+      ripples.forEach((ripple, i) => {
+        ripple.r += 2;
+        ripple.opacity -= 0.005;
+
+        if (ripple.opacity <= 0) {
+          ripples.splice(i, 1);
+          return;
+        }
+
+        ctx.beginPath();
+        ctx.arc(ripple.x, ripple.y, ripple.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(26, 93, 145, ${ripple.opacity})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Secondary ring
+        if (ripple.r > 20) {
+          ctx.beginPath();
+          ctx.arc(ripple.x, ripple.y, ripple.r - 20, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(243, 156, 18, ${ripple.opacity * 0.5})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      });
+
+      requestAnimationFrame(animate);
     };
-    const rafId = requestAnimationFrame(animateMouse);
+
+    const rafId = requestAnimationFrame(animate);
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
     };
   }, []);
@@ -199,8 +249,8 @@ export default function Home() {
           { opacity: 1, y: 0 },
           { opacity: 0, y: -80, duration: 1 }, 0);
           
-        if (animationRef.current?.parentElement) {
-          masterTL.fromTo(animationRef.current.parentElement, 
+        if (canvasRef.current) {
+          masterTL.fromTo(canvasRef.current, 
             { opacity: 1 }, 
             { opacity: 0, duration: 1 }, 0);
         }
@@ -305,10 +355,7 @@ export default function Home() {
       </div>
 
       <section ref={heroRef} className={styles.hero}>
-        <div className={styles.animationWrapper}>
-          <div ref={animationRef} className={styles.mouseFollower} />
-          <div className={styles.animationOverlay} />
-        </div>
+        <canvas ref={canvasRef} className={styles.waterCanvas} />
         <div className={styles.heroContent}>
           <h1 ref={headlineRef} className={styles.heroH1}>
             Expertos en<br />
