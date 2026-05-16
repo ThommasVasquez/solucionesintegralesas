@@ -1,6 +1,7 @@
-import { google } from 'googleapis';
+// import { google } from 'googleapis'; // Disabled for Edge compatibility
 
 export async function getGoogleSheetsClient() {
+  /*
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -13,6 +14,8 @@ export async function getGoogleSheetsClient() {
   });
 
   return google.sheets({ version: 'v4', auth });
+  */
+  throw new Error('Google Sheets client disabled for Edge compatibility');
 }
 
 export async function getSheetData(
@@ -20,15 +23,7 @@ export async function getSheetData(
   sheetName: string,
   range?: string
 ) {
-  const sheets = await getGoogleSheetsClient();
-  const fullRange = range || `${sheetName}!A1:ZZ1000`;
-  
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: fullRange,
-  });
-
-  return response.data.values || [];
+  throw new Error('Direct sheet access disabled. Use the iframe method.');
 }
 
 export async function updateSheetData(
@@ -37,25 +32,9 @@ export async function updateSheetData(
   range: string,
   values: any[][]
 ) {
-  const sheets = await getGoogleSheetsClient();
-  
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${sheetName}!${range}`,
-    valueInputOption: 'RAW',
-    requestBody: { values },
-  });
+  throw new Error('Direct sheet update disabled.');
 }
 
 export async function getAvailableSheets(spreadsheetId: string) {
-  const sheets = await getGoogleSheetsClient();
-  
-  const response = await sheets.spreadsheets.get({
-    spreadsheetId,
-  });
-
-  return response.data.sheets?.map(sheet => ({
-    title: sheet.properties?.title || '',
-    sheetId: sheet.properties?.sheetId || 0,
-  })) || [];
+  return [];
 }

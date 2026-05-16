@@ -1,9 +1,11 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { SheetViewer } from "@/components/sheets/SheetViewer";
 import Navbar from "@/components/Navbar";
 
 export const runtime = 'edge';
+
+// El parámetro rm=minimal oculta la interfaz de Google para que parezca más integrado
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing&rm=minimal";
 
 export default async function ProMascotasPage() {
   const session = await auth();
@@ -12,20 +14,23 @@ export default async function ProMascotasPage() {
     redirect("/login");
   }
 
-  const role = (session.user as any).role;
-
   return (
-    <main className="min-h-screen bg-slate-900">
+    <main className="h-screen w-full flex flex-col bg-[#0f172a] overflow-hidden">
       <Navbar />
-      <div className="pt-24 h-[calc(100vh-2rem)] flex flex-col p-4">
-        <div className="flex-grow rounded-3xl overflow-hidden bg-slate-800 border border-slate-700 shadow-2xl">
-          <SheetViewer 
-            sheetName="Visitas ProMascotas" 
-            role={role} 
-            apiUrl="/api/sheets/promascotas"
-          />
-        </div>
+      <div className="flex-grow pt-20 h-full w-full">
+        <iframe 
+          src={SHEET_URL}
+          className="w-full h-full border-none bg-white"
+          title="Gestión de Visitas ProMascotas"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        />
       </div>
+      
+      <style jsx global>{`
+        body {
+          overflow: hidden;
+        }
+      `}</style>
     </main>
   );
 }
