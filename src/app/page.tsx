@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import Image from 'next/image';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from '@/components/Navbar';
 import styles from './page.module.css';
 import Footer from '@/components/Footer';
+import * as THREE from 'three';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -81,7 +82,7 @@ export default function Home() {
   const cardsRef     = useRef<HTMLDivElement[]>([]);
   const textsRef     = useRef<HTMLDivElement[]>([]);
   const heroRef      = useRef<HTMLElement>(null);
-  const canvasRef    = useRef<HTMLCanvasElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
 
   const [activeCardIdx, setActiveCardIdx] = useState<number | null>(null);
@@ -115,73 +116,84 @@ export default function Home() {
     return () => clearInterval(id);
   }, [activeCardIdx]);
 
-  // WATER EFFECT (CANVAS RIPPLES)
+  // THREE.JS HYPERREALISTIC WATER EFFECT
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvasContainerRef.current) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    canvasContainerRef.current.appendChild(renderer.domElement);
 
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+    const loader = new THREE.TextureLoader();
+    // Hyperrealistic water texture (pool caustics)
+    const texture = loader.load('https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2000&auto=format&fit=crop');
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
 
-    const ripples: { x: number; y: number; r: number; opacity: number }[] = [];
+    const geometry = new THREE.PlaneGeometry(20, 20, 128, 128);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+        uTexture: { value: texture },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        uniform float uTime;
+        uniform vec2 uMouse;
+        void main() {
+          vUv = uv;
+          vec3 pos = position;
+          float dist = distance(uv, uMouse);
+          float ripple = sin(dist * 40.0 - uTime * 5.0) * exp(-dist * 5.0) * 0.15;
+          pos.z += ripple;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vUv;
+        uniform sampler2D uTexture;
+        uniform float uTime;
+        uniform vec2 uMouse;
+        void main() {
+          float dist = distance(vUv, uMouse);
+          float ripple = sin(dist * 40.0 - uTime * 5.0) * exp(-dist * 5.0) * 0.03;
+          vec2 distortedUv = vUv + ripple;
+          vec4 color = texture2D(uTexture, distortedUv);
+          // Add a subtle blue tint and brightness
+          color.rgb *= vec3(0.95, 1.0, 1.1);
+          color.a = 0.9;
+          gl_FragColor = color;
+        }
+      `,
+      transparent: true,
+    });
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.x = -Math.PI / 4;
+    scene.add(mesh);
+
+    camera.position.z = 5;
 
     const handleMouseMove = (e: MouseEvent) => {
-      ripples.push({
-        x: e.clientX,
-        y: e.clientY,
-        r: 0,
-        opacity: 0.5
-      });
+      material.uniforms.uMouse.value.x = e.clientX / window.innerWidth;
+      material.uniforms.uMouse.value.y = 1.0 - (e.clientY / window.innerHeight);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      
-      // Background gradient
-      const grad = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, width);
-      grad.addColorStop(0, '#f5f5f3');
-      grad.addColorStop(1, '#e2e8f0');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
-
-      ripples.forEach((ripple, i) => {
-        ripple.r += 2;
-        ripple.opacity -= 0.005;
-
-        if (ripple.opacity <= 0) {
-          ripples.splice(i, 1);
-          return;
-        }
-
-        ctx.beginPath();
-        ctx.arc(ripple.x, ripple.y, ripple.r, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(26, 93, 145, ${ripple.opacity})`;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        // Secondary ring
-        if (ripple.r > 20) {
-          ctx.beginPath();
-          ctx.arc(ripple.x, ripple.y, ripple.r - 20, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(243, 156, 18, ${ripple.opacity * 0.5})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      });
-
+      material.uniforms.uTime.value += 0.05;
+      renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
-
     const rafId = requestAnimationFrame(animate);
 
     const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener('resize', handleResize);
 
@@ -189,6 +201,9 @@ export default function Home() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
+      if (canvasContainerRef.current) {
+        canvasContainerRef.current.removeChild(renderer.domElement);
+      }
     };
   }, []);
 
@@ -249,8 +264,8 @@ export default function Home() {
           { opacity: 1, y: 0 },
           { opacity: 0, y: -80, duration: 1 }, 0);
           
-        if (canvasRef.current) {
-          masterTL.fromTo(canvasRef.current, 
+        if (canvasContainerRef.current) {
+          masterTL.fromTo(canvasContainerRef.current, 
             { opacity: 1 }, 
             { opacity: 0, duration: 1 }, 0);
         }
@@ -355,7 +370,7 @@ export default function Home() {
       </div>
 
       <section ref={heroRef} className={styles.hero}>
-        <canvas ref={canvasRef} className={styles.waterCanvas} />
+        <div ref={canvasContainerRef} className={styles.waterCanvas} />
         <div className={styles.heroContent}>
           <h1 ref={headlineRef} className={styles.heroH1}>
             Expertos en<br />
