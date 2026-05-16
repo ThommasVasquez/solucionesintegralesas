@@ -126,7 +126,7 @@ export default function Home() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     canvasContainerRef.current.appendChild(renderer.domElement);
 
-    const geometry = new THREE.PlaneGeometry(20, 20, 128, 128);
+    const geometry = new THREE.PlaneGeometry(40, 40, 128, 128);
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -170,10 +170,11 @@ export default function Home() {
     });
 
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.rotation.x = -Math.PI / 4;
+    mesh.rotation.x = -Math.PI / 2; // Flat rotation to better cover view
     scene.add(mesh);
 
-    camera.position.z = 5;
+    camera.position.set(0, 5, 0); // View from top
+    camera.lookAt(0, 0, 0);
 
     const handleMouseMove = (e: MouseEvent) => {
       material.uniforms.uMouse.value.x = e.clientX / window.innerWidth;
