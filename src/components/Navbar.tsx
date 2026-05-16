@@ -131,32 +131,32 @@ export default function Navbar() {
             <button 
               className={styles.ctaBtn} 
               style={{ backgroundColor: COLORS.SOLUCIONES }}
-              aria-label="Seleccionar marca para agendar cita"
+              aria-label="Ver nuestras empresas"
             >
-              <span className={styles.fullText}>Agendar servicio</span>
-              <span className={styles.mobileText}>Agendar</span>
+              <span className={styles.fullText}>Empresas</span>
+              <span className={styles.mobileText}>Empresas</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={styles.chevron} aria-hidden="true">
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </button>
             
             <div className={`${styles.dropdownMenu} ${isOpen ? styles.menuVisible : ''}`} role="menu">
-              <a href="https://wa.me/573001234567?text=Hola! Quiero agendar mantenimiento de piscina/jacuzzi con Ingenova" target="_blank" rel="noreferrer" className={styles.menuItem} role="menuitem">
+              <Link href="/empresas/ingenova" className={styles.menuItem} role="menuitem">
                 <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>Ingenova</span>
                 <span className={styles.brandDesc}>Jacuzzis, Piscinas & Turcos</span>
-              </a>
-              <a href="https://wa.me/573001234567?text=Hola! Quiero información sobre administración de piscinas o natación con ClubHouse" target="_blank" rel="noreferrer" className={styles.menuItem} role="menuitem">
+              </Link>
+              <Link href="/empresas/clubhouse" className={styles.menuItem} role="menuitem">
                 <span className={styles.brandTitle} style={{ color: COLORS.CLUBHOUSE }}>ClubHouse</span>
                 <span className={styles.brandDesc}>Administración & Capacitación</span>
-              </a>
-              <a href="https://wa.me/573001234567?text=Hola! Quiero agendar profilaxis dental para mi mascota con ProMascotas" target="_blank" rel="noreferrer" className={styles.menuItem} role="menuitem">
+              </Link>
+              <Link href="/empresas/promascotas" className={styles.menuItem} role="menuitem">
                 <span className={styles.brandTitle} style={{ color: COLORS.PROMASCOTAS }}>ProMascotas</span>
                 <span className={styles.brandDesc}>Profilaxis a Domicilio</span>
-              </a>
-              <a href="https://wa.me/573001234567?text=Hola! Quiero hablar con Soluciones Integrales AS" target="_blank" rel="noreferrer" className={styles.menuItem} role="menuitem">
+              </Link>
+              <Link href="/empresas/soluciones-as" className={styles.menuItem} role="menuitem">
                 <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Soluciones AS</span>
                 <span className={styles.brandDesc}>Respaldo Corporativo</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
