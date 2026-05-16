@@ -6,23 +6,23 @@ import { authConfig } from "./auth.config";
 const USERS = [
   {
     id: "1",
-    email: "patron@energysoft.com",
-    password: "patron1234",
-    name: "El Patron",
+    email: "sebastian@ingenova.com.co",
+    password: "Sebastian1*.",
+    name: "Sebastián",
     role: "PATRON"
   },
   {
     id: "2",
-    email: "admin@energysoft.com",
-    password: "admin1234",
-    name: "Administrador",
+    email: "jessica@ingenova.com.co",
+    password: "Jessica2*.",
+    name: "Jessica",
     role: "ADMIN"
   },
   {
     id: "3",
-    email: "tecnico@energysoft.com",
-    password: "tecnico1234",
-    name: "Técnico de Campo",
+    email: "adrian@ingenova.com.co",
+    password: "Adrian3*.",
+    name: "Adrian",
     role: "TECNICO"
   }
 ];
