@@ -4,8 +4,6 @@ import { auth } from '@/lib/auth';
 
 const PROMASCOTAS_ID = '1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54';
 
-export const runtime = 'edge';
-
 export async function POST(req: Request) {
   const session = await auth();
   if (!session) {
