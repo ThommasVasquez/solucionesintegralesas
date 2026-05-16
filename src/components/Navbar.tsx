@@ -54,31 +54,39 @@ export default function Navbar() {
     <header ref={navRef} className={`${styles.navbar} glass`}>
       <div className={`container ${styles.navContainer}`}>
         <Link href="/" className={styles.logo} aria-label="Volver al inicio">
-          <Image 
-            src="/logo.png" 
-            alt="Soluciones Integrales AS SAS Logo" 
-            width={180} 
-            height={55} 
-            className={styles.logoImg}
-            priority
-          />
+          <div className={styles.fullLogo}>
+            <Image 
+              src="/logo.png" 
+              alt="Soluciones Integrales AS SAS Logo" 
+              width={180} 
+              height={55} 
+              className={styles.logoImg}
+              priority
+            />
+          </div>
+          <div className={styles.iconLogo}>
+            <Image 
+              src="/icon.png" 
+              alt="Soluciones Integrales Icon" 
+              width={45} 
+              height={45} 
+              className={styles.logoImg}
+              priority
+            />
+          </div>
         </Link>
         
         <nav className={styles.links} aria-label="Navegación principal">
           {isHomePage ? (
             <>
-              <Link href="/#servicios" className={styles.link}>Líneas de Negocio</Link>
+              <Link href="/#servicios" className={styles.link}>Servicios</Link>
               <Link href="/#nosotros" className={styles.link}>Nosotros</Link>
-              <Link href="/#cobertura" className={styles.link}>Cobertura</Link>
               <Link href="/#contacto" className={styles.link}>Contacto</Link>
             </>
           ) : (
             <>
-              <NavLink href="/">Inicio Web</NavLink>
-              <NavLink href="/dashboard">Dashboard</NavLink>
-              <NavLink href="/dashboard/promascotas">ProMascotas</NavLink>
-              <NavLink href="/dashboard/clubhouse">ClubHouse</NavLink>
-              <NavLink href="/dashboard/ingenova">Ingenova</NavLink>
+              <NavLink href="/">Inicio</NavLink>
+              <NavLink href="/dashboard">Panel</NavLink>
             </>
           )}
         </nav>
@@ -86,7 +94,8 @@ export default function Navbar() {
         <div className={styles.actions}>
           {!session ? (
             <Link href="/login" className={styles.loginBtn}>
-              Ingresar
+              <span className={styles.fullText}>Ingresar</span>
+              <span className={styles.mobileText}>Login</span>
             </Link>
           ) : (
             <div 
@@ -101,14 +110,12 @@ export default function Navbar() {
                 </svg>
               </button>
               
-              <div className={`${styles.dropdownMenu} ${isAuthMenuOpen ? styles.menuVisible : ''}`}>
+              <div className={`${styles.dropdownMenu} ${isAuthMenuOpen ? styles.menuVisible : ''} ${styles.authDropdown}`}>
                 <Link href="/dashboard" className={styles.menuItem}>
-                  <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Ir al Dashboard</span>
-                  <span className={styles.brandDesc}>Panel principal</span>
+                  <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Dashboard</span>
                 </Link>
                 <div className={styles.menuItem} onClick={() => signOut({ callbackUrl: '/' })}>
                   <span className={styles.brandTitle} style={{ color: '#ff4d4d' }}>Cerrar Sesión</span>
-                  <span className={styles.brandDesc}>Finalizar sesión actual</span>
                 </div>
               </div>
             </div>
@@ -126,7 +133,8 @@ export default function Navbar() {
               style={{ backgroundColor: COLORS.SOLUCIONES }}
               aria-label="Seleccionar marca para agendar cita"
             >
-              Agendar servicio
+              <span className={styles.fullText}>Agendar servicio</span>
+              <span className={styles.mobileText}>Agendar</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={styles.chevron} aria-hidden="true">
                 <path d="M6 9l6 6 6-6" />
               </svg>
