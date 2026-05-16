@@ -10,9 +10,11 @@ export default function Footer() {
       <div className={`container ${styles.container}`}>
         <div className={styles.brand}>
           <Link href="/" className={styles.logo}>
-            <img
+            <Image
               src="/logo_white.png"
               alt="Soluciones Integrales AS SAS"
+              width={180}
+              height={55}
               className={styles.footerLogo}
             />
           </Link>

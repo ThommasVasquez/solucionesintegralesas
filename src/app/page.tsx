@@ -25,9 +25,9 @@ const businessLines = [
     color: BRAND_COLORS.INGENOVA,
     desc: 'Somos expertos en el corazón de sus zonas húmedas. Ofrecemos mantenimiento preventivo y correctivo, venta de motobombas, filtros y químicos de alta calidad para garantizar aguas cristalinas y sistemas eficientes.',
     images: [
-      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1571155823795-467926b68e7d?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?q=80&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1595113316349-9fa4eb24f884?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?q=80&w=1200&auto=format&fit=crop'
     ]
   },
   { 
@@ -37,9 +37,9 @@ const businessLines = [
     color: BRAND_COLORS.CLUBHOUSE,
     desc: 'Llevamos la gestión de complejos acuáticos a otro nivel. Desde la administración operativa de clubes y conjuntos hasta escuelas de natación para todas las edades con instructores certificados por la federación.',
     images: [
-      'https://images.unsplash.com/photo-1530549387634-e7a5bc2a6132?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1560090995-01632a28895b?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=80&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1530549387634-e7a5bc2a6132?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1200&auto=format&fit=crop'
     ]
   },
   { 
@@ -49,9 +49,9 @@ const businessLines = [
     color: BRAND_COLORS.PROMASCOTAS,
     desc: 'La sonrisa de su mejor amigo es nuestra prioridad. Realizamos limpieza dental profunda sin anestesia general (según evaluación), eliminando sarro y mal aliento directamente en la comodidad de su hogar.',
     images: [
-      'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=1200&auto=format&fit=crop'
     ]
   },
   { 
@@ -61,9 +61,9 @@ const businessLines = [
     color: BRAND_COLORS.SOLUCIONES,
     desc: 'Más que un servicio, somos su aliado estratégico. Soluciones Integrales AS SAS centraliza la excelencia operativa para brindar confianza, garantía y profesionalismo en cada intervención técnica.',
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1200&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop'
     ]
   },
 ];
@@ -323,8 +323,8 @@ export default function Home() {
             </div>
             <div className={styles.nosotrosImage}>
               <Image 
-                src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=800&auto=format&fit=crop"
-                alt="Nuestro Equipo"
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop"
+                alt="Nuestro Equipo Profesional"
                 width={600}
                 height={400}
                 className={styles.roundedImg}
