@@ -126,7 +126,7 @@ export default function Home() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     canvasContainerRef.current.appendChild(renderer.domElement);
 
-    const geometry = new THREE.PlaneGeometry(40, 40, 128, 128);
+    const geometry = new THREE.PlaneGeometry(20, 20, 128, 128);
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -135,63 +135,45 @@ export default function Home() {
       vertexShader: `
         varying vec2 vUv;
         varying float vElevation;
-        varying vec3 vNormal;
         uniform float uTime;
         uniform vec2 uMouse;
         void main() {
           vUv = uv;
           vec3 pos = position;
           float dist = distance(uv, uMouse);
-          
-          // High frequency ripples (smaller, more defined)
-          float ripple = sin(dist * 60.0 - uTime * 4.0) * exp(-dist * 8.0) * 0.2;
-          
-          pos.z += ripple;
-          vElevation = ripple;
-          
-          // Calculate a simple normal based on the ripple
-          vNormal = normalize(vec3(-ripple * 10.0, -ripple * 10.0, 1.0));
-          
+          float ripple = sin(dist * 40.0 - uTime * 5.0) * exp(-dist * 5.0) * 0.15;
+          // Add subtle ambient waves
+          float waves = sin(uv.x * 10.0 + uTime) * cos(uv.y * 10.0 + uTime) * 0.05;
+          pos.z += ripple + waves;
+          vElevation = ripple + waves;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
       `,
       fragmentShader: `
         varying vec2 vUv;
         varying float vElevation;
-        varying vec3 vNormal;
         uniform float uTime;
         void main() {
-          // Pure white base
-          vec3 baseColor = vec3(1.0, 1.0, 1.0);
+          // Subtle blue gradient colors
+          vec3 colorLow = vec3(0.96, 0.96, 0.98); // Very light grey/blue
+          vec3 colorHigh = vec3(0.85, 0.92, 0.98); // Light soft blue
+          vec3 finalColor = mix(colorLow, colorHigh, vElevation * 2.0 + 0.5);
           
-          // Light direction for specular effect
-          vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0));
+          // Add subtle specular highlights based on elevation
+          float highlight = smoothstep(0.05, 0.15, vElevation);
+          finalColor += highlight * 0.1;
           
-          // Specular highlight calculation
-          float spec = pow(max(dot(vNormal, lightDir), 0.0), 32.0);
-          
-          // Subtle shadow in the valleys
-          float shadow = smoothstep(0.0, -0.1, vElevation) * 0.1;
-          
-          // Combine: Base + Highlight - Shadow
-          vec3 finalColor = baseColor + (spec * 0.4) - shadow;
-          
-          // Subtlest blue tint only on the ripple
-          float tintMask = abs(vElevation) * 10.0;
-          finalColor = mix(finalColor, finalColor * vec3(0.95, 0.97, 1.0), tintMask);
-          
-          gl_FragColor = vec4(finalColor, 1.0); 
+          gl_FragColor = vec4(finalColor, 1.0);
         }
       `,
       transparent: true,
     });
 
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.rotation.x = -Math.PI / 2; // Flat rotation to better cover view
+    mesh.rotation.x = -Math.PI / 4;
     scene.add(mesh);
 
-    camera.position.set(0, 5, 0); // View from top
-    camera.lookAt(0, 0, 0);
+    camera.position.z = 5;
 
     const handleMouseMove = (e: MouseEvent) => {
       material.uniforms.uMouse.value.x = e.clientX / window.innerWidth;
