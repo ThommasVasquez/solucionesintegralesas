@@ -81,7 +81,8 @@ export default function Home() {
   const cardsRef     = useRef<HTMLDivElement[]>([]);
   const textsRef     = useRef<HTMLDivElement[]>([]);
   const heroRef      = useRef<HTMLElement>(null);
-  const bgVideoRef   = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<HTMLDivElement>(null);
+  const mouseRef     = useRef({ x: 0, y: 0 });
   const [wordIdx, setWordIdx] = useState(0);
 
   const [activeCardIdx, setActiveCardIdx] = useState<number | null>(null);
@@ -114,6 +115,32 @@ export default function Home() {
     }, 3000);
     return () => clearInterval(id);
   }, [activeCardIdx]);
+
+  // Mouse move animation
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
+    const animateMouse = () => {
+      if (animationRef.current) {
+        gsap.to(animationRef.current, {
+          x: mouseRef.current.x,
+          y: mouseRef.current.y,
+          duration: 2,
+          ease: 'power3.out'
+        });
+      }
+      requestAnimationFrame(animateMouse);
+    };
+    const rafId = requestAnimationFrame(animateMouse);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -172,7 +199,7 @@ export default function Home() {
           { opacity: 1, y: 0 },
           { opacity: 0, y: -80, duration: 1 }, 0);
           
-        masterTL.fromTo(bgVideoRef.current, 
+        masterTL.fromTo(animationRef.current?.parentElement, 
           { opacity: 1 }, 
           { opacity: 0, duration: 1 }, 0);
 
@@ -276,11 +303,9 @@ export default function Home() {
       </div>
 
       <section ref={heroRef} className={styles.hero}>
-        <div ref={bgVideoRef} className={styles.videoWrapper}>
-          <video autoPlay muted loop playsInline className={styles.videoBackground}>
-            <source src="/hero-bg.mp4" type="video/mp4" />
-          </video>
-          <div className={styles.videoOverlay} />
+        <div className={styles.animationWrapper}>
+          <div ref={animationRef} className={styles.mouseFollower} />
+          <div className={styles.animationOverlay} />
         </div>
         <div className={styles.heroContent}>
           <h1 ref={headlineRef} className={styles.heroH1}>
