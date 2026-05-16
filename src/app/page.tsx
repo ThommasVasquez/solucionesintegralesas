@@ -141,9 +141,10 @@ export default function Home() {
           vUv = uv;
           vec3 pos = position;
           float dist = distance(uv, uMouse);
-          float ripple = sin(dist * 40.0 - uTime * 5.0) * exp(-dist * 5.0) * 0.15;
-          // Add subtle ambient waves
-          float waves = sin(uv.x * 10.0 + uTime) * cos(uv.y * 10.0 + uTime) * 0.05;
+          // Increased ripple amplitude and range
+          float ripple = sin(dist * 35.0 - uTime * 4.0) * exp(-dist * 4.0) * 0.3;
+          // More pronounced ambient waves
+          float waves = sin(uv.x * 8.0 + uTime * 0.5) * cos(uv.y * 8.0 + uTime * 0.5) * 0.08;
           pos.z += ripple + waves;
           vElevation = ripple + waves;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -154,16 +155,19 @@ export default function Home() {
         varying float vElevation;
         uniform float uTime;
         void main() {
-          // Subtle blue gradient colors
-          vec3 colorLow = vec3(0.96, 0.96, 0.98); // Very light grey/blue
-          vec3 colorHigh = vec3(0.85, 0.92, 0.98); // Light soft blue
-          vec3 finalColor = mix(colorLow, colorHigh, vElevation * 2.0 + 0.5);
+          // Deeper contrast blue colors
+          vec3 colorLow = vec3(0.88, 0.94, 0.98);  // Soft depth blue
+          vec3 colorHigh = vec3(0.2, 0.5, 0.8);    // Richer brand blue
           
-          // Add subtle specular highlights based on elevation
-          float highlight = smoothstep(0.05, 0.15, vElevation);
-          finalColor += highlight * 0.1;
+          // Use elevation to mix colors with more contrast
+          float mixVal = smoothstep(-0.2, 0.2, vElevation);
+          vec3 finalColor = mix(colorLow, colorHigh, mixVal);
           
-          gl_FragColor = vec4(finalColor, 1.0);
+          // Bright specular highlights on crests
+          float highlight = smoothstep(0.08, 0.25, vElevation);
+          finalColor += highlight * 0.3;
+          
+          gl_FragColor = vec4(finalColor, 0.7); // Slightly more transparent to blend with bg
         }
       `,
       transparent: true,
