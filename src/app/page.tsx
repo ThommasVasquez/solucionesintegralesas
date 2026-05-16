@@ -135,6 +135,7 @@ export default function Home() {
       vertexShader: `
         varying vec2 vUv;
         varying float vElevation;
+        varying vec3 vNormal;
         uniform float uTime;
         uniform vec2 uMouse;
         void main() {
@@ -142,33 +143,42 @@ export default function Home() {
           vec3 pos = position;
           float dist = distance(uv, uMouse);
           
-          // Localized ripples around cursor with sharp falloff
-          float ripple = sin(dist * 30.0 - uTime * 4.0) * exp(-dist * 10.0) * 0.25;
+          // High frequency ripples (smaller, more defined)
+          float ripple = sin(dist * 60.0 - uTime * 4.0) * exp(-dist * 8.0) * 0.2;
           
           pos.z += ripple;
           vElevation = ripple;
+          
+          // Calculate a simple normal based on the ripple
+          vNormal = normalize(vec3(-ripple * 10.0, -ripple * 10.0, 1.0));
+          
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
         }
       `,
       fragmentShader: `
         varying vec2 vUv;
         varying float vElevation;
+        varying vec3 vNormal;
         uniform float uTime;
         void main() {
           // Pure white base
           vec3 baseColor = vec3(1.0, 1.0, 1.0);
           
-          // Subtle blue tint for the ripple itself
-          vec3 rippleColor = vec3(0.1, 0.4, 0.7); // Brand blue
+          // Light direction for specular effect
+          vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0));
           
-          // Mix based on localized elevation
-          // We only want color where there is movement
-          float mask = abs(vElevation) * 15.0;
-          vec3 finalColor = mix(baseColor, baseColor - (rippleColor * 0.1), mask);
+          // Specular highlight calculation
+          float spec = pow(max(dot(vNormal, lightDir), 0.0), 32.0);
           
-          // Add a subtle specular highlight on the crest
-          float highlight = smoothstep(0.01, 0.15, vElevation);
-          finalColor += highlight * 0.05;
+          // Subtle shadow in the valleys
+          float shadow = smoothstep(0.0, -0.1, vElevation) * 0.1;
+          
+          // Combine: Base + Highlight - Shadow
+          vec3 finalColor = baseColor + (spec * 0.4) - shadow;
+          
+          // Subtlest blue tint only on the ripple
+          float tintMask = abs(vElevation) * 10.0;
+          finalColor = mix(finalColor, finalColor * vec3(0.95, 0.97, 1.0), tintMask);
           
           gl_FragColor = vec4(finalColor, 1.0); 
         }
