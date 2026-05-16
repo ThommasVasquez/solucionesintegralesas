@@ -4,17 +4,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import { registerAllModules } from 'handsontable/registry';
 import 'handsontable/dist/handsontable.full.min.css';
-import { UserRole } from '@prisma/client';
-
-registerAllModules();
-
+// Removed UserRole import from prisma
 interface SheetViewerProps {
   sheetName: string;
-  role: UserRole;
+  role: string;
   initialData?: any[][];
+  apiUrl?: string;
 }
 
-export function SheetViewer({ sheetName, role, initialData = [] }: SheetViewerProps) {
+export function SheetViewer({ sheetName, role, initialData = [], apiUrl }: SheetViewerProps) {
+  const fetchUrl = apiUrl || `/api/sheets/${encodeURIComponent(sheetName)}`;
+  const saveUrl = apiUrl ? `${apiUrl}/edit` : `/api/sheets/${encodeURIComponent(sheetName)}/edit`;
   const hotRef = useRef<any>(null);
   const [data, setData] = useState<any[][]>(initialData);
   const [loading, setLoading] = useState(!initialData.length);
@@ -31,7 +31,7 @@ export function SheetViewer({ sheetName, role, initialData = [] }: SheetViewerPr
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/sheets/${encodeURIComponent(sheetName)}`);
+      const res = await fetch(fetchUrl);
       if (!res.ok) throw new Error('Failed to fetch sheet data');
       const json = await res.json();
       setData(json.data);
@@ -52,10 +52,10 @@ export function SheetViewer({ sheetName, role, initialData = [] }: SheetViewerPr
     
     try {
       setLoading(true);
-      const res = await fetch(`/api/sheets/${encodeURIComponent(sheetName)}/edit`, {
+      const res = await fetch(saveUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values: currentData, range: 'A1' }) // Simplification: replacing all
+        body: JSON.stringify({ values: currentData, range: 'A1' }) 
       });
       
       if (!res.ok) throw new Error('Failed to save data');

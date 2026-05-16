@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { BRAND_COLORS } from "@/app/page";
 import Navbar from "@/components/Navbar";
 import styles from "./dashboard.module.css";
+import { Link } from "next-view-transitions";
 
 export const runtime = 'edge';
 
@@ -58,7 +59,9 @@ export default async function DashboardPage() {
               </div>
               <h3>ProMascotas</h3>
               <p>Control de visitas y profilaxis a domicilio.</p>
-              <button className={styles.cardAction} style={{ color: BRAND_COLORS.PROMASCOTAS }}>Gestionar Visitas →</button>
+              <Link href="/dashboard/promascotas" className={styles.cardAction} style={{ color: BRAND_COLORS.PROMASCOTAS }}>
+                Gestionar Visitas →
+              </Link>
             </div>
           </div>
         </div>
