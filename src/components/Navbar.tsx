@@ -34,6 +34,22 @@ export default function Navbar() {
     return () => ctx.revert();
   }, []);
 
+  const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => {
+    const isActive = pathname === href;
+    if (isActive) {
+      return (
+        <span className={styles.link} style={{ fontWeight: 700, color: '#111', cursor: 'default' }}>
+          {children}
+        </span>
+      );
+    }
+    return (
+      <Link href={href} className={styles.link}>
+        {children}
+      </Link>
+    );
+  };
+
   return (
     <header ref={navRef} className={`${styles.navbar} glass`}>
       <div className={`container ${styles.navContainer}`}>
@@ -58,10 +74,10 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/" className={styles.link}>Inicio Web</Link>
-              <Link href="/dashboard" className={styles.link}>Dashboard</Link>
-              <Link href="/dashboard/promascotas" className={styles.link}>ProMascotas</Link>
-              <Link href="/dashboard/clubhouse" className={styles.link}>ClubHouse</Link>
+              <NavLink href="/">Inicio Web</NavLink>
+              <NavLink href="/dashboard">Dashboard</NavLink>
+              <NavLink href="/dashboard/promascotas">ProMascotas</NavLink>
+              <NavLink href="/dashboard/clubhouse">ClubHouse</NavLink>
               <span className={styles.link} style={{ opacity: 0.5, cursor: 'not-allowed' }}>Ingenova</span>
             </>
           )}
