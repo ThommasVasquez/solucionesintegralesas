@@ -47,7 +47,9 @@ export default function Navbar() {
           <Link href="#contacto" className={styles.link}>Contacto</Link>
         </nav>
         <div className={styles.actions}>
-          <button className={styles.loginBtn} aria-label="Ingresar a mi cuenta">Ingresar</button>
+          <Link href="/login" className={styles.loginBtn} aria-label="Ingresar a mi cuenta">
+            Ingresar
+          </Link>
           
           <div 
             className={styles.dropdownContainer}
