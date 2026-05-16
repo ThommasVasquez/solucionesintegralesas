@@ -230,3 +230,149 @@
     left: -90px;
   }
 }
+
+/* ── Nosotros ── */
+.nosotros {
+  padding: 8rem 2rem;
+  background: #fff;
+  position: relative;
+  z-index: 30;
+}
+
+.nosotrosGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nosotrosText {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sectionLabel {
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: #1a5d91;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.nosotrosText h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  line-height: 1.2;
+  color: #111;
+  font-weight: 700;
+}
+
+.nosotrosText p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #555;
+}
+
+.stats {
+  display: flex;
+  gap: 3rem;
+  margin-top: 1rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.statNum {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.statLab {
+  font-size: 0.9rem;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.nosotrosImage {
+  position: relative;
+}
+
+.roundedImg {
+  border-radius: 30px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.1);
+  object-fit: cover;
+}
+
+/* ── Cobertura ── */
+.cobertura {
+  padding: 8rem 2rem;
+  background: #f8f9fa;
+  position: relative;
+  z-index: 30;
+}
+
+.coberturaP {
+  max-width: 600px;
+  margin: 1rem auto 3rem;
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.mapMockup {
+  background: #fff;
+  border-radius: 40px;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.cityBadge {
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  color: #333;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.cityBadge:hover {
+  background: #1a5d91;
+  color: #fff;
+  border-color: #1a5d91;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(26, 93, 145, 0.2);
+}
+
+@media (max-width: 900px) {
+  .nosotrosGrid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .nosotrosText {
+    align-items: center;
+  }
+  .stats {
+    justify-content: center;
+    gap: 2rem;
+  }
+  .nosotrosImage {
+    order: -1;
+  }
+}
+

@@ -10,12 +10,11 @@ import Footer from '@/components/Footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// CENTRALIZACIÓN DE COLORES DE MARCA
 export const BRAND_COLORS = {
-  SOLUCIONES: '#1a5d91', // Azules - Corporativo
-  INGENOVA: '#f39c12',   // Naranja - Jacuzzis y Piscinas
-  PROMASCOTAS: '#f1c40f', // Amarillo - Mascotas
-  CLUBHOUSE: '#82b440',   // Verde - Natación
+  SOLUCIONES: '#1a5d91',
+  INGENOVA: '#f39c12',
+  PROMASCOTAS: '#f1c40f',
+  CLUBHOUSE: '#82b440',
 };
 
 const businessLines = [
@@ -24,7 +23,7 @@ const businessLines = [
     title: 'Jacuzzis, Piscinas & Turcos',
     tag: 'Mantenimiento & Repuestos',
     color: BRAND_COLORS.INGENOVA,
-    desc: 'Servicio técnico especializado y venta de repuestos para sistemas de hidromasaje, piscinas y baños turcos.',
+    desc: 'Somos expertos en el corazón de sus zonas húmedas. Ofrecemos mantenimiento preventivo y correctivo, venta de motobombas, filtros y químicos de alta calidad para garantizar aguas cristalinas y sistemas eficientes.',
     images: [
       'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1571155823795-467926b68e7d?q=80&w=800&auto=format&fit=crop',
@@ -36,7 +35,7 @@ const businessLines = [
     title: 'Administración & Nado',
     tag: 'Gestión & Capacitación',
     color: BRAND_COLORS.CLUBHOUSE,
-    desc: 'Administración profesional de complejos acuáticos y programas certificados de capacitación en natación.',
+    desc: 'Llevamos la gestión de complejos acuáticos a otro nivel. Desde la administración operativa de clubes y conjuntos hasta escuelas de natación para todas las edades con instructores certificados por la federación.',
     images: [
       'https://images.unsplash.com/photo-1530549387634-e7a5bc2a6132?q=80&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1560090995-01632a28895b?q=80&w=800&auto=format&fit=crop',
@@ -48,7 +47,7 @@ const businessLines = [
     title: 'Profilaxis a Domicilio',
     tag: 'Cuidado Dental Pet',
     color: BRAND_COLORS.PROMASCOTAS,
-    desc: 'Salud oral experta para tus mascotas sin salir de casa. Limpieza dental profunda con trato profesional.',
+    desc: 'La sonrisa de su mejor amigo es nuestra prioridad. Realizamos limpieza dental profunda sin anestesia general (según evaluación), eliminando sarro y mal aliento directamente en la comodidad de su hogar.',
     images: [
       'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=800&auto=format&fit=crop',
@@ -57,10 +56,10 @@ const businessLines = [
   },
   { 
     label: 'Soluciones AS', 
-    title: 'Servicios Integrales',
-    tag: 'Respaldo Corporativo',
+    title: 'Respaldo Corporativo',
+    tag: 'Infraestructura Técnica',
     color: BRAND_COLORS.SOLUCIONES,
-    desc: 'La infraestructura técnica y profesional que respalda cada una de nuestras líneas de negocio especializadas.',
+    desc: 'Más que un servicio, somos su aliado estratégico. Soluciones Integrales AS SAS centraliza la excelencia operativa para brindar confianza, garantía y profesionalismo en cada intervención técnica.',
     images: [
       'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800&auto=format&fit=crop',
@@ -85,7 +84,6 @@ export default function Home() {
   const bgVideoRef   = useRef<HTMLDivElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
 
-  // Estados para el carrusel dinámico de fotos en foco
   const [activeCardIdx, setActiveCardIdx] = useState<number | null>(null);
   const activeCardIdxRef = useRef<number | null>(null);
   const [imageCycleIdx, setImageCycleIdx] = useState(0);
@@ -106,7 +104,6 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
-  // Timer para ciclar imágenes cada 3 segundos SOLO en la tarjeta activa
   useEffect(() => {
     if (activeCardIdx === null) {
       setImageCycleIdx(0);
@@ -152,20 +149,18 @@ export default function Home() {
           scrollTrigger: {
             trigger: heroRef.current,
             start: 'top top',
-            end: '+=600%',
+            end: '+=800%',
             pin: true, scrub: 0.5, invalidateOnRefresh: true,
           },
         });
 
-        // Seguimiento del scroll para activar la tarjeta correspondiente
         masterTL.eventCallback("onUpdate", () => {
-          const t = masterTL.time();
+          const t = masterTL.progress();
           let nextIdx = null;
-          // Los tiempos coinciden con el inicio del enfoque de cada tarjeta (startTime + 0.5)
-          if (t >= 12.0) nextIdx = 3;
-          else if (t >= 9.0) nextIdx = 2;
-          else if (t >= 6.0) nextIdx = 1;
-          else if (t >= 3.0) nextIdx = 0;
+          if (t >= 0.8) nextIdx = 3;
+          else if (t >= 0.6) nextIdx = 2;
+          else if (t >= 0.4) nextIdx = 1;
+          else if (t >= 0.2) nextIdx = 0;
           
           if (activeCardIdxRef.current !== nextIdx) {
             activeCardIdxRef.current = nextIdx;
@@ -213,7 +208,6 @@ export default function Home() {
             { opacity: 0, y: textYOffset + 30 },
             { opacity: 1, y: textYOffset, duration: 1, pointerEvents: 'auto' }, startTime + 0.5);
             
-          // Ampliación exclusiva de la tarjeta en foco
           masterTL.to(cards[i], { 
             x: focusX, y: focusY, scale: isDesktop ? 1.4 : 1.15, opacity: 1, duration: 1.2, ease: 'power3.out' 
           }, startTime + 0.5);
@@ -262,9 +256,9 @@ export default function Home() {
         </div>
         <div className={styles.fixedTexts}>
           <div ref={el => { if (el) textsRef.current[0] = el; }} className={styles.textBlock}>
-            <span className={styles.stepTag} style={{ color: BRAND_COLORS.SOLUCIONES }}>Expertos certificados</span>
-            <h2>Soluciones Integrales AS</h2>
-            <p>Infraestructura técnica y profesional de vanguardia para todas nuestras marcas especializadas.</p>
+            <span className={styles.stepTag} style={{ color: BRAND_COLORS.SOLUCIONES }}>Soporte Técnico Especializado</span>
+            <h2>Soluciones Integrales AS SAS</h2>
+            <p>El respaldo corporativo de confianza en Colombia. Integramos tecnología, experiencia y un equipo humano altamente capacitado para cuidar lo que más le importa.</p>
           </div>
           {businessLines.map((line, i) => (
             <div key={`text-${i}`} ref={el => { if (el) textsRef.current[i+1] = el; }} className={styles.textBlock}>
@@ -272,9 +266,9 @@ export default function Home() {
               <h2 style={{ borderColor: line.color }}>{line.title}</h2>
               <p>{line.desc}</p>
               <div className={styles.stepCta}>
-                <button className="btn-primary" style={{ backgroundColor: line.color, borderColor: line.color }}>
+                <a href={`https://wa.me/573001234567?text=Hola! Vengo de la web y quiero agendar con ${line.label}`} target="_blank" rel="noreferrer" className="btn-primary" style={{ backgroundColor: line.color, borderColor: line.color }}>
                   Agendar con {line.label}
-                </button>
+                </a>
               </div>
             </div>
           ))}
@@ -296,20 +290,71 @@ export default function Home() {
             </span>.
           </h1>
           <div ref={ctaGroupRef} className={styles.ctaGroup}>
-            <button className="btn-primary" style={{ backgroundColor: BRAND_COLORS.SOLUCIONES, borderColor: BRAND_COLORS.SOLUCIONES }}>
+            <button className="btn-primary" style={{ backgroundColor: BRAND_COLORS.SOLUCIONES, borderColor: BRAND_COLORS.SOLUCIONES }} onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
               Nuestros servicios
             </button>
-            <button className="btn-outline">Conócenos</button>
+            <button className="btn-outline" onClick={() => document.getElementById('nosotros')?.scrollIntoView({ behavior: 'smooth' })}>Conócenos</button>
           </div>
         </div>
       </section>
 
-      <section className={styles.ctaFinal}>
+      <section id="nosotros" className={styles.nosotros}>
+        <div className="container">
+          <div className={styles.nosotrosGrid}>
+            <div className={styles.nosotrosText}>
+              <span className={styles.sectionLabel}>Nuestra Historia</span>
+              <h2>Más de 10 años brindando soluciones de confianza</h2>
+              <p>En **Soluciones Integrales AS SAS**, nacimos con una misión clara: simplificar la vida de nuestros clientes a través de servicios técnicos de alta calidad y un respaldo corporativo inigualable.</p>
+              <p>Lo que comenzó como una especialización en zonas húmedas con **Ingenova**, ha evolucionado hasta convertirse en un ecosistema de servicios que abarca desde la administración de nado con **ClubHouse** hasta la salud animal con **ProMascotas**.</p>
+              <div className={styles.stats}>
+                <div className={styles.statItem}>
+                  <span className={styles.statNum}>+2k</span>
+                  <span className={styles.statLab}>Clientes Felices</span>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statNum}>100%</span>
+                  <span className={styles.statLab}>Garantía Técnica</span>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statNum}>24/7</span>
+                  <span className={styles.statLab}>Soporte Premium</span>
+                </div>
+              </div>
+            </div>
+            <div className={styles.nosotrosImage}>
+              <Image 
+                src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=800&auto=format&fit=crop"
+                alt="Nuestro Equipo"
+                width={600}
+                height={400}
+                className={styles.roundedImg}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cobertura" className={styles.cobertura}>
+        <div className="container text-center">
+          <span className={styles.sectionLabel}>Donde estamos</span>
+          <h2>Presencia y Cobertura</h2>
+          <p className={styles.coberturaP}>Actualmente brindamos cobertura total en **Bogotá y Sabana Norte**, llegando hasta la puerta de su hogar o empresa con la rapidez y eficiencia que nos caracteriza.</p>
+          <div className={styles.mapMockup}>
+             <div className={styles.cityBadge}>Bogotá D.C.</div>
+             <div className={styles.cityBadge}>Chía</div>
+             <div className={styles.cityBadge}>Cajicá</div>
+             <div className={styles.cityBadge}>Cota</div>
+             <div className={styles.cityBadge}>Sopó</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contacto" className={styles.ctaFinal}>
         <div className={styles.ctaFinalInner}>
-          <h3 className={styles.ctaTitle}>¿Listo para empezar?</h3>
-          <p className={styles.ctaSub}>Atención inmediata · Respaldo de Soluciones Integrales AS.</p>
+          <h3 className={styles.ctaTitle}>¿Tiene un requerimiento especial?</h3>
+          <p className={styles.ctaSub}>Estamos listos para asesorarlo. Atención inmediata y respaldo total.</p>
           <a href="https://wa.me/573001234567" target="_blank" rel="noreferrer" className="btn-primary" style={{ backgroundColor: BRAND_COLORS.SOLUCIONES, borderColor: BRAND_COLORS.SOLUCIONES }}>
-            Hablar con un asesor →
+            Hablar con un asesor ahora →
           </a>
         </div>
       </section>
