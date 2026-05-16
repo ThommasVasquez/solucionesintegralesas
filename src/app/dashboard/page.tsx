@@ -41,7 +41,9 @@ export default async function DashboardPage() {
               </div>
               <h3>Ingenova</h3>
               <p>Gestión de hojas de control para mantenimiento de piscinas.</p>
-              <button className={styles.cardAction} style={{ color: BRAND_COLORS.INGENOVA }}>Abrir Planillas →</button>
+              <Link href="/dashboard/ingenova" className={styles.cardAction} style={{ color: BRAND_COLORS.INGENOVA }}>
+                Abrir Planillas →
+              </Link>
             </div>
 
             <div className={styles.card}>

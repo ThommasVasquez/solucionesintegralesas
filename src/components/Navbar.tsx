@@ -78,7 +78,7 @@ export default function Navbar() {
               <NavLink href="/dashboard">Dashboard</NavLink>
               <NavLink href="/dashboard/promascotas">ProMascotas</NavLink>
               <NavLink href="/dashboard/clubhouse">ClubHouse</NavLink>
-              <span className={styles.link} style={{ opacity: 0.5, cursor: 'not-allowed' }}>Ingenova</span>
+              <NavLink href="/dashboard/ingenova">Ingenova</NavLink>
             </>
           )}
         </nav>
