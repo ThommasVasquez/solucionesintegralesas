@@ -5,7 +5,7 @@ import styles from "./promascotas.module.css";
 
 export const runtime = 'edge';
 
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing&rm=minimal";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing";
 
 export default async function ProMascotasPage() {
   const session = await auth();
