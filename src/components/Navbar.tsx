@@ -16,12 +16,24 @@ const COLORS = {
 
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
 
   const isHomePage = pathname === '/';
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -122,6 +134,7 @@ export default function Navbar() {
           )}
           
           <div 
+            ref={dropdownRef}
             className={styles.dropdownContainer}
             onMouseEnter={() => setIsOpen(true)}
             onMouseLeave={() => setIsOpen(false)}
@@ -132,6 +145,7 @@ export default function Navbar() {
               className={styles.ctaBtn} 
               style={{ backgroundColor: COLORS.SOLUCIONES }}
               aria-label="Ver nuestras empresas"
+              onClick={() => setIsOpen(prev => !prev)}
             >
               <span className={styles.fullText}>Empresas</span>
               <span className={styles.mobileText}>Empresas</span>
@@ -141,19 +155,19 @@ export default function Navbar() {
             </button>
             
             <div className={`${styles.dropdownMenu} ${isOpen ? styles.menuVisible : ''}`} role="menu">
-              <Link href="/empresas/ingenova" className={styles.menuItem} role="menuitem">
+              <Link href="/empresas/ingenova" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
                 <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>Ingenova</span>
-                <span className={styles.brandDesc}>Jacuzzis, Piscinas & Turcos</span>
+                <span className={styles.brandDesc}>Jacuzzis, Piscinas &amp; Turcos</span>
               </Link>
-              <Link href="/empresas/clubhouse" className={styles.menuItem} role="menuitem">
+              <Link href="/empresas/clubhouse" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
                 <span className={styles.brandTitle} style={{ color: COLORS.CLUBHOUSE }}>ClubHouse</span>
-                <span className={styles.brandDesc}>Administración & Capacitación</span>
+                <span className={styles.brandDesc}>Administración &amp; Capacitación</span>
               </Link>
-              <Link href="/empresas/promascotas" className={styles.menuItem} role="menuitem">
+              <Link href="/empresas/promascotas" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
                 <span className={styles.brandTitle} style={{ color: COLORS.PROMASCOTAS }}>ProMascotas</span>
                 <span className={styles.brandDesc}>Profilaxis a Domicilio</span>
               </Link>
-              <Link href="/empresas/soluciones-as" className={styles.menuItem} role="menuitem">
+              <Link href="/empresas/soluciones-as" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
                 <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Soluciones AS</span>
                 <span className={styles.brandDesc}>Respaldo Corporativo</span>
               </Link>
