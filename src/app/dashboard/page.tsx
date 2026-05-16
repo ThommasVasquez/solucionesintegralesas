@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { BRAND_COLORS } from "@/app/page";
 import Navbar from "@/components/Navbar";
 
+export const runtime = 'edge';
+
 export default async function DashboardPage() {
   const session = await auth();
 
