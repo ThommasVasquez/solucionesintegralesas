@@ -50,7 +50,9 @@ export default async function DashboardPage() {
               </div>
               <h3>ClubHouse</h3>
               <p>Administración y control de capacitación.</p>
-              <button className={styles.cardAction} style={{ color: BRAND_COLORS.CLUBHOUSE }}>Ver Registros →</button>
+              <Link href="/dashboard/clubhouse" className={styles.cardAction} style={{ color: BRAND_COLORS.CLUBHOUSE }}>
+                Ver Registros →
+              </Link>
             </div>
 
             <div className={styles.card}>
