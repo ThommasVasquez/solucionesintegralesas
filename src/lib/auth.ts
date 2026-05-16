@@ -1,27 +1,47 @@
 import NextAuth, { type DefaultSession } from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { compare } from "bcryptjs";
-import { db } from "@/lib/db";
-import { UserRole } from "@prisma/client";
 import { authConfig } from "./auth.config";
+
+// SISTEMA DE USUARIOS SIMPLIFICADO (Sin base de datos)
+const USERS = [
+  {
+    id: "1",
+    email: "patron@energysoft.com",
+    password: "patron1234",
+    name: "El Patron",
+    role: "PATRON"
+  },
+  {
+    id: "2",
+    email: "admin@energysoft.com",
+    password: "admin1234",
+    name: "Administrador",
+    role: "ADMIN"
+  },
+  {
+    id: "3",
+    email: "tecnico@energysoft.com",
+    password: "tecnico1234",
+    name: "Técnico de Campo",
+    role: "TECNICO"
+  }
+];
 
 declare module "next-auth" {
   interface Session {
     user: {
       id: string;
-      role: UserRole;
+      role: string;
     } & DefaultSession["user"];
   }
   
   interface User {
-    role: UserRole;
+    role: string;
   }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(db) as any,
   session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
@@ -34,20 +54,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email as string }
-        });
+        // Validación simple contra el array USERS
+        const user = USERS.find(u => u.email === credentials.email);
 
-        if (!user || !user.password) {
-          return null;
-        }
-
-        const isPasswordValid = await compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!isPasswordValid) {
+        if (!user || user.password !== credentials.password) {
           return null;
         }
 
