@@ -141,10 +141,10 @@ export default function Home() {
           vUv = uv;
           vec3 pos = position;
           float dist = distance(uv, uMouse);
-          // Increased ripple amplitude and range
-          float ripple = sin(dist * 35.0 - uTime * 4.0) * exp(-dist * 4.0) * 0.3;
-          // More pronounced ambient waves
-          float waves = sin(uv.x * 8.0 + uTime * 0.5) * cos(uv.y * 8.0 + uTime * 0.5) * 0.08;
+          // Balanced ripple amplitude
+          float ripple = sin(dist * 35.0 - uTime * 4.0) * exp(-dist * 4.5) * 0.2;
+          // Subtler ambient waves
+          float waves = sin(uv.x * 6.0 + uTime * 0.4) * cos(uv.y * 6.0 + uTime * 0.4) * 0.04;
           pos.z += ripple + waves;
           vElevation = ripple + waves;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
@@ -155,19 +155,18 @@ export default function Home() {
         varying float vElevation;
         uniform float uTime;
         void main() {
-          // Deeper contrast blue colors
-          vec3 colorLow = vec3(0.88, 0.94, 0.98);  // Soft depth blue
-          vec3 colorHigh = vec3(0.2, 0.5, 0.8);    // Richer brand blue
+          // Soft, elegant blue palette
+          vec3 colorLow = vec3(0.94, 0.97, 1.0);   // Very soft blue-white
+          vec3 colorHigh = vec3(0.6, 0.8, 0.95);    // Delicate sky blue
           
-          // Use elevation to mix colors with more contrast
-          float mixVal = smoothstep(-0.2, 0.2, vElevation);
+          float mixVal = vElevation * 1.5 + 0.5;
           vec3 finalColor = mix(colorLow, colorHigh, mixVal);
           
-          // Bright specular highlights on crests
-          float highlight = smoothstep(0.08, 0.25, vElevation);
-          finalColor += highlight * 0.3;
+          // Subtle specular highlights
+          float highlight = smoothstep(0.04, 0.2, vElevation);
+          finalColor += highlight * 0.15;
           
-          gl_FragColor = vec4(finalColor, 0.7); // Slightly more transparent to blend with bg
+          gl_FragColor = vec4(finalColor, 0.85); 
         }
       `,
       transparent: true,
