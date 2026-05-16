@@ -127,7 +127,10 @@ export default function Home() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     canvasContainerRef.current.appendChild(renderer.domElement);
 
-    const geometry = new THREE.PlaneGeometry(20, 20, 64, 64);
+    const isMobile = window.innerWidth <= 768;
+    const geometrySize = isMobile ? 32 : 64;
+
+    const geometry = new THREE.PlaneGeometry(20, 20, geometrySize, geometrySize);
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -176,15 +179,23 @@ export default function Home() {
 
     camera.position.z = 5;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      material.uniforms.uMouse.value.x = e.clientX / window.innerWidth;
-      material.uniforms.uMouse.value.y = 1.0 - (e.clientY / window.innerHeight);
+    const updateMouse = (clientX: number, clientY: number) => {
+      material.uniforms.uMouse.value.x = clientX / window.innerWidth;
+      material.uniforms.uMouse.value.y = 1.0 - (clientY / window.innerHeight);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => updateMouse(e.clientX, e.clientY);
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
 
     const animate = () => {
-      material.uniforms.uTime.value += 0.03;
+      material.uniforms.uTime.value += isMobile ? 0.02 : 0.03;
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     };
@@ -199,6 +210,7 @@ export default function Home() {
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(rafId);
       if (canvasContainerRef.current) {
