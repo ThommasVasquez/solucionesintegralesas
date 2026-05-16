@@ -8,13 +8,6 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Soluciones Integrales AS SAS | Técnicos Club House',
   description: 'Servicio técnico premium y mantenimiento de electrodomésticos de alta gama en Colombia.',
-  icons: {
-    icon: [
-      { url: '/logo.png', type: 'image/png' },
-    ],
-    shortcut: '/logo.png',
-    apple: '/logo.png',
-  },
 };
 
 export default function RootLayout({
