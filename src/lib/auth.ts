@@ -24,6 +24,13 @@ const USERS = [
     password: "Adrian3*.",
     name: "Adrian",
     role: "TECNICO"
+  },
+  {
+    id: "4",
+    email: "sergio@ingenova.com.co",
+    password: "Sergio4*.",
+    name: "Sergio",
+    role: "ADMIN"
   }
 ];
 
