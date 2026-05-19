@@ -1,3 +1,6 @@
+/* ── Typography Import ── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
 /* ═══════════════════════════════════════════════
    INGENOVA — Premium Landing Page Styles
    Colors extracted from brand logo:
@@ -17,9 +20,6 @@
   --gold-gradient:   linear-gradient(135deg, #C9A84C 0%, #E8D490 50%, #C9A84C 100%);
   --gold-shimmer:    linear-gradient(90deg, transparent, rgba(232,212,144,0.4), transparent);
 }
-
-/* ── Typography Import ── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* ── Global reset for this page ── */
 .page {
