@@ -14,6 +14,8 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const isSergio = session.user?.email === "sergio@ingenova.com.co";
+
   return (
     <main className={styles.main}>
       <Navbar />
@@ -35,27 +37,31 @@ export default async function DashboardPage() {
           </div>
 
           <div className={styles.grid}>
-            <div className={styles.card}>
-              <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.INGENOVA + '20' }}>
-                <span style={{ color: BRAND_COLORS.INGENOVA }}>🏊‍♂️</span>
-              </div>
-              <h3>Ingenova</h3>
-              <p>Gestión de hojas de control para mantenimiento de piscinas.</p>
-              <Link href="/dashboard/ingenova" className={styles.cardAction} style={{ color: BRAND_COLORS.INGENOVA }}>
-                Abrir Planillas →
-              </Link>
-            </div>
+            {!isSergio && (
+              <>
+                <div className={styles.card}>
+                  <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.INGENOVA + '20' }}>
+                    <span style={{ color: BRAND_COLORS.INGENOVA }}>🏊‍♂️</span>
+                  </div>
+                  <h3>Ingenova</h3>
+                  <p>Gestión de hojas de control para mantenimiento de piscinas.</p>
+                  <Link href="/dashboard/ingenova" className={styles.cardAction} style={{ color: BRAND_COLORS.INGENOVA }}>
+                    Abrir Planillas →
+                  </Link>
+                </div>
 
-            <div className={styles.card}>
-              <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.CLUBHOUSE + '20' }}>
-                <span style={{ color: BRAND_COLORS.CLUBHOUSE }}>🏠</span>
-              </div>
-              <h3>ClubHouse</h3>
-              <p>Administración y control de capacitación.</p>
-              <Link href="/dashboard/clubhouse" className={styles.cardAction} style={{ color: BRAND_COLORS.CLUBHOUSE }}>
-                Ver Registros →
-              </Link>
-            </div>
+                <div className={styles.card}>
+                  <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.CLUBHOUSE + '20' }}>
+                    <span style={{ color: BRAND_COLORS.CLUBHOUSE }}>🏠</span>
+                  </div>
+                  <h3>ClubHouse</h3>
+                  <p>Administración y control de capacitación.</p>
+                  <Link href="/dashboard/clubhouse" className={styles.cardAction} style={{ color: BRAND_COLORS.CLUBHOUSE }}>
+                    Ver Registros →
+                  </Link>
+                </div>
+              </>
+            )}
 
             <div className={styles.card}>
               <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.PROMASCOTAS + '20' }}>
