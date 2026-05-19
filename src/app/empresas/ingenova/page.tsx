@@ -125,7 +125,6 @@ export default function IngenovaPage() {
               height={80}
               className={s.heroLogo}
               priority
-              onError={() => {}}
             />
 
             {/* Badge */}
