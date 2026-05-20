@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getStoredMessages, clearStoredMessages } from '@/lib/whatsapp-store';
 
-export const runtime = 'edge';
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',

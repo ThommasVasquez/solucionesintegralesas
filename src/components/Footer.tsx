@@ -16,6 +16,7 @@ export default function Footer() {
               width={180}
               height={55}
               className={styles.footerLogo}
+              style={{ width: 'auto', height: '70px' }}
             />
           </Link>
           <p className={styles.description}>
@@ -73,6 +74,7 @@ export default function Footer() {
             width={100}
             height={20}
             className={styles.energyLogo}
+            style={{ width: 'auto', height: '20px' }}
           />
           | Software con Energía! ⚡️
         </p>

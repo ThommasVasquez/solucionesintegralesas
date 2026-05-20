@@ -73,6 +73,7 @@ export default function Navbar() {
               width={180} 
               height={55} 
               className={styles.logoImg}
+              style={{ width: 'auto', height: '55px' }}
               priority
             />
           </div>
@@ -83,6 +84,7 @@ export default function Navbar() {
               width={45} 
               height={45} 
               className={styles.logoImg}
+              style={{ width: 'auto', height: '45px' }}
               priority
             />
           </div>

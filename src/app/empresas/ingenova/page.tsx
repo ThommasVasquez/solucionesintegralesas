@@ -124,6 +124,7 @@ export default function IngenovaPage() {
               width={200}
               height={80}
               className={s.heroLogo}
+              style={{ width: '220px', height: 'auto' }}
               priority
             />
 
