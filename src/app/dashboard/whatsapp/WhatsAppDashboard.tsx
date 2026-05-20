@@ -114,6 +114,91 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
         return null;
     }
 
+    // Función para obtener el timestamp real del mensaje desde el DOM de WhatsApp
+    function getMessageTimestamp(el) {
+        try {
+            const copyable = el.querySelector('[data-pre-plain-text]') || el.closest('[data-pre-plain-text]');
+            if (copyable) {
+                const preText = copyable.getAttribute('data-pre-plain-text');
+                if (preText) {
+                    const bracketMatch = preText.match(/^\\[(.*?)\\]/);
+                    if (bracketMatch && bracketMatch[1]) {
+                        const dateTimeStr = bracketMatch[1];
+                        
+                        const timeMatch = dateTimeStr.match(/(\\d{1,2}):(\\d{2})\\s*([ap]\\.?\\s*m\\.?)?/i);
+                        const dateMatch = dateTimeStr.match(/(\\d{1,2})[\\/\\.\\-](\\d{1,2})[\\/\\.\\-](\\d{2,4})/);
+                        
+                        if (timeMatch && dateMatch) {
+                            let hours = parseInt(timeMatch[1], 10);
+                            const minutes = parseInt(timeMatch[2], 10);
+                            const ampm = timeMatch[3];
+                            
+                            if (ampm) {
+                                const ampmLower = ampm.toLowerCase().replace(/\\s/g, '').replace(/\\./g, '');
+                                if (ampmLower.includes('p') && hours < 12) {
+                                    hours += 12;
+                                } else if (ampmLower.includes('a') && hours === 12) {
+                                    hours = 0;
+                                }
+                            }
+                            
+                            const val1 = parseInt(dateMatch[1], 10);
+                            const val2 = parseInt(dateMatch[2], 10);
+                            let year = parseInt(dateMatch[3], 10);
+                            if (year < 100) year += 2000;
+                            
+                            let day, month;
+                            if (val2 > 12) {
+                                day = val2;
+                                month = val1 - 1;
+                            } else {
+                                day = val1;
+                                month = val2 - 1;
+                            }
+                            
+                            const parsedDate = new Date(year, month, day, hours, minutes);
+                            if (!isNaN(parsedDate.getTime())) {
+                                return parsedDate.toISOString();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('[AS Tracker] Error parseando timestamp del DOM:', e);
+        }
+        
+        try {
+            const timeEl = el.querySelector('[class*="time"], span[class*="time"]');
+            if (timeEl && timeEl.textContent) {
+                const timeStr = timeEl.textContent.trim();
+                const timeMatch = timeStr.match(/(\\d{1,2}):(\\d{2})\\s*([ap]\\.?\\s*m\\.?)?/i);
+                if (timeMatch) {
+                    let hours = parseInt(timeMatch[1], 10);
+                    const minutes = parseInt(timeMatch[2], 10);
+                    const ampm = timeMatch[3];
+                    if (ampm) {
+                        const ampmLower = ampm.toLowerCase().replace(/\\s/g, '').replace(/\\./g, '');
+                        if (ampmLower.includes('p') && hours < 12) {
+                            hours += 12;
+                        } else if (ampmLower.includes('a') && hours === 12) {
+                            hours = 0;
+                        }
+                    }
+                    const now = new Date();
+                    const parsedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+                    if (!isNaN(parsedDate.getTime())) {
+                        return parsedDate.toISOString();
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('[AS Tracker] Error de fallback para el tiempo:', e);
+        }
+        
+        return new Date().toISOString();
+    }
+
     // Procesar y enviar un mensaje
     function processMessage(el) {
         try {
@@ -208,7 +293,7 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
                 chatId: chatName.toLowerCase().replace(/\\s+/g, '_'),
                 sender: sender,
                 content: content,
-                timestamp: new Date().toISOString(),
+                timestamp: getMessageTimestamp(el),
                 direction: direction
             };
 
