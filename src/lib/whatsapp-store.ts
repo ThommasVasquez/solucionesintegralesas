@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 export interface WhatsAppMessage {
   id: string;
   chatId: string;
@@ -7,27 +10,48 @@ export interface WhatsAppMessage {
   direction: 'INBOUND' | 'OUTBOUND';
 }
 
-// Almacenamiento en memoria global (compatible con entornos Edge y Cloudflare Workers)
-const globalForWhatsApp = globalThis as unknown as {
-  whatsappMessages: WhatsAppMessage[];
-};
+// Ruta del archivo de persistencia en disco
+const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_FILE = path.join(DATA_DIR, 'whatsapp-messages.json');
 
-if (!globalForWhatsApp.whatsappMessages) {
-  globalForWhatsApp.whatsappMessages = [];
+// Asegurar que el directorio existe
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
 }
 
+// Leer mensajes del disco
 export function getStoredMessages(): WhatsAppMessage[] {
-  return globalForWhatsApp.whatsappMessages;
+  try {
+    ensureDataDir();
+    if (!fs.existsSync(DATA_FILE)) {
+      return [];
+    }
+    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+    return JSON.parse(raw) as WhatsAppMessage[];
+  } catch (e) {
+    console.error('[WhatsApp Store] Error leyendo archivo:', e);
+    return [];
+  }
 }
 
+// Escribir mensajes al disco
 export function saveStoredMessages(messages: WhatsAppMessage[]): boolean {
-  globalForWhatsApp.whatsappMessages = messages;
-  return true;
+  try {
+    ensureDataDir();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(messages, null, 2), 'utf-8');
+    return true;
+  } catch (e) {
+    console.error('[WhatsApp Store] Error escribiendo archivo:', e);
+    return false;
+  }
 }
 
+// Agregar un mensaje (con deduplicación)
 export function addStoredMessage(message: WhatsAppMessage): { success: boolean; isDuplicate: boolean } {
   const messages = getStoredMessages();
-  
+
   // Evitar duplicados
   const exists = messages.some(m => m.id === message.id);
   if (exists) {
@@ -35,10 +59,11 @@ export function addStoredMessage(message: WhatsAppMessage): { success: boolean; 
   }
 
   messages.push(message);
-  return { success: true, isDuplicate: false };
+  const saved = saveStoredMessages(messages);
+  return { success: saved, isDuplicate: false };
 }
 
+// Limpiar todos los mensajes
 export function clearStoredMessages(): boolean {
-  globalForWhatsApp.whatsappMessages = [];
-  return true;
+  return saveStoredMessages([]);
 }

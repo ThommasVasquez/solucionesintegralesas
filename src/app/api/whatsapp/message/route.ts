@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { addStoredMessage } from '@/lib/whatsapp-store';
 
-export const runtime = 'edge';
-
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

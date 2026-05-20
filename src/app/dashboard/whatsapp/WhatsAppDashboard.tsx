@@ -72,16 +72,15 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
     y: 0,
     text: '',
   });
-  // Tampermonkey script code
+
   const tampermonkeyScript = `// ==UserScript==
 // @name         WhatsApp Web Real-Time Tracker for Soluciones AS
 // @namespace    http://tampermonkey.net/
-// @version      1.3
-// @description  Envía mensajes entrantes y salientes en tiempo real a tu dashboard de producción/local
-// @author       Antigravity AI
+// @version      1.7
+// @description  Envía mensajes entrantes y salientes de WhatsApp Web en tiempo real a la API local
 // @match        https://web.whatsapp.com/*
-// @grant        none
-// @run-at       document-end
+// @grant        GM_xmlhttpRequest
+// @run-at       document-start
 // ==/UserScript==
 
 (function() {
@@ -89,27 +88,40 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
 
     console.log('[AS WhatsApp Tracker] Script cargado. Iniciando monitoreo...');
 
+    window.asTrackerLoaded = true;
+
     const API_URL = '${origin}/api/whatsapp/message';
     const sentMessageIds = new Set();
+    window.asTrackerSentIds = sentMessageIds;
     let currentChatName = null;
 
     // Función para obtener el nombre del cliente del chat actual
     function getActiveChatName() {
-        const header = document.querySelector('header');
-        if (!header) return null;
-        
-        // Buscar elementos con título en el encabezado
-        const titleEl = header.querySelector('[title]');
-        if (titleEl) {
-            const title = titleEl.getAttribute('title');
-            if (title && title.trim() !== '') return title.trim();
-        }
-        
-        // Selector alternativo basado en spans principales
-        const spanEl = header.querySelector('span[dir="auto"], .copyable-text span');
-        if (spanEl) {
-            const title = spanEl.textContent;
-            if (title && title.trim() !== '') return title.trim();
+        const headers = document.querySelectorAll('header');
+        for (const h of headers) {
+            let current = h;
+            while (current && current !== document.body) {
+                if (current.id === 'main' || current.getAttribute('id') === 'main') {
+                    // Hemos encontrado el header que pertenece al chat activo (#main)
+                    const titleSpan = h.querySelector('span[dir="auto"][title]') || h.querySelector('span[dir="auto"]');
+                    if (titleSpan) {
+                        const titleAttr = titleSpan.getAttribute('title');
+                        if (titleAttr && titleAttr.trim() !== '') return titleAttr.trim();
+                        const text = titleSpan.textContent;
+                        if (text && text.trim() !== '') return text.trim();
+                    }
+                    
+                    // Fallback usando el texto completo del header
+                    const text = h.innerText || h.textContent || '';
+                    if (text) {
+                        const parts = text.split('|');
+                        if (parts[0] && parts[0].trim() !== '') {
+                            return parts[0].trim();
+                        }
+                    }
+                }
+                current = current.parentElement;
+            }
         }
         return null;
     }
@@ -120,32 +132,74 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
             if (!el) return;
             
             // Obtener el ID único del mensaje en el DOM
-            let msgId = el.getAttribute('data-id');
-            if (!msgId) {
-                // Generar un hash alternativo si no hay data-id
-                const text = el.innerText || '';
-                msgId = 'hash-' + text.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '') + '-' + Date.now();
-            }
+            const msgId = el.getAttribute('data-id') || '';
+            if (!msgId) return;
+
+            // Filtrar mensajes de sistema (notificaciones de seguridad, cambios de grupo, etc.)
+            const isSystemMsg = !!(el.querySelector('[data-testid="system_message"]') || el.querySelector('[data-testid="msg-notification-container"]'));
+            if (isSystemMsg) return;
+
+            // Verificar que tiene contenido real (texto, media, etc.)
+            const hasContent = !!(el.querySelector('[class*="copyable-text"]') || el.querySelector('[class*="selectable-text"]') || el.querySelector('img[src^="blob:"]') || el.querySelector('video') || el.querySelector('[data-icon*="audio"]') || el.querySelector('[data-icon*="document"]') || el.querySelector('[class*="sticker"]'));
+            if (!hasContent) return;
 
             if (sentMessageIds.has(msgId)) return;
 
-            const className = typeof el.className === 'string' ? el.className : '';
-            const isOutbound = el.classList.contains('message-out') || className.includes('message-out');
-            const isInbound = el.classList.contains('message-in') || className.includes('message-in');
+            // Detectar dirección del mensaje — múltiples estrategias para WA y WA Business
+            // 1. Clases CSS clásicas de WhatsApp Web
+            const isOutboundClass = !!(el.querySelector('.message-out') || el.classList.contains('message-out'));
+            const isInboundClass = !!(el.querySelector('.message-in') || el.classList.contains('message-in'));
+            // 2. SVGs de cola de burbuja (tail-out / tail-in)
+            const isOutboundTail = !!el.querySelector('[data-testid="tail-out"]');
+            const isInboundTail = !!el.querySelector('[data-testid="tail-in"]');
+            // 3. Atributo data-pre-plain-text en copyable-text (contiene «[hora, fecha] Tú:» o «[hora] Nombre:»)
+            let isOutboundPre = false;
+            const copyable = el.querySelector('[data-pre-plain-text]');
+            if (copyable) {
+                const pre = copyable.getAttribute('data-pre-plain-text') || '';
+                isOutboundPre = /\] (Tú|You|Yo):/i.test(pre);
+            }
+            // 4. Posición flex — burbujas salientes suelen estar alineadas a la derecha
+            let isOutboundFlex = false;
+            const bubble = el.querySelector('[class*="focusable-list-item"]') || el.firstElementChild;
+            if (bubble) {
+                const style = window.getComputedStyle(bubble);
+                isOutboundFlex = style.justifyContent === 'flex-end' || style.alignSelf === 'flex-end';
+            }
+
+            const isOutbound = isOutboundClass || isOutboundTail || isOutboundPre || isOutboundFlex;
+            const isInbound = isInboundClass || isInboundTail || (!isOutbound);
 
             if (!isOutbound && !isInbound) return;
 
-            // Extraer el texto usando selectores más robustos con comodines de clase
-            const textContainer = el.querySelector('[class*="copyable-text"] span, [class*="selectable-text"] span');
+            // Extraer el texto del mensaje
+            const textContainer = el.querySelector('[class*="copyable-text"], [class*="selectable-text"]') || el.querySelector('span.selectable-text');
             let content = '';
             
             if (textContainer) {
-                content = textContainer.innerText || textContainer.textContent || '';
+                const clone = textContainer.cloneNode(true);
+                const timeEl = clone.querySelector('[class*="time"], span[class*="time"]');
+                if (timeEl) timeEl.remove();
+                content = clone.innerText || clone.textContent || '';
+            } else {
+                // Fallback: buscar texto en spans válidos que no correspondan a la hora
+                const msgContainer = el.querySelector('[data-testid="msg-container"]');
+                if (msgContainer) {
+                    const spans = Array.from(msgContainer.querySelectorAll('span'));
+                    const textSpan = spans.find(s => {
+                        const hasText = s.innerText && s.innerText.trim().length > 0;
+                        const isTime = s.querySelector('[class*="time"]') || s.className.includes('time') || s.innerText.match(/^\\d{1,2}:\\d{2}\\s*(?:[ap]\\.?\\s*m\\.?)?$/i);
+                        return hasText && !isTime;
+                    });
+                    if (textSpan) {
+                        content = textSpan.innerText || textSpan.textContent || '';
+                    }
+                }
             }
             
             content = content.trim();
 
-            // Detectar mensajes multimedia o de sistema para no perder la estadística de respuesta
+            // Detectar mensajes multimedia o de sistema
             if (!content) {
                 if (el.querySelector('[data-icon*="audio"], [class*="audio"]')) {
                     content = '[Nota de voz / Audio]';
@@ -173,23 +227,28 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
                 direction: direction
             };
 
-            // Enviar al API
-            fetch(API_URL, {
+            // Enviar al API usando GM_xmlhttpRequest para saltarse CSP (Content Security Policy)
+            GM_xmlhttpRequest({
                 method: 'POST',
+                url: API_URL,
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    sentMessageIds.add(msgId);
-                    console.log(\`[AS Tracker] Mensaje enviado: "\${content.substring(0, 20)}..." de \${sender}\`);
+                data: JSON.stringify(payload),
+                onload: function(response) {
+                    try {
+                        const data = JSON.parse(response.responseText);
+                        if (data.success) {
+                            sentMessageIds.add(msgId);
+                            console.log(\`[AS Tracker] Mensaje enviado: "\${content.substring(0, 20)}..." de \${sender}\`);
+                        }
+                    } catch(e) {
+                        console.error('[AS Tracker] Error parseando respuesta de la API:', e);
+                    }
+                },
+                onerror: function(err) {
+                    console.error('[AS Tracker] Error en GM_xmlhttpRequest:', err);
                 }
-            })
-            .catch(err => {
-                console.error('[AS Tracker] Error enviando mensaje al servidor local:', err);
             });
 
         } catch (error) {
@@ -204,9 +263,9 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
             currentChatName = activeChat;
             console.log(\`[AS WhatsApp Tracker] Chat cambiado a: \${activeChat}. Procesando historial...\`);
             
-            // Esperar un momento a que rendericen los mensajes
+            // Esperar un momento a que rendericen los mensajes en el DOM
             setTimeout(() => {
-                const msgs = document.querySelectorAll('[class*="message-in"], [class*="message-out"]');
+                const msgs = document.querySelectorAll('#main [data-id]');
                 console.log(\`[AS WhatsApp Tracker] Procesando \${msgs.length} mensajes visibles actuales.\`);
                 msgs.forEach(processMessage);
             }, 1200);
@@ -226,11 +285,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType !== Node.ELEMENT_NODE) return;
 
-                        const nodeClassName = typeof node.className === 'string' ? node.className : '';
-                        if (node.classList && (node.classList.contains('message-in') || node.classList.contains('message-out') || nodeClassName.includes('message-in') || nodeClassName.includes('message-out'))) {
+                        // Si el nodo mismo es un mensaje
+                        const dataId = node.getAttribute('data-id') || '';
+                        if (dataId) {
                             processMessage(node);
                         } else {
-                            const msgs = node.querySelectorAll('[class*="message-in"], [class*="message-out"]');
+                            // Si contiene mensajes adentro
+                            const msgs = node.querySelectorAll('[data-id]');
                             msgs.forEach(processMessage);
                         }
                     });
