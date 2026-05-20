@@ -41,6 +41,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
   const [isClient, setIsClient] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'active' | 'disconnected'>('disconnected');
   const [lastMessageTime, setLastMessageTime] = useState<Date | null>(null);
+  const [origin, setOrigin] = useState('http://localhost:3001');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   // Estados del parser de archivos manual
   const [parsedRawMessages, setParsedRawMessages] = useState<{ sender: string; content: string; timestamp: string }[]>([]);
@@ -70,8 +77,8 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
   const tampermonkeyScript = `// ==UserScript==
 // @name         WhatsApp Web Real-Time Tracker for Soluciones AS
 // @namespace    http://tampermonkey.net/
-// @version      1.1
-// @description  Envía mensajes entrantes y salientes en tiempo real a tu dashboard local
+// @version      1.2
+// @description  Envía mensajes entrantes y salientes en tiempo real a tu dashboard de producción/local
 // @author       Antigravity AI
 // @match        https://web.whatsapp.com/*
 // @grant        none
@@ -83,7 +90,7 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
 
     console.log('[AS WhatsApp Tracker] Script cargado. Iniciando monitoreo...');
 
-    const API_URL = 'http://localhost:3001/api/whatsapp/message';
+    const API_URL = '${origin}/api/whatsapp/message';
     const sentMessageIds = new Set();
 
     // Función para obtener el nombre del cliente del chat actual
@@ -91,10 +98,17 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
         const header = document.querySelector('header');
         if (!header) return null;
         
-        // WhatsApp Web tiene el nombre del contacto en un span con title o clase copyable-text
-        const titleEl = header.querySelector('span[title], .copyable-text span, [role="button"] span');
+        // Buscar elementos con título en el encabezado
+        const titleEl = header.querySelector('[title]');
         if (titleEl) {
-            const title = titleEl.getAttribute('title') || titleEl.textContent;
+            const title = titleEl.getAttribute('title');
+            if (title && title.trim() !== '') return title.trim();
+        }
+        
+        // Selector alternativo basado en spans principales
+        const spanEl = header.querySelector('span[dir="auto"], .copyable-text span');
+        if (spanEl) {
+            const title = spanEl.textContent;
             if (title && title.trim() !== '') return title.trim();
         }
         return null;
@@ -113,13 +127,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
 
             if (sentMessageIds.has(msgId)) return;
 
-            const isOutbound = el.classList.contains('message-out');
-            const isInbound = el.classList.contains('message-in');
+            const isOutbound = el.classList.contains('message-out') || el.className.includes('message-out');
+            const isInbound = el.classList.contains('message-in') || el.className.includes('message-in');
 
             if (!isOutbound && !isInbound) return;
 
-            // Extraer el texto
-            const textContainer = el.querySelector('.copyable-text span, .selectable-text span, span');
+            // Extraer el texto usando selectores más robustos con comodines de clase
+            const textContainer = el.querySelector('[class*="copyable-text"] span, [class*="selectable-text"] span, span');
             if (!textContainer) return;
 
             let content = textContainer.innerText || textContainer.textContent || '';
@@ -175,10 +189,10 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType !== Node.ELEMENT_NODE) return;
 
-                        if (node.classList && (node.classList.contains('message-in') || node.classList.contains('message-out'))) {
+                        if (node.className && (node.className.includes('message-in') || node.className.includes('message-out'))) {
                             processMessage(node);
                         } else {
-                            const msgs = node.querySelectorAll('.message-in, .message-out');
+                            const msgs = node.querySelectorAll('[class*="message-in"], [class*="message-out"]');
                             msgs.forEach(processMessage);
                         }
                     });
