@@ -1,3 +1,5 @@
+import { db } from './db';
+
 export interface WhatsAppMessage {
   id: string;
   chatId: string;
@@ -7,7 +9,7 @@ export interface WhatsAppMessage {
   direction: 'INBOUND' | 'OUTBOUND';
 }
 
-// In-memory fallback for environments without fs support (like Edge Runtime)
+// In-memory fallback for environments without fs support (like Edge Runtime) and no DB
 const globalStore = globalThis as unknown as {
   whatsappMessages?: WhatsAppMessage[];
 };
@@ -20,8 +22,6 @@ if (!globalStore.whatsappMessages) {
 async function getNodeFs() {
   if (typeof window === 'undefined' && process.env.NEXT_RUNTIME !== 'edge') {
     try {
-      // Use dynamic string variables to prevent the Next.js bundler from trying to resolve/bundle
-      // Node.js native modules in the browser/edge bundles.
       const fsName = 'fs';
       const pathName = 'path';
       const fs = await import(fsName);
@@ -36,6 +36,25 @@ async function getNodeFs() {
 
 // Leer mensajes
 export async function getStoredMessages(): Promise<WhatsAppMessage[]> {
+  if (process.env.DATABASE_URL) {
+    try {
+      const messages = await db.whatsAppMessage.findMany({
+        orderBy: { timestamp: 'asc' },
+      });
+      return messages.map((m) => ({
+        id: m.id,
+        chatId: m.chatId,
+        sender: m.sender,
+        content: m.content,
+        timestamp: m.timestamp.toISOString(),
+        direction: m.direction as 'INBOUND' | 'OUTBOUND',
+      }));
+    } catch (e) {
+      console.warn('[WhatsApp Store] Error leyendo de la base de datos, usando fallback:', e);
+    }
+  }
+
+  // Fallback a archivos
   const nodeFs = await getNodeFs();
   if (nodeFs) {
     const { fs, path } = nodeFs;
@@ -60,8 +79,31 @@ export async function getStoredMessages(): Promise<WhatsAppMessage[]> {
   }
 }
 
-// Escribir mensajes
+// Escribir/Guardar mensajes masivos (usado para demo e importación)
 export async function saveStoredMessages(messages: WhatsAppMessage[]): Promise<boolean> {
+  if (process.env.DATABASE_URL) {
+    try {
+      // Eliminar existentes y guardar los nuevos para sincronizar
+      await db.$transaction([
+        db.whatsAppMessage.deleteMany(),
+        db.whatsAppMessage.createMany({
+          data: messages.map((m) => ({
+            id: m.id,
+            chatId: m.chatId,
+            sender: m.sender,
+            content: m.content,
+            timestamp: new Date(m.timestamp),
+            direction: m.direction,
+          })),
+        }),
+      ]);
+      return true;
+    } catch (e) {
+      console.warn('[WhatsApp Store] Error guardando en la base de datos, usando fallback:', e);
+    }
+  }
+
+  // Fallback a archivos
   const nodeFs = await getNodeFs();
   if (nodeFs) {
     const { fs, path } = nodeFs;
@@ -86,10 +128,33 @@ export async function saveStoredMessages(messages: WhatsAppMessage[]): Promise<b
 
 // Agregar un mensaje (con deduplicación)
 export async function addStoredMessage(message: WhatsAppMessage): Promise<{ success: boolean; isDuplicate: boolean }> {
-  const messages = await getStoredMessages();
+  if (process.env.DATABASE_URL) {
+    try {
+      const exists = await db.whatsAppMessage.findUnique({
+        where: { id: message.id },
+      });
+      if (exists) {
+        return { success: true, isDuplicate: true };
+      }
+      await db.whatsAppMessage.create({
+        data: {
+          id: message.id,
+          chatId: message.chatId,
+          sender: message.sender,
+          content: message.content,
+          timestamp: new Date(message.timestamp),
+          direction: message.direction,
+        },
+      });
+      return { success: true, isDuplicate: false };
+    } catch (e) {
+      console.warn('[WhatsApp Store] Error agregando a la base de datos, usando fallback:', e);
+    }
+  }
 
-  // Evitar duplicados
-  const exists = messages.some(m => m.id === message.id);
+  // Fallback a archivos
+  const messages = await getStoredMessages();
+  const exists = messages.some((m) => m.id === message.id);
   if (exists) {
     return { success: true, isDuplicate: true };
   }
@@ -101,7 +166,13 @@ export async function addStoredMessage(message: WhatsAppMessage): Promise<{ succ
 
 // Limpiar todos los mensajes
 export async function clearStoredMessages(): Promise<boolean> {
+  if (process.env.DATABASE_URL) {
+    try {
+      await db.whatsAppMessage.deleteMany();
+      return true;
+    } catch (e) {
+      console.warn('[WhatsApp Store] Error limpiando base de datos, usando fallback:', e);
+    }
+  }
   return saveStoredMessages([]);
 }
-
-
