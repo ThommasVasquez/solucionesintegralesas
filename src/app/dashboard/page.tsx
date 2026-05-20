@@ -73,6 +73,17 @@ export default async function DashboardPage() {
                 Gestionar Visitas →
               </Link>
             </div>
+
+            <div className={styles.card}>
+              <div className={styles.iconWrapper} style={{ backgroundColor: '#25d36620' }}>
+                <span style={{ color: '#25d366' }}>💬</span>
+              </div>
+              <h3>Reportes WhatsApp</h3>
+              <p>Métricas de entrada, respuestas y tiempos de contestación.</p>
+              <Link href="/dashboard/whatsapp" className={styles.cardAction} style={{ color: '#25d366' }}>
+                Ver Reportes →
+              </Link>
+            </div>
           </div>
         </div>
       </div>
