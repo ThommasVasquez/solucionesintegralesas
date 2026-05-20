@@ -45,7 +45,7 @@ export default async function DashboardPage() {
                   </div>
                   <h3>Ingenova</h3>
                   <p>Gestión de hojas de control para mantenimiento de piscinas.</p>
-                  <Link href="/dashboard/ingenova" className={styles.cardAction} style={{ color: BRAND_COLORS.INGENOVA }}>
+                  <Link href="/dashboard/ingenova" className={styles.cardAction} style={{ color: BRAND_COLORS.INGENOVA }} prefetch={false}>
                     Abrir Planillas →
                   </Link>
                 </div>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
                   </div>
                   <h3>ClubHouse</h3>
                   <p>Administración y control de capacitación.</p>
-                  <Link href="/dashboard/clubhouse" className={styles.cardAction} style={{ color: BRAND_COLORS.CLUBHOUSE }}>
+                  <Link href="/dashboard/clubhouse" className={styles.cardAction} style={{ color: BRAND_COLORS.CLUBHOUSE }} prefetch={false}>
                     Ver Registros →
                   </Link>
                 </div>
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
               </div>
               <h3>ProMascotas</h3>
               <p>Control de visitas y profilaxis a domicilio.</p>
-              <Link href="/dashboard/promascotas" className={styles.cardAction} style={{ color: BRAND_COLORS.PROMASCOTAS }}>
+              <Link href="/dashboard/promascotas" className={styles.cardAction} style={{ color: BRAND_COLORS.PROMASCOTAS }} prefetch={false}>
                 Gestionar Visitas →
               </Link>
             </div>
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
               </div>
               <h3>Reportes WhatsApp</h3>
               <p>Métricas de entrada, respuestas y tiempos de contestación.</p>
-              <Link href="/dashboard/whatsapp" className={styles.cardAction} style={{ color: '#25d366' }}>
+              <Link href="/dashboard/whatsapp" className={styles.cardAction} style={{ color: '#25d366' }} prefetch={false}>
                 Ver Reportes →
               </Link>
             </div>

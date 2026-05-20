@@ -1035,7 +1035,7 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
       <div className={styles.header}>
         <div className={styles.welcome}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Link href="/dashboard" style={{ display: 'inline-flex', color: 'var(--text-muted)' }}>
+            <Link href="/dashboard" style={{ display: 'inline-flex', color: 'var(--text-muted)' }} prefetch={false}>
               <ArrowLeft size={20} />
             </Link>
             <h1>WhatsApp en Tiempo Real</h1>

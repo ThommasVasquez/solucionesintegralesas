@@ -56,7 +56,7 @@ export default function Navbar() {
       );
     }
     return (
-      <Link href={href} className={styles.link}>
+      <Link href={href} className={styles.link} prefetch={false}>
         {children}
       </Link>
     );
@@ -65,7 +65,7 @@ export default function Navbar() {
   return (
     <header ref={navRef} className={`${styles.navbar} glass`}>
       <div className={`container ${styles.navContainer}`}>
-        <Link href="/" className={styles.logo} aria-label="Volver al inicio">
+        <Link href="/" className={styles.logo} aria-label="Volver al inicio" prefetch={false}>
           <div className={styles.fullLogo}>
             <Image 
               src="/logo.png" 
@@ -91,9 +91,9 @@ export default function Navbar() {
         <nav className={styles.links} aria-label="Navegación principal">
           {isHomePage ? (
             <>
-              <Link href="/#servicios" className={styles.link}>Servicios</Link>
-              <Link href="/#nosotros" className={styles.link}>Nosotros</Link>
-              <Link href="/#contacto" className={styles.link}>Contacto</Link>
+              <Link href="/#servicios" className={styles.link} prefetch={false}>Servicios</Link>
+              <Link href="/#nosotros" className={styles.link} prefetch={false}>Nosotros</Link>
+              <Link href="/#contacto" className={styles.link} prefetch={false}>Contacto</Link>
             </>
           ) : (
             <>
@@ -105,7 +105,7 @@ export default function Navbar() {
 
         <div className={styles.actions}>
           {!session ? (
-            <Link href="/login" className={styles.loginBtn}>
+            <Link href="/login" className={styles.loginBtn} prefetch={false}>
               <span className={styles.fullText}>Ingresar</span>
               <span className={styles.mobileText}>Login</span>
             </Link>
@@ -123,7 +123,7 @@ export default function Navbar() {
               </button>
               
               <div className={`${styles.dropdownMenu} ${isAuthMenuOpen ? styles.menuVisible : ''} ${styles.authDropdown}`}>
-                <Link href="/dashboard" className={styles.menuItem}>
+                <Link href="/dashboard" className={styles.menuItem} prefetch={false}>
                   <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Dashboard</span>
                 </Link>
                 <div className={styles.menuItem} onClick={() => signOut({ callbackUrl: '/' })}>
@@ -155,19 +155,19 @@ export default function Navbar() {
             </button>
             
             <div className={`${styles.dropdownMenu} ${isOpen ? styles.menuVisible : ''}`} role="menu">
-              <Link href="/empresas/ingenova" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
+              <Link href="/empresas/ingenova" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)} prefetch={false}>
                 <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>Ingenova</span>
                 <span className={styles.brandDesc}>Jacuzzis, Piscinas &amp; Turcos</span>
               </Link>
-              <Link href="/empresas/clubhouse" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
+              <Link href="/empresas/clubhouse" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)} prefetch={false}>
                 <span className={styles.brandTitle} style={{ color: COLORS.CLUBHOUSE }}>ClubHouse</span>
                 <span className={styles.brandDesc}>Administración &amp; Capacitación</span>
               </Link>
-              <Link href="/empresas/promascotas" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
+              <Link href="/empresas/promascotas" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)} prefetch={false}>
                 <span className={styles.brandTitle} style={{ color: COLORS.PROMASCOTAS }}>ProMascotas</span>
                 <span className={styles.brandDesc}>Profilaxis a Domicilio</span>
               </Link>
-              <Link href="/empresas/soluciones-as" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)}>
+              <Link href="/empresas/soluciones-as" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)} prefetch={false}>
                 <span className={styles.brandTitle} style={{ color: COLORS.SOLUCIONES }}>Soluciones AS</span>
                 <span className={styles.brandDesc}>Respaldo Corporativo</span>
               </Link>
