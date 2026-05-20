@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getStoredMessages, clearStoredMessages } from '@/lib/whatsapp-store';
 
+export const runtime = 'edge';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,7 +18,7 @@ export async function OPTIONS() {
 
 export async function GET() {
   try {
-    const messages = getStoredMessages();
+    const messages = await getStoredMessages();
     return NextResponse.json(
       { messages },
       { status: 200, headers: corsHeaders }
@@ -33,7 +34,7 @@ export async function GET() {
 
 export async function DELETE() {
   try {
-    const success = clearStoredMessages();
+    const success = await clearStoredMessages();
     if (!success) {
       return NextResponse.json(
         { error: 'No se pudo vaciar el almacenamiento' },
@@ -52,3 +53,4 @@ export async function DELETE() {
     );
   }
 }
+

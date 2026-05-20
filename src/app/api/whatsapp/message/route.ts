@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { addStoredMessage } from '@/lib/whatsapp-store';
 
+export const runtime = 'edge';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { success, isDuplicate } = addStoredMessage({
+    const { success, isDuplicate } = await addStoredMessage({
       id,
       chatId,
       sender,
@@ -57,3 +58,4 @@ export async function POST(request: Request) {
     );
   }
 }
+
