@@ -134,6 +134,19 @@ export async function addStoredMessage(message: WhatsAppMessage): Promise<{ succ
         where: { id: message.id },
       });
       if (exists) {
+        const existingTime = new Date(exists.timestamp).getTime();
+        const newTime = new Date(message.timestamp).getTime();
+        
+        // Si el timestamp guardado difiere del nuevo (ej: antes se guardó con fecha actual por error)
+        if (Math.abs(existingTime - newTime) > 1000) {
+          await db.whatsAppMessage.update({
+            where: { id: message.id },
+            data: {
+              timestamp: new Date(message.timestamp),
+            },
+          });
+          return { success: true, isDuplicate: false };
+        }
         return { success: true, isDuplicate: true };
       }
       await db.whatsAppMessage.create({
@@ -154,8 +167,15 @@ export async function addStoredMessage(message: WhatsAppMessage): Promise<{ succ
 
   // Fallback a archivos
   const messages = await getStoredMessages();
-  const exists = messages.some((m) => m.id === message.id);
-  if (exists) {
+  const index = messages.findIndex((m) => m.id === message.id);
+  if (index !== -1) {
+    const existingTime = new Date(messages[index].timestamp).getTime();
+    const newTime = new Date(message.timestamp).getTime();
+    if (Math.abs(existingTime - newTime) > 1000) {
+      messages[index].timestamp = message.timestamp;
+      await saveStoredMessages(messages);
+      return { success: true, isDuplicate: false };
+    }
     return { success: true, isDuplicate: true };
   }
 

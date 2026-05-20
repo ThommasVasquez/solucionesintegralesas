@@ -755,11 +755,11 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
         totalReceived: 0,
         totalAnswered: 0,
         responseRate: 0,
-        avgResponseTime: 0,
+        avgResponseTime: null as number | null,
         groupedByDay: [] as { dayLabel: string; inbound: number; outbound: number }[],
         groupedByHour: Array(24).fill(0) as number[],
         topCustomers: [] as { name: string; count: number }[],
-        avgResponseTimeByDay: [] as { dayLabel: string; avgTime: number }[],
+        avgResponseTimeByDay: [] as { dayLabel: string; avgTime: number | null }[],
       };
     }
 
@@ -816,7 +816,7 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
         } else {
           if (firstInboundMs !== null) {
             const outMs = new Date(m.timestamp).getTime();
-            const diffMin = Math.max(0, Math.floor((outMs - firstInboundMs) / 60000));
+            const diffMin = Math.max(0, (outMs - firstInboundMs) / 60000);
             
             if (diffMin < 2880) {
               responseTimes.push(diffMin);
@@ -836,7 +836,7 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
 
     const avgResponseTime = responseTimes.length > 0 
       ? responseTimes.reduce((sum, t) => sum + t, 0) / responseTimes.length 
-      : 0;
+      : null;
 
     const responseRate = totalCustomerBlocks > 0 
       ? Math.round((answeredCustomerBlocks / totalCustomerBlocks) * 100) 
@@ -856,7 +856,7 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
 
     const avgResponseTimeByDay = sortedDays.map(day => {
       const times = dayResponseTimes[day] || [];
-      const avg = times.length > 0 ? Math.round(times.reduce((s, t) => s + t, 0) / times.length) : 0;
+      const avg = times.length > 0 ? (times.reduce((s, t) => s + t, 0) / times.length) : null;
       return {
         dayLabel: day,
         avgTime: avg
@@ -895,8 +895,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
     };
   }, [filteredMessages]);
 
-  const formatResponseTime = (mins: number) => {
-    if (mins === 0) return 'N/A';
+  const formatResponseTime = (mins: number | null) => {
+    if (mins === null || isNaN(mins)) return 'N/A';
+    if (mins === 0) return '< 1 min';
+    if (mins < 1) {
+      const secs = Math.round(mins * 60);
+      return `${secs} seg`;
+    }
     if (mins < 60) return `${Math.round(mins)} min`;
     const hours = Math.floor(mins / 60);
     const remainingMins = Math.round(mins % 60);
@@ -1001,7 +1006,9 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
   };
 
   const renderResponseTimeChart = () => {
-    const data = stats.avgResponseTimeByDay.filter(d => d.avgTime > 0);
+    const data = stats.avgResponseTimeByDay.filter(
+      (d): d is { dayLabel: string; avgTime: number } => d.avgTime !== null
+    );
     if (data.length === 0) {
       return (
         <div className={styles.emptyChart}>
