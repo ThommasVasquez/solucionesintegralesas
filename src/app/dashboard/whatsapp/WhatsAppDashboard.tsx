@@ -72,12 +72,11 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
     y: 0,
     text: '',
   });
-
   // Tampermonkey script code
   const tampermonkeyScript = `// ==UserScript==
 // @name         WhatsApp Web Real-Time Tracker for Soluciones AS
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Envía mensajes entrantes y salientes en tiempo real a tu dashboard de producción/local
 // @author       Antigravity AI
 // @match        https://web.whatsapp.com/*
@@ -92,6 +91,7 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
 
     const API_URL = '${origin}/api/whatsapp/message';
     const sentMessageIds = new Set();
+    let currentChatName = null;
 
     // Función para obtener el nombre del cliente del chat actual
     function getActiveChatName() {
@@ -117,6 +117,8 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
     // Procesar y enviar un mensaje
     function processMessage(el) {
         try {
+            if (!el) return;
+            
             // Obtener el ID único del mensaje en el DOM
             let msgId = el.getAttribute('data-id');
             if (!msgId) {
@@ -127,19 +129,36 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
 
             if (sentMessageIds.has(msgId)) return;
 
-            const isOutbound = el.classList.contains('message-out') || el.className.includes('message-out');
-            const isInbound = el.classList.contains('message-in') || el.className.includes('message-in');
+            const className = typeof el.className === 'string' ? el.className : '';
+            const isOutbound = el.classList.contains('message-out') || className.includes('message-out');
+            const isInbound = el.classList.contains('message-in') || className.includes('message-in');
 
             if (!isOutbound && !isInbound) return;
 
             // Extraer el texto usando selectores más robustos con comodines de clase
-            const textContainer = el.querySelector('[class*="copyable-text"] span, [class*="selectable-text"] span, span');
-            if (!textContainer) return;
-
-            let content = textContainer.innerText || textContainer.textContent || '';
+            const textContainer = el.querySelector('[class*="copyable-text"] span, [class*="selectable-text"] span');
+            let content = '';
+            
+            if (textContainer) {
+                content = textContainer.innerText || textContainer.textContent || '';
+            }
+            
             content = content.trim();
 
-            if (!content) return;
+            // Detectar mensajes multimedia o de sistema para no perder la estadística de respuesta
+            if (!content) {
+                if (el.querySelector('[data-icon*="audio"], [class*="audio"]')) {
+                    content = '[Nota de voz / Audio]';
+                } else if (el.querySelector('img[src^="blob:"], video, [class*="image"], [class*="video"]')) {
+                    content = '[Imagen / Video]';
+                } else if (el.querySelector('[data-icon*="document"], [class*="document"]')) {
+                    content = '[Documento / Archivo]';
+                } else if (el.querySelector('[class*="sticker"]')) {
+                    content = '[Sticker]';
+                } else {
+                    content = '[Mensaje multimedia o sistema]';
+                }
+            }
 
             const chatName = getActiveChatName() || 'Cliente Desconocido';
             const sender = isOutbound ? 'Yo' : chatName;
@@ -178,18 +197,37 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
         }
     }
 
+    // Comprobar si se ha cambiado de chat para capturar el historial
+    function checkChatSwitch() {
+        const activeChat = getActiveChatName();
+        if (activeChat && activeChat !== currentChatName) {
+            currentChatName = activeChat;
+            console.log(\`[AS WhatsApp Tracker] Chat cambiado a: \${activeChat}. Procesando historial...\`);
+            
+            // Esperar un momento a que rendericen los mensajes
+            setTimeout(() => {
+                const msgs = document.querySelectorAll('[class*="message-in"], [class*="message-out"]');
+                console.log(\`[AS WhatsApp Tracker] Procesando \${msgs.length} mensajes visibles actuales.\`);
+                msgs.forEach(processMessage);
+            }, 1200);
+        }
+    }
+
     // Configurar observador del DOM
     function initObserver() {
         const targetNode = document.body;
         const config = { childList: true, subtree: true };
 
         const callback = function(mutationsList, observer) {
+            checkChatSwitch(); // Verificar si cambió de chat
+            
             for(let mutation of mutationsList) {
                 if (mutation.type === 'childList') {
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType !== Node.ELEMENT_NODE) return;
 
-                        if (node.className && (node.className.includes('message-in') || node.className.includes('message-out'))) {
+                        const nodeClassName = typeof node.className === 'string' ? node.className : '';
+                        if (node.classList && (node.classList.contains('message-in') || node.classList.contains('message-out') || nodeClassName.includes('message-in') || nodeClassName.includes('message-out'))) {
                             processMessage(node);
                         } else {
                             const msgs = node.querySelectorAll('[class*="message-in"], [class*="message-out"]');
@@ -203,6 +241,9 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
         const observer = new MutationObserver(callback);
         observer.observe(targetNode, config);
         console.log('[AS WhatsApp Tracker] MutationObserver activo. Escuchando chats...');
+        
+        // Primera ejecución al cargar
+        checkChatSwitch();
     }
 
     // Esperar a que la app cargue completamente
@@ -222,6 +263,8 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
     setCopiedScript(true);
     setTimeout(() => setCopiedScript(false), 2000);
   };
+
+
 
   // Función para obtener mensajes de la API
   const fetchMessagesFromAPI = async () => {
