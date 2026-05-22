@@ -1495,6 +1495,17 @@
 }
 
 @media (max-width: 480px) {
+  .drawer {
+    width: 85vw;
+  }
+  .reviewBox {
+    padding: 20px 15px;
+    gap: 12px;
+  }
+  .reviewQuote {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
   .statsContainer {
     grid-template-columns: 1fr;
     gap: 24px;

@@ -214,7 +214,7 @@
   /* Force text blocks into the top zone on mobile */
   .textBlock {
     position: absolute;
-    top: 12vh;
+    top: 100px;
     left: 5%;
     right: 5%;
     width: 90%;
@@ -223,11 +223,20 @@
     text-align: center;
   }
 
+  .textBlock h2 {
+    font-size: 1.8rem;
+  }
+
   .card {
     width: 155px;
     height: 205px;
     top: -102px;
     left: -77px;
+  }
+
+  .mapMockup {
+    padding: 2rem 1rem;
+    border-radius: 20px;
   }
 }
 
@@ -395,6 +404,14 @@
   }
   .coberturaP {
     padding: 0 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .stats {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem 1rem;
   }
 }
 

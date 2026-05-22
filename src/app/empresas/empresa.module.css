@@ -359,6 +359,11 @@
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
+  .hero {
+    min-height: auto;
+    padding: 120px 1.5rem 60px;
+  }
+
   .heroContent {
     grid-template-columns: 1fr;
     gap: 3rem;
@@ -408,5 +413,18 @@
 
   .heroCta {
     flex-direction: column;
+    width: 100%;
+  }
+
+  .heroCta > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 }

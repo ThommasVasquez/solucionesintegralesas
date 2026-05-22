@@ -120,4 +120,17 @@
     flex-direction: column;
     align-items: flex-start;
   }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel {
+    padding: 1.25rem;
+  }
+  .content {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
 }

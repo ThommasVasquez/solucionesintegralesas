@@ -8,13 +8,18 @@
 }
 
 .iframeWrapper {
-  flex-grow: 1;
-  padding-top: 5rem;
-  height: 100%;
+  flex: 1;
+  margin-top: 90px;
+  position: relative;
+  height: auto;
   width: 100%;
+  padding-top: 0;
 }
 
 .iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   border: none;

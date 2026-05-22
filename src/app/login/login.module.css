@@ -131,3 +131,9 @@
 .backLink:hover {
   color: #3b82f6;
 }
+
+@media (max-width: 480px) {
+  .card {
+    padding: 1.5rem;
+  }
+}
