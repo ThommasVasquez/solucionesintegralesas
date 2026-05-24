@@ -16,6 +16,7 @@ export const BRAND_COLORS = {
   INGENOVA: '#f39c12',
   PROMASCOTAS: '#f1c40f',
   CLUBHOUSE: '#82b440',
+  PRINTERSERVICE: '#0ea5e9',
 };
 
 const businessLines = [

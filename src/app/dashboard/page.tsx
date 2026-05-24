@@ -60,6 +60,21 @@ export default async function DashboardPage() {
                     Ver Registros →
                   </Link>
                 </div>
+
+                <div className={styles.card}>
+                  <div className={styles.iconWrapper} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '2px' }}>
+                    <img 
+                      src="/printerservice-logo.png" 
+                      alt="PrinterService Logo" 
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                    />
+                  </div>
+                  <h3>PrinterService</h3>
+                  <p>Control y gestión de servicios de impresión.</p>
+                  <Link href="/dashboard/printerservice" className={styles.cardAction} style={{ color: BRAND_COLORS.PRINTERSERVICE }} prefetch={false}>
+                    Ver Planilla →
+                  </Link>
+                </div>
               </>
             )}
 
