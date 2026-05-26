@@ -14,7 +14,7 @@ const USERS = [
   {
     id: "2",
     email: "jessyca@ingenova.com.co",
-    password: "Jessyca2*",
+    password: "Jessyca2*.",
     name: "Jessyca",
     role: "ADMIN"
   },
