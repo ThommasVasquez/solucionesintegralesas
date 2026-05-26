@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import styles from "./promascotas.module.css";
+import TabbedDashboardClient from "../components/TabbedDashboardClient";
+import { BRAND_COLORS } from "@/app/page";
 
 export const runtime = 'edge';
 
@@ -21,16 +21,13 @@ export default async function ProMascotasPage() {
     : SHEET_URL;
 
   return (
-    <main className={styles.main}>
-      <Navbar />
-      <div className={styles.iframeWrapper}>
-        <iframe 
-          src={currentSheetUrl}
-          className={styles.iframe}
-          title="Gestión de Visitas ProMascotas"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        />
-      </div>
-    </main>
+    <TabbedDashboardClient 
+      user={{ name: session.user?.name, email: session.user?.email }}
+      isSergio={isSergio}
+      sheetUrl={currentSheetUrl}
+      title="Gestión de Visitas ProMascotas"
+      brandColor={BRAND_COLORS.PROMASCOTAS}
+      hideExcelForSergio={false}
+    />
   );
 }

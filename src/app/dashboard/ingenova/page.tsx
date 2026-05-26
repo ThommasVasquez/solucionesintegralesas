@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import styles from "./ingenova.module.css";
+import TabbedDashboardClient from "../components/TabbedDashboardClient";
+import { BRAND_COLORS } from "@/app/page";
 
 export const runtime = 'edge';
 
@@ -14,17 +14,16 @@ export default async function IngenovaPage() {
     redirect("/login");
   }
 
+  const isSergio = session.user?.email === "sergio@ingenova.com.co";
+
   return (
-    <main className={styles.main}>
-      <Navbar />
-      <div className={styles.iframeWrapper}>
-        <iframe 
-          src={SHEET_URL}
-          className={styles.iframe}
-          title="Administración Ingenova"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        />
-      </div>
-    </main>
+    <TabbedDashboardClient 
+      user={{ name: session.user?.name, email: session.user?.email }}
+      isSergio={isSergio}
+      sheetUrl={SHEET_URL}
+      title="Administración Ingenova"
+      brandColor={BRAND_COLORS.INGENOVA}
+      hideExcelForSergio={true}
+    />
   );
 }

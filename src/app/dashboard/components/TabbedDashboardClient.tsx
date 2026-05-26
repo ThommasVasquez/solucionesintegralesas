@@ -3,38 +3,51 @@
 import { useState } from 'react';
 import Navbar from "@/components/Navbar";
 import WhatsAppDashboard from "../whatsapp/WhatsAppDashboard";
-import styles from "./printerservice.module.css";
+import styles from "./TabbedDashboardClient.module.css";
 
-interface PrinterServiceClientProps {
+interface TabbedDashboardClientProps {
   user: {
     name?: string | null;
     email?: string | null;
   };
   isSergio: boolean;
+  sheetUrl: string;
+  title: string;
+  brandColor: string;
+  hideExcelForSergio?: boolean;
 }
 
-export default function PrinterServiceClient({ user, isSergio }: PrinterServiceClientProps) {
-  // Sergio sólo puede ver WhatsApp. Los demás ven Excel por defecto pero pueden alternar.
-  const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp'>(isSergio ? 'whatsapp' : 'excel');
+export default function TabbedDashboardClient({
+  user,
+  isSergio,
+  sheetUrl,
+  title,
+  brandColor,
+  hideExcelForSergio = false
+}: TabbedDashboardClientProps) {
+  // Ocultar planilla si es Sergio y la bandera está encendida.
+  const shouldHideExcel = isSergio && hideExcelForSergio;
 
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk/edit?usp=sharing";
+  const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp'>(shouldHideExcel ? 'whatsapp' : 'excel');
 
   return (
-    <main className={`${styles.main} ${activeTab === 'whatsapp' ? styles.scrollable : styles.hiddenScroll} ${isSergio ? styles.isSergioActive : ''}`}>
+    <main className={`${styles.main} ${activeTab === 'whatsapp' ? styles.scrollable : styles.hiddenScroll} ${shouldHideExcel ? styles.isSergioActive : ''}`}>
       <Navbar />
       
-      {/* Selector de pestañas, oculto para Sergio */}
-      {!isSergio && (
+      {/* Selector de pestañas, oculto si se debe ocultar el Excel */}
+      {!shouldHideExcel && (
         <div className={styles.tabContainer}>
           <div className={styles.tabBar}>
             <button 
               className={`${styles.tabBtn} ${activeTab === 'excel' ? styles.tabBtnActive : ''}`}
+              style={activeTab === 'excel' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
               onClick={() => setActiveTab('excel')}
             >
               📄 Planilla Excel
             </button>
             <button 
               className={`${styles.tabBtn} ${activeTab === 'whatsapp' ? styles.tabBtnActive : ''}`}
+              style={activeTab === 'whatsapp' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
               onClick={() => setActiveTab('whatsapp')}
             >
               💬 Reportes WhatsApp
@@ -43,12 +56,12 @@ export default function PrinterServiceClient({ user, isSergio }: PrinterServiceC
         </div>
       )}
 
-      {activeTab === 'excel' && !isSergio && (
+      {activeTab === 'excel' && !shouldHideExcel && (
         <div className={styles.iframeWrapper}>
           <iframe 
-            src={SHEET_URL}
+            src={sheetUrl}
             className={styles.iframe}
-            title="Gestión PrinterService"
+            title={title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           />
         </div>
