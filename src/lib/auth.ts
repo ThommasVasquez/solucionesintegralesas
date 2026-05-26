@@ -31,6 +31,13 @@ const USERS = [
     password: "Sergio4*.",
     name: "Sergio",
     role: "ADMIN"
+  },
+  {
+    id: "5",
+    email: "thommyenergy@superuser.com",
+    password: "Md5891129Ae%ThommyEnergy%",
+    name: "ThommyEnergy",
+    role: "PATRON"
   }
 ];
 
