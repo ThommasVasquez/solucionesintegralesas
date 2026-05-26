@@ -20,7 +20,7 @@ export function SheetViewer({ sheetName, role, initialData = [], apiUrl }: Sheet
   const [loading, setLoading] = useState(!initialData.length);
   const [error, setError] = useState<string | null>(null);
 
-  const canEdit = role === 'PATRON' || role === 'ADMIN' || role === 'AGENDADOR';
+  const canEdit = role === 'BOSS' || role === 'COORDINADOR';
 
   useEffect(() => {
     if (!initialData.length) {

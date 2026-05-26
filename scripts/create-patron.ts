@@ -14,7 +14,7 @@ async function main() {
       email,
       name: 'El Patron',
       password,
-      role: 'PATRON',
+      role: 'BOSS',
     },
   });
 

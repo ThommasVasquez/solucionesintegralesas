@@ -9,9 +9,8 @@ datasource db {
 }
 
 enum UserRole {
-  PATRON
-  ADMIN
-  TECNICO
+  BOSS
+  COORDINADOR
   AGENDADOR
 }
 
@@ -21,7 +20,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   password      String    // Hasheado con bcrypt
-  role          UserRole  @default(TECNICO)
+  role          UserRole  @default(AGENDADOR)
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

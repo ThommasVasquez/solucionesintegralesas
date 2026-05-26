@@ -1,23 +1,18 @@
 import { UserRole } from '@prisma/client';
 
 export const PERMISSIONS = {
-  PATRON: {
+  BOSS: {
     sheets: { view: true, edit: true, delete: true, create: true },
     users: { create: true, edit: true, delete: true, viewAll: true },
     system: { settings: true, logs: true }
   },
-  ADMIN: {
+  COORDINADOR: {
     sheets: { view: true, edit: true, delete: true, create: true },
-    users: { create: false, edit: true, delete: false, viewAll: true },
-    system: { settings: false, logs: true }
-  },
-  TECNICO: {
-    sheets: { view: true, edit: false, delete: false, create: false },
     users: { create: false, edit: false, delete: false, viewAll: false },
     system: { settings: false, logs: false }
   },
   AGENDADOR: {
-    sheets: { view: true, edit: true, delete: false, create: false },
+    sheets: { view: true, edit: false, delete: false, create: false },
     users: { create: false, edit: false, delete: false, viewAll: false },
     system: { settings: false, logs: false }
   }
@@ -25,7 +20,7 @@ export const PERMISSIONS = {
 
 export function canPerform(
   role: UserRole,
-  resource: keyof typeof PERMISSIONS.PATRON,
+  resource: keyof typeof PERMISSIONS.BOSS,
   action: string
 ): boolean {
   const perms = PERMISSIONS[role]?.[resource] as Record<string, boolean>;
