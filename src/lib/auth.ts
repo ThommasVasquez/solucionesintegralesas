@@ -8,64 +8,64 @@ const USERS = [
     email: "sebastian@ingenova.com.co",
     password: "Sebastian1*.",
     name: "Sebastián",
-    role: "BOSS"
+    role: "BOSS",
   },
   {
     id: "2",
     email: "jessyca@ingenova.com.co",
     password: "Jessyca2*.",
     name: "Jessyca",
-    role: "BOSS"
+    role: "BOSS",
   },
   {
     id: "3",
     email: "adrian@ingenova.com.co",
     password: "Adrian3*.",
     name: "Adrian",
-    role: "BOSS"
+    role: "BOSS",
   },
   {
     id: "4",
     email: "sergio@ingenova.com.co",
     password: "Sergio4*.",
     name: "Sergio",
-    role: "COORDINADOR"
+    role: "COORDINADOR",
   },
   {
     id: "5",
     email: "thommyenergy@superuser.com",
     password: "Md5891129Ae%ThommyEnergy%",
-    name: "ThommyEnergy",
-    role: "BOSS"
+    name: "ThommyEnergy! ⚡️",
+    role: "BOSS",
   },
   {
     id: "6",
     email: "rafael@ingenova.com.co",
     password: "Rafael2026*.",
     name: "Rafael",
-    role: "COORDINADOR"
+    role: "COORDINADOR",
   },
   {
     id: "7",
     email: "kevin@ingenova.com.co",
     password: "Kevin2026*.",
     name: "Kevin",
-    role: "COORDINADOR"
+    role: "COORDINADOR",
   },
   {
     id: "8",
     email: "agendadora1@ingenova.com.co",
     password: "Agendadora20261*.",
     name: "Agendadora 1",
-    role: "AGENDADOR"
+    role: "AGENDADOR",
   },
   {
     id: "9",
     email: "agendadora2@ingenova.com.co",
     password: "Agendadora20262*.",
     name: "Agendadora 2",
-    role: "AGENDADOR"
-  }
+    role: "AGENDADOR",
+  },
 ];
 
 declare module "next-auth" {
@@ -75,7 +75,7 @@ declare module "next-auth" {
       role: string;
     } & DefaultSession["user"];
   }
-  
+
   interface User {
     role: string;
   }
@@ -87,7 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     CredentialsProvider({
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -95,7 +95,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         // Validación simple contra el array USERS
-        const user = USERS.find(u => u.email === credentials.email);
+        const user = USERS.find((u) => u.email === credentials.email);
 
         if (!user || user.password !== credentials.password) {
           return null;
@@ -107,7 +107,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.name,
           role: user.role,
         };
-      }
-    })
-  ]
+      },
+    }),
+  ],
 });
