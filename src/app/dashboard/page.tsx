@@ -61,22 +61,23 @@ export default async function DashboardPage() {
                   </Link>
                 </div>
 
-                <div className={styles.card}>
-                  <div className={styles.iconWrapper} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '2px' }}>
-                    <img 
-                      src="/printerservice-logo.png" 
-                      alt="PrinterService Logo" 
-                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                    />
-                  </div>
-                  <h3>PrinterService</h3>
-                  <p>Control y gestión de servicios de impresión.</p>
-                  <Link href="/dashboard/printerservice" className={styles.cardAction} style={{ color: BRAND_COLORS.PRINTERSERVICE }} prefetch={false}>
-                    Ver Planilla →
-                  </Link>
-                </div>
               </>
             )}
+
+            <div className={styles.card}>
+              <div className={styles.iconWrapper} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '2px' }}>
+                <img 
+                  src="/printerservice-logo.png" 
+                  alt="PrinterService Logo" 
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+              </div>
+              <h3>PrinterService</h3>
+              <p>Control de servicios de impresión e informes de WhatsApp.</p>
+              <Link href="/dashboard/printerservice" className={styles.cardAction} style={{ color: BRAND_COLORS.PRINTERSERVICE }} prefetch={false}>
+                Ver Panel →
+              </Link>
+            </div>
 
             <div className={styles.card}>
               <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.PROMASCOTAS + '20' }}>
@@ -86,17 +87,6 @@ export default async function DashboardPage() {
               <p>Control de visitas y profilaxis a domicilio.</p>
               <Link href="/dashboard/promascotas" className={styles.cardAction} style={{ color: BRAND_COLORS.PROMASCOTAS }} prefetch={false}>
                 Gestionar Visitas →
-              </Link>
-            </div>
-
-            <div className={styles.card}>
-              <div className={styles.iconWrapper} style={{ backgroundColor: '#25d36620' }}>
-                <span style={{ color: '#25d366' }}>💬</span>
-              </div>
-              <h3>Reportes WhatsApp</h3>
-              <p>Métricas de entrada, respuestas y tiempos de contestación.</p>
-              <Link href="/dashboard/whatsapp" className={styles.cardAction} style={{ color: '#25d366' }} prefetch={false}>
-                Ver Reportes →
               </Link>
             </div>
           </div>

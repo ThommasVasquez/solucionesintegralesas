@@ -4,16 +4,66 @@
   display: flex;
   flex-direction: column;
   background-color: #0f172a;
+}
+
+.scrollable {
+  overflow-y: auto;
+  height: auto;
+  min-height: 100vh;
+}
+
+.hiddenScroll {
   overflow: hidden;
 }
 
+/* Tabs */
+.tabContainer {
+  background-color: #0f172a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 20px;
+  margin-top: 90px;
+  display: flex;
+  justify-content: center;
+}
+
+.tabBar {
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tabBtnActive {
+  background: #0ea5e9;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+/* Wrapper for Excel iframe */
 .iframeWrapper {
   flex: 1;
-  margin-top: 90px;
   position: relative;
   height: auto;
   width: 100%;
-  padding-top: 0;
 }
 
 .iframe {
@@ -24,4 +74,37 @@
   height: 100%;
   border: none;
   background-color: white;
+}
+
+/* Wrapper for WhatsApp Dashboard */
+.whatsappWrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  width: 100%;
+}
+
+/* Clearances */
+.main.scrollable .whatsappWrapper {
+  margin-top: 20px;
+}
+
+.isSergioActive .whatsappWrapper {
+  margin-top: 90px !important;
+}
+
+@media (max-width: 480px) {
+  .tabContainer {
+    padding: 10px 10px;
+  }
+  .tabBar {
+    width: 100%;
+    gap: 4px;
+  }
+  .tabBtn {
+    flex: 1;
+    padding: 8px 8px;
+    font-size: 0.8rem;
+    text-align: center;
+  }
 }
