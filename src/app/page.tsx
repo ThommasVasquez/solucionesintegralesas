@@ -117,10 +117,10 @@ export default function Home() {
       }, (context) => {
         const { isDesktop } = context.conditions as any;
 
-        const fanStates = isDesktop 
-          ? [ { x: -180, y: 185, rotation: -17 }, { x: -60,  y: 145, rotation: -5 }, { x: 60,   y: 145, rotation: 5 }, { x: 180,  y: 185, rotation: 17 } ]
-          // Mobile: cards anchor at 65% screen, fan spreads around that point
-          : [ { x: -90, y: 30, rotation: -12 }, { x: -30,  y: 0, rotation: -4 }, { x: 30, y: 0, rotation: 4 }, { x: 90, y: 30, rotation: 12 } ];
+        const gridPos = isDesktop
+          ? [{ x: -120, y: -150 }, { x: 120, y: -150 }, { x: -120, y: 150 }, { x: 120, y: 150 }]
+          // Mobile: keep all 4 cards within lower zone (around the 65% anchor)
+          : [{ x: -65, y: -80 }, { x: 65, y: -80 }, { x: -65, y: 80 }, { x: 65, y: 80 }];
 
         gsap.set(cards, { opacity: 0, y: 350, scale: isDesktop ? 0.8 : 0.6, x: 0, rotation: 0 });
         gsap.set(texts, { opacity: 0, y: 30, pointerEvents: 'none' });
@@ -129,9 +129,14 @@ export default function Home() {
         introTL
           .fromTo(texts[0], { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, pointerEvents: 'auto' })
           .to(cards, {
-            opacity: 1, scale: isDesktop ? 1 : 0.8,
-            x: (i) => fanStates[i].x, y: (i) => fanStates[i].y, rotation: (i) => fanStates[i].rotation,
-            duration: 1.2, stagger: 0.05, ease: 'elastic.out(1, 0.75)',
+            opacity: 1,
+            scale: isDesktop ? 0.8 : 0.55,
+            x: (i) => gridPos[i].x,
+            y: (i) => gridPos[i].y,
+            rotation: 0,
+            duration: 1.2,
+            stagger: 0.05,
+            ease: 'power3.out',
           }, '-=0.6');
 
         const masterTL = gsap.timeline({
@@ -139,17 +144,19 @@ export default function Home() {
             trigger: heroRef.current,
             start: 'top top',
             end: '+=800%',
-            pin: true, scrub: 0.5, invalidateOnRefresh: true,
+            pin: true,
+            scrub: 0.5,
+            invalidateOnRefresh: true,
           },
         });
 
         masterTL.eventCallback("onUpdate", () => {
           const t = masterTL.progress();
           let nextIdx = null;
-          if (t >= 0.8) nextIdx = 3;
-          else if (t >= 0.6) nextIdx = 2;
-          else if (t >= 0.4) nextIdx = 1;
-          else if (t >= 0.2) nextIdx = 0;
+          if (t >= 0.83) nextIdx = 3;
+          else if (t >= 0.58) nextIdx = 2;
+          else if (t >= 0.33) nextIdx = 1;
+          else if (t >= 0.083) nextIdx = 0;
           
           if (activeCardIdxRef.current !== nextIdx) {
             activeCardIdxRef.current = nextIdx;
@@ -158,17 +165,6 @@ export default function Home() {
         });
 
         masterTL.set(texts[0], { opacity: 1, y: 0, pointerEvents: 'auto' }, 0); 
-        
-        const gridPos = isDesktop
-          ? [{ x: -120, y: -150 }, { x: 120, y: -150 }, { x: -120, y: 150 }, { x: 120, y: 150 }]
-          // Mobile: keep all 4 cards within lower zone (around the 65% anchor)
-          : [{ x: -65, y: -80 }, { x: 65, y: -80 }, { x: -65, y: 80 }, { x: 65, y: 80 }];
-
-        cards.forEach((card, i) => {
-          masterTL.fromTo(card, 
-            { x: fanStates[i].x, y: fanStates[i].y, rotation: fanStates[i].rotation, scale: isDesktop ? 1 : 0.8, opacity: 1 },
-            { x: gridPos[i].x, y: gridPos[i].y, rotation: 0, scale: isDesktop ? 0.8 : 0.55, opacity: 1, duration: 1.5, ease: 'power2.inOut' }, 0);
-        });
 
         const focusX = isDesktop ? 260 : 0;
         // Mobile: CSS handles text at top, cards at bottom — GSAP y=0 keeps both in their CSS zones
@@ -176,7 +172,7 @@ export default function Home() {
         const textYOffset = 0; // CSS positioning handles separation, no GSAP y needed
 
         businessLines.forEach((_, i) => {
-          const startTime = 2.5 + i * 3;
+          const startTime = 1.0 + i * 3;
           masterTL.to(texts[i], { opacity: 0, y: -20, duration: 0.8, pointerEvents: 'none' }, startTime);
           
           if (i > 0) {
