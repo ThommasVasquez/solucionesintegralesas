@@ -7,7 +7,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from '@/components/Navbar';
 import styles from './page.module.css';
 import Footer from '@/components/Footer';
-import * as THREE from 'three';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -70,21 +69,11 @@ const businessLines = [
   },
 ];
 
-const words = [
-  { text: 'piscinas', color: BRAND_COLORS.INGENOVA },
-  { text: 'capacitación', color: BRAND_COLORS.CLUBHOUSE },
-  { text: 'mascotas', color: BRAND_COLORS.PROMASCOTAS },
-  { text: 'bienestar', color: BRAND_COLORS.SOLUCIONES }
-];
 
 export default function Home() {
-  const headlineRef  = useRef<HTMLHeadingElement>(null);
-  const ctaGroupRef  = useRef<HTMLDivElement>(null);
   const cardsRef     = useRef<HTMLDivElement[]>([]);
   const textsRef     = useRef<HTMLDivElement[]>([]);
   const heroRef      = useRef<HTMLElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  const [wordIdx, setWordIdx] = useState(0);
 
   const [activeCardIdx, setActiveCardIdx] = useState<number | null>(null);
   const activeCardIdxRef = useRef<number | null>(null);
@@ -101,10 +90,6 @@ export default function Home() {
     return () => lenis.destroy();
   }, []);
 
-  useEffect(() => {
-    const id = setInterval(() => setWordIdx(p => (p + 1) % words.length), 2200);
-    return () => clearInterval(id);
-  }, []);
 
   useEffect(() => {
     if (activeCardIdx === null) {
@@ -117,108 +102,6 @@ export default function Home() {
     return () => clearInterval(id);
   }, [activeCardIdx]);
 
-  // THREE.JS HYPERREALISTIC WATER EFFECT (NO PHOTO - PURE SHADER)
-  useEffect(() => {
-    if (!canvasContainerRef.current) return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    canvasContainerRef.current.appendChild(renderer.domElement);
-
-    const isMobile = window.innerWidth <= 768;
-    const geometrySize = isMobile ? 32 : 64;
-
-    const geometry = new THREE.PlaneGeometry(20, 20, geometrySize, geometrySize);
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0 },
-        uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-      },
-      vertexShader: `
-        varying vec2 vUv;
-        varying float vElevation;
-        uniform float uTime;
-        uniform vec2 uMouse;
-        void main() {
-          vUv = uv;
-          vec3 pos = position;
-          float dist = distance(uv, uMouse);
-          float ripple = sin(dist * 40.0 - uTime * 5.0) * exp(-dist * 5.0) * 0.15;
-          // Add subtle ambient waves
-          float waves = sin(uv.x * 10.0 + uTime) * cos(uv.y * 10.0 + uTime) * 0.05;
-          pos.z += ripple + waves;
-          vElevation = ripple + waves;
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-        }
-      `,
-      fragmentShader: `
-        varying vec2 vUv;
-        varying float vElevation;
-        uniform float uTime;
-        void main() {
-          // Subtle blue gradient colors
-          vec3 colorLow = vec3(0.96, 0.96, 0.98); // Very light grey/blue
-          vec3 colorHigh = vec3(0.85, 0.92, 0.98); // Light soft blue
-          vec3 finalColor = mix(colorLow, colorHigh, vElevation * 2.0 + 0.5);
-          
-          // Add subtle specular highlights based on elevation
-          float highlight = smoothstep(0.05, 0.15, vElevation);
-          finalColor += highlight * 0.1;
-          
-          gl_FragColor = vec4(finalColor, 1.0);
-        }
-      `,
-      transparent: true,
-    });
-
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.rotation.x = -Math.PI / 4;
-    scene.add(mesh);
-
-    camera.position.z = 5;
-
-    const updateMouse = (clientX: number, clientY: number) => {
-      material.uniforms.uMouse.value.x = clientX / window.innerWidth;
-      material.uniforms.uMouse.value.y = 1.0 - (clientY / window.innerHeight);
-    };
-
-    const handleMouseMove = (e: MouseEvent) => updateMouse(e.clientX, e.clientY);
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0) {
-        updateMouse(e.touches[0].clientX, e.touches[0].clientY);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-
-    const animate = () => {
-      material.uniforms.uTime.value += isMobile ? 0.02 : 0.03;
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    };
-    const rafId = requestAnimationFrame(animate);
-
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(rafId);
-      if (canvasContainerRef.current) {
-        canvasContainerRef.current.removeChild(renderer.domElement);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -244,7 +127,7 @@ export default function Home() {
 
         const introTL = gsap.timeline({ delay: 0.2 });
         introTL
-          .fromTo([headlineRef.current, ctaGroupRef.current], { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 1, stagger: 0.1 })
+          .fromTo(texts[0], { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1, pointerEvents: 'auto' })
           .to(cards, {
             opacity: 1, scale: isDesktop ? 1 : 0.8,
             x: (i) => fanStates[i].x, y: (i) => fanStates[i].y, rotation: (i) => fanStates[i].rotation,
@@ -274,19 +157,7 @@ export default function Home() {
           }
         });
 
-        masterTL.fromTo([headlineRef.current, ctaGroupRef.current], 
-          { opacity: 1, y: 0 },
-          { opacity: 0, y: -80, duration: 1 }, 0);
-          
-        if (canvasContainerRef.current) {
-          masterTL.fromTo(canvasContainerRef.current, 
-            { opacity: 1 }, 
-            { opacity: 0, duration: 1 }, 0);
-        }
-
-        masterTL.fromTo(texts[0], 
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 1, pointerEvents: 'auto' }, 0.5); 
+        masterTL.set(texts[0], { opacity: 1, y: 0, pointerEvents: 'auto' }, 0); 
         
         const gridPos = isDesktop
           ? [{ x: -120, y: -150 }, { x: 120, y: -150 }, { x: -120, y: 150 }, { x: 120, y: 150 }]
@@ -385,23 +256,7 @@ export default function Home() {
         </div>
       </div>
 
-      <section ref={heroRef} className={styles.hero}>
-        <div ref={canvasContainerRef} className={styles.waterCanvas} />
-        <div className={styles.heroContent}>
-          <h1 ref={headlineRef} className={styles.heroH1}>
-            Expertos en<br />
-            <span className={styles.accent} style={{ color: words[wordIdx].color }}>
-              {words[wordIdx].text}
-            </span>.
-          </h1>
-          <div ref={ctaGroupRef} className={styles.ctaGroup}>
-            <button className="btn-primary" style={{ backgroundColor: BRAND_COLORS.SOLUCIONES, borderColor: BRAND_COLORS.SOLUCIONES }} onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
-              Nuestros servicios
-            </button>
-            <button className="btn-outline" onClick={() => document.getElementById('nosotros')?.scrollIntoView({ behavior: 'smooth' })}>Conócenos</button>
-          </div>
-        </div>
-      </section>
+      <section ref={heroRef} className={styles.hero} />
 
       <section id="nosotros" className={styles.nosotros}>
         <div className="container">
