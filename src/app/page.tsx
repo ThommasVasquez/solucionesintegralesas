@@ -118,9 +118,9 @@ export default function Home() {
         const { isDesktop } = context.conditions as any;
 
         const gridPos = isDesktop
-          ? [{ x: -120 + 220, y: -150 }, { x: 120 + 220, y: -150 }, { x: -120 + 220, y: 150 }, { x: 120 + 220, y: 150 }]
-          // Mobile: keep all 4 cards within lower zone (around the 65% anchor)
-          : [{ x: -65, y: -80 }, { x: 65, y: -80 }, { x: -65, y: 80 }, { x: 65, y: 80 }];
+          ? [{ x: 75, y: -240 }, { x: 450, y: -240 }, { x: 75, y: 240 }, { x: 450, y: 240 }]
+          // Mobile: keep all 4 cards within lower zone
+          : [{ x: -100, y: -130 }, { x: 100, y: -130 }, { x: -100, y: 130 }, { x: 100, y: 130 }];
 
         gsap.set(cards, { opacity: 0, y: 350, scale: isDesktop ? 0.8 : 0.6, x: 0, rotation: 0 });
         gsap.set(texts, { opacity: 0, y: 30, pointerEvents: 'none' });
