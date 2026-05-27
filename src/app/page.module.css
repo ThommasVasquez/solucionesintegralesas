@@ -29,7 +29,7 @@
 
 .textBlock {
   position: absolute;
-  max-width: 480px;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   gap: 1.2rem;

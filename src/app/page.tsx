@@ -118,7 +118,7 @@ export default function Home() {
         const { isDesktop } = context.conditions as any;
 
         const gridPos = isDesktop
-          ? [{ x: -120, y: -150 }, { x: 120, y: -150 }, { x: -120, y: 150 }, { x: 120, y: 150 }]
+          ? [{ x: -120 + 220, y: -150 }, { x: 120 + 220, y: -150 }, { x: -120 + 220, y: 150 }, { x: 120 + 220, y: 150 }]
           // Mobile: keep all 4 cards within lower zone (around the 65% anchor)
           : [{ x: -65, y: -80 }, { x: 65, y: -80 }, { x: -65, y: 80 }, { x: 65, y: 80 }];
 
