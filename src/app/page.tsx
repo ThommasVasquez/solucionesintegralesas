@@ -166,6 +166,12 @@ export default function Home() {
 
         masterTL.set(texts[0], { opacity: 1, y: 0, pointerEvents: 'auto' }, 0); 
 
+        cards.forEach((card, i) => {
+          masterTL.fromTo(card, 
+            { x: gridPos[i].x, y: gridPos[i].y, rotation: 0, scale: isDesktop ? 0.8 : 0.55, opacity: 1 },
+            { x: gridPos[i].x, y: gridPos[i].y, rotation: 0, scale: isDesktop ? 0.8 : 0.55, opacity: 1, duration: 1.0 }, 0);
+        }); 
+
         const focusX = isDesktop ? 260 : 0;
         // Mobile: CSS handles text at top, cards at bottom — GSAP y=0 keeps both in their CSS zones
         const focusY = isDesktop ? 0 : 0;
