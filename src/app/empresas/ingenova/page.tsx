@@ -2,12 +2,12 @@ import type { Metadata } from 'next';
 import IngenovaClient from './IngenovaClient';
 
 export const metadata: Metadata = {
-  title: 'Ingenova — Mantenimiento Premium de Piscinas, Jacuzzis & Turcos | Bogotá',
-  description: 'Empresa líder en mantenimiento especializado de zonas húmedas en Colombia. Piscinas, jacuzzis y turcos con técnicos certificados, repuestos originales y garantía escrita.',
-  keywords: 'mantenimiento piscinas bogota, jacuzzi bogota, turco mantenimiento, quimicos piscina, motobomba piscina',
+  title: 'Aqua Integral — Especialista en la Calidad del Agua | Bogotá',
+  description: 'Aqua Integral, soluciones integrales en el tratamiento y control de la calidad del agua, garantizando el acceso confiable al agua limpia y segura.',
+  keywords: 'tratamiento de agua, agua potable, agua residual, medicion y control, piscinas, bombas de agua, bogota',
   openGraph: {
-    title: 'Ingenova — Soluciones Integrales AS',
-    description: 'Expertos en piscinas, jacuzzis y turcos en Bogotá',
+    title: 'Aqua Integral — Soluciones Integrales AS',
+    description: 'Soluciones integrales en el tratamiento y control de la calidad del agua',
     type: 'website',
   },
 };
@@ -15,4 +15,5 @@ export const metadata: Metadata = {
 export default function IngenovaPage() {
   return <IngenovaClient />;
 }
+
 
