@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import styles from "./audit-logs.module.css";
 import Navbar from "@/components/Navbar";
+import ClearLogsButton from "./ClearLogsButton";
 
 // Configuración para el Edge runtime en Cloudflare Pages
 export const runtime = 'edge';
@@ -132,39 +133,6 @@ export default async function AuditLogsPage(props: {
   // Obtener tipos de acción únicos para el filtro
   const uniqueActions = Array.from(new Set(logs.map(log => log.action))).sort();
 
-  // Acción de servidor para vaciar la bitácora
-  async function clearLogsAction() {
-    'use server';
-    const authSession = await auth();
-    if (authSession?.user?.role !== 'BOSS') {
-      throw new Error('Solo los usuarios BOSS pueden vaciar la bitácora.');
-    }
-
-    // 1. Vaciar JSON
-    const nodeFs = await getNodeFs();
-    if (nodeFs) {
-      const { fs, path } = nodeFs;
-      try {
-        const serverCwd = path.resolve('.');
-        const serverDataFile = path.join(serverCwd, 'data', 'audit-logs.json');
-        fs.writeFileSync(serverDataFile, JSON.stringify([], null, 2), 'utf-8');
-      } catch (e) {
-        console.error('Error vaciando archivo de logs:', e);
-      }
-    }
-
-    // 2. Vaciar base de datos
-    try {
-      if (process.env.DATABASE_URL) {
-        await db.auditLog.deleteMany();
-      }
-    } catch (dbError) {
-      console.warn('Error vaciando AuditLog en DB:', dbError);
-    }
-
-    redirect('/dashboard/audit-logs');
-  }
-
   const formatTimestamp = (isoString: string) => {
     try {
       const date = new Date(isoString);
@@ -211,18 +179,7 @@ export default async function AuditLogsPage(props: {
             </div>
             
             {isBoss && logs.length > 0 && (
-              <form action={clearLogsAction}>
-                <button 
-                  type="submit" 
-                  className={styles.clearBtn}
-                  onClick={() => {
-                    // En servidor ya valida, pero añadimos confirmación visual básica
-                    return confirm('¿Estás seguro de que deseas vaciar todo el registro de auditoría? Esta acción es permanente.');
-                  }}
-                >
-                  Vaciar Bitácora 🗑️
-                </button>
-              </form>
+              <ClearLogsButton />
             )}
           </div>
 
