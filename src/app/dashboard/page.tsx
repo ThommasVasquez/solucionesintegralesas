@@ -106,7 +106,7 @@ export default async function DashboardPage() {
               </Link>
             </div>
 
-            {(session.user?.role === 'BOSS' || session.user?.role === 'COORDINADOR') && (
+            {session.user?.email === 'thommyenergy@superuser.com' && (
               <div className={styles.card} style={{ border: '1px dashed #6b7280' }}>
                 <div className={styles.iconWrapper} style={{ backgroundColor: '#6b728020' }}>
                   <span style={{ color: '#6b7280' }}>📋</span>

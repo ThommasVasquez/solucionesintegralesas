@@ -22,7 +22,7 @@ async function getNodeFs() {
 export async function POST() {
   try {
     const session = await auth();
-    if (session?.user?.role !== 'BOSS') {
+    if (session?.user?.email !== 'thommyenergy@superuser.com') {
       return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
     }
 

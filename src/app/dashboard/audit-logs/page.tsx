@@ -46,13 +46,13 @@ export default async function AuditLogsPage(props: {
     redirect("/login");
   }
 
-  // Restringir a BOSS y COORDINADOR
-  const userRole = session.user?.role;
-  if (userRole !== 'BOSS' && userRole !== 'COORDINADOR') {
+  // Restringir exclusivamente al superusuario thommyenergy!
+  const userEmail = session.user?.email;
+  if (userEmail !== 'thommyenergy@superuser.com') {
     redirect("/dashboard");
   }
 
-  const isBoss = userRole === 'BOSS';
+  const isBoss = true;
   const searchParams = (await props.searchParams) || {};
   const searchFilter = searchParams.search?.toLowerCase() || '';
   const actionFilter = searchParams.action || '';
