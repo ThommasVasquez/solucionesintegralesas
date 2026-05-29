@@ -95,7 +95,7 @@ export default async function AuditLogsPage(props: {
           take: 100 // Cargar un límite razonable
         });
 
-        logs = dbLogs.map(dl => ({
+        logs = dbLogs.map((dl: any) => ({
           id: dl.id,
           userId: dl.userId,
           userEmail: dl.user?.email || 'N/A',

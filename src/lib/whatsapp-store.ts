@@ -41,7 +41,7 @@ export async function getStoredMessages(): Promise<WhatsAppMessage[]> {
       const messages = await db.whatsAppMessage.findMany({
         orderBy: { timestamp: 'asc' },
       });
-      return messages.map((m) => ({
+      return messages.map((m: any) => ({
         id: m.id,
         chatId: m.chatId,
         sender: m.sender,
