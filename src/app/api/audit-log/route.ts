@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { logActionServer } from '@/lib/audit-server';
 
-// El runtime por defecto es Node.js, lo cual permite acceso a 'fs'
+export const runtime = 'edge';
+
+// El runtime es Edge para compatibilidad con Cloudflare Pages.
+// logActionServer utiliza importaciones dinámicas para manejar de forma segura fs/path en Node.js.
 export async function POST(request: Request) {
   try {
     const body = await request.json();

@@ -1,14 +1,29 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import fs from "fs";
-import path from "path";
 import Link from "next/link";
 import styles from "./audit-logs.module.css";
 import Navbar from "@/components/Navbar";
 
-// Forzar renderizado dinámico en servidor para leer archivos de logs
+// Configuración para el Edge runtime en Cloudflare Pages
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
+
+async function getNodeFs() {
+  if (typeof window === 'undefined' && process.env.NEXT_RUNTIME !== 'edge') {
+    try {
+      const fsName = 'fs';
+      const pathName = 'path';
+      const fs = await import(fsName);
+      const path = await import(pathName);
+      return { fs: fs.default || fs, path: path.default || path };
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 
 interface AuditLogEntry {
   id: string;
@@ -41,20 +56,58 @@ export default async function AuditLogsPage(props: {
   const searchFilter = searchParams.search?.toLowerCase() || '';
   const actionFilter = searchParams.action || '';
 
-  // 1. Leer los logs del archivo local
-  const cwd = process.cwd();
-  const dataFile = path.join(cwd, 'data', 'audit-logs.json');
+  // 1. Leer los logs del archivo local (si está en Node.js) o de base de datos
   let logs: AuditLogEntry[] = [];
+  const nodeFs = await getNodeFs();
 
-  if (fs.existsSync(dataFile)) {
+  if (nodeFs) {
+    const { fs, path } = nodeFs;
     try {
-      const raw = fs.readFileSync(dataFile, 'utf-8');
-      logs = JSON.parse(raw);
-      if (!Array.isArray(logs)) {
-        logs = [];
+      const cwd = path.resolve('.');
+      const dataFile = path.join(cwd, 'data', 'audit-logs.json');
+      if (fs.existsSync(dataFile)) {
+        const raw = fs.readFileSync(dataFile, 'utf-8');
+        logs = JSON.parse(raw);
+        if (!Array.isArray(logs)) {
+          logs = [];
+        }
       }
-    } catch {
-      logs = [];
+    } catch (e) {
+      console.warn('Error leyendo logs locales:', e);
+    }
+  }
+
+  // Cargar desde base de datos como fallback o fuente primaria en Edge
+  if (logs.length === 0) {
+    try {
+      if (process.env.DATABASE_URL) {
+        const dbLogs = await db.auditLog.findMany({
+          orderBy: { createdAt: 'desc' },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true
+              }
+            }
+          },
+          take: 100 // Cargar un límite razonable
+        });
+
+        logs = dbLogs.map(dl => ({
+          id: dl.id,
+          userId: dl.userId,
+          userEmail: dl.user?.email || 'N/A',
+          userName: dl.user?.name || 'Desconocido',
+          action: dl.action,
+          resource: dl.resource,
+          details: dl.details,
+          timestamp: dl.createdAt.toISOString()
+        }));
+      }
+    } catch (dbError) {
+      console.warn('Error cargando logs desde DB:', dbError);
     }
   }
 
@@ -88,12 +141,16 @@ export default async function AuditLogsPage(props: {
     }
 
     // 1. Vaciar JSON
-    try {
-      const serverCwd = process.cwd();
-      const serverDataFile = path.join(serverCwd, 'data', 'audit-logs.json');
-      fs.writeFileSync(serverDataFile, JSON.stringify([], null, 2), 'utf-8');
-    } catch (e) {
-      console.error('Error vaciando archivo de logs:', e);
+    const nodeFs = await getNodeFs();
+    if (nodeFs) {
+      const { fs, path } = nodeFs;
+      try {
+        const serverCwd = path.resolve('.');
+        const serverDataFile = path.join(serverCwd, 'data', 'audit-logs.json');
+        fs.writeFileSync(serverDataFile, JSON.stringify([], null, 2), 'utf-8');
+      } catch (e) {
+        console.error('Error vaciando archivo de logs:', e);
+      }
     }
 
     // 2. Vaciar base de datos
