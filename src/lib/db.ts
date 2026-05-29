@@ -1,20 +1,34 @@
-import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { Pool } from "@neondatabase/serverless";
 
-const prismaClientSingleton = () => {
-  const isEdge = typeof window === 'undefined' && (
-    process.env.NEXT_RUNTIME === 'edge' ||
-    typeof (globalThis as any).EdgeRuntime !== 'undefined' ||
-    !(process as any).versions?.node
-  );
+const isEdge = typeof window === 'undefined' && (
+  process.env.NEXT_RUNTIME === 'edge' ||
+  typeof (globalThis as any).EdgeRuntime !== 'undefined' ||
+  !(process as any).versions?.node
+);
 
+let PrismaClient: any;
+try {
+  if (isEdge) {
+    console.log("[Prisma DB DEBUG] Importing @prisma/client/wasm for Edge runtime...");
+    const edgeModule = await import("@prisma/client/wasm");
+    PrismaClient = edgeModule.PrismaClient;
+  } else {
+    console.log("[Prisma DB DEBUG] Importing @prisma/client for Node.js runtime...");
+    const nodeModule = await import("@prisma/client");
+    PrismaClient = nodeModule.PrismaClient;
+  }
+} catch (e) {
+  console.error("[Prisma DB] Error importando PrismaClient:", e);
+}
+
+const prismaClientSingleton = () => {
   console.log("[Prisma DB DEBUG] isEdge:", isEdge);
   console.log("[Prisma DB DEBUG] DATABASE_URL is defined:", !!process.env.DATABASE_URL);
 
   if (isEdge) {
     try {
-      if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes("neon.tech")) {
+      if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes("neon.tech") && PrismaClient) {
         console.log("[Prisma DB DEBUG] Initializing Prisma Client with Neon Serverless adapter...");
         const pool = new Pool({ connectionString: process.env.DATABASE_URL });
         const adapter = new PrismaNeon(pool as any);
@@ -48,7 +62,7 @@ const prismaClientSingleton = () => {
   // Node.js (Local/Dev)
   try {
     console.log("[Prisma DB DEBUG] Node.js environment detected. Falling back to standard PrismaClient...");
-    return new PrismaClient();
+    return PrismaClient ? new PrismaClient() : null;
   } catch (nodeError) {
     console.error("[Prisma DB] Error instantiating standard PrismaClient under Node.js:", nodeError);
     throw nodeError;

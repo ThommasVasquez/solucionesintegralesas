@@ -52,7 +52,7 @@ export default async function AuditLogsPage(props: {
   }
 
   const isBoss = userRole === 'BOSS';
-  const searchParams = await props.searchParams;
+  const searchParams = (await props.searchParams) || {};
   const searchFilter = searchParams.search?.toLowerCase() || '';
   const actionFilter = searchParams.action || '';
 
