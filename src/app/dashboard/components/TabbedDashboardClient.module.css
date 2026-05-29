@@ -216,6 +216,12 @@
   font-weight: 600;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.02);
+  color: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
   transition: all 0.2s ease;
 }
 
