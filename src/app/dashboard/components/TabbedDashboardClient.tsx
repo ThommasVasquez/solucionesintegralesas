@@ -84,9 +84,10 @@ export default function TabbedDashboardClient({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadingFileName, setUploadingFileName] = useState('');
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
 
   // Categorías de carpetas
-  const categories = ['Todos', ...Array.from(new Set(files.map(f => f.category)))];
+  const categories = ['Todos', ...Array.from(new Set([...files.map(f => f.category), ...customCategories]))];
 
   // Helper para deducir tipo de archivo por extensión
   const getFileType = (fileName: string): 'pdf' | 'doc' | 'xls' | 'img' => {
@@ -125,6 +126,80 @@ export default function TabbedDashboardClient({
                 action: 'UPLOAD_FILE',
                 resource: title,
                 details: { fileName: file.name, size: file.size, message: `Subió el archivo ${file.name} en el panel ${title}` }
+              });
+            }, 300);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 100);
+    }
+  };
+
+  // Crear Carpeta manualmente
+  const handleCreateFolder = () => {
+    const folderName = prompt("Ingrese el nombre de la nueva carpeta:");
+    if (folderName && folderName.trim()) {
+      const trimmed = folderName.trim();
+      if (categories.includes(trimmed)) {
+        alert("Ya existe una carpeta con ese nombre.");
+        return;
+      }
+      setCustomCategories(prev => [...prev, trimmed]);
+      setSelectedCategory(trimmed);
+      logAction({
+        userEmail: user.email,
+        userName: user.name,
+        action: 'CREATE_FOLDER',
+        resource: title,
+        details: { folderName: trimmed, message: `Creó la carpeta "${trimmed}" en el panel ${title}` }
+      });
+    }
+  };
+
+  // Subir Carpeta (webkitdirectory)
+  const handleFolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const folderFiles = Array.from(e.target.files);
+      const firstFile = folderFiles[0];
+      const folderName = firstFile.webkitRelativePath.split('/')[0] || 'Carpeta Subida';
+      
+      if (categories.includes(folderName)) {
+        alert(`Ya existe una carpeta llamada "${folderName}". Los archivos se guardarán en ella.`);
+      }
+
+      setIsUploading(true);
+      setUploadProgress(0);
+      setUploadingFileName(`Carpeta "${folderName}" (${folderFiles.length} archivos)`);
+      
+      const interval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              const newFiles: DriveFile[] = folderFiles.map(file => ({
+                name: file.name,
+                type: getFileType(file.name),
+                size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+                date: new Date().toLocaleDateString(),
+                category: folderName
+              }));
+              
+              setCustomCategories(prevCats => [...prevCats, folderName]);
+              setFiles(prevFiles => [...newFiles, ...prevFiles]);
+              setSelectedCategory(folderName);
+              setIsUploading(false);
+              
+              logAction({
+                userEmail: user.email,
+                userName: user.name,
+                action: 'UPLOAD_FOLDER',
+                resource: title,
+                details: { 
+                  folderName, 
+                  fileCount: folderFiles.length,
+                  message: `Subió la carpeta "${folderName}" con ${folderFiles.length} archivos en el panel ${title}` 
+                }
               });
             }, 300);
             return 100;
@@ -247,6 +322,31 @@ export default function TabbedDashboardClient({
               </div>
               
               <div className={styles.uploadZone}>
+                <button 
+                  onClick={handleCreateFolder}
+                  disabled={isUploading}
+                  className={styles.uploadBtn}
+                  style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}
+                >
+                  <FolderOpen size={18} />
+                  Crear Carpeta
+                </button>
+
+                <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}>
+                  <FolderOpen size={18} />
+                  Subir Carpeta
+                  <input 
+                    type="file" 
+                    // @ts-ignore
+                    webkitdirectory="true"
+                    directory="true"
+                    multiple
+                    onChange={handleFolderChange}
+                    className={styles.hiddenInput} 
+                    disabled={isUploading}
+                  />
+                </label>
+
                 <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor }}>
                   <Upload size={18} />
                   Subir Archivo
