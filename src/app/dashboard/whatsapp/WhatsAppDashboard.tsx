@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'next-view-transitions';
 import styles from './whatsapp.module.css';
+import { logAction } from '@/lib/audit-client';
 
 interface WhatsAppMessage {
   id: string;
@@ -33,9 +34,10 @@ interface WhatsAppMessage {
 
 interface WhatsAppDashboardProps {
   userName: string;
+  userEmail: string;
 }
 
-export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) {
+export default function WhatsAppDashboard({ userName, userEmail }: WhatsAppDashboardProps) {
   // Estado de mensajes
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
   const [isClient, setIsClient] = useState(false);
@@ -401,6 +403,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
     navigator.clipboard.writeText(tampermonkeyScript);
     setCopiedScript(true);
     setTimeout(() => setCopiedScript(false), 2000);
+    logAction({
+      userEmail,
+      userName,
+      action: 'COPY_WHATSAPP_SCRIPT',
+      resource: 'WhatsApp',
+      details: { message: 'Copió el script de Tampermonkey para WhatsApp Web' }
+    });
   };
 
 
@@ -457,6 +466,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
           setLastMessageTime(null);
           setConnectionStatus('connected');
           alert('Historial de WhatsApp borrado del disco.');
+          logAction({
+            userEmail,
+            userName,
+            action: 'CLEAR_WHATSAPP_DATA',
+            resource: 'WhatsApp',
+            details: { message: 'Vació las estadísticas de mensajes de WhatsApp del servidor' }
+          });
         } else {
           alert('No se pudo borrar el historial del disco.');
         }
@@ -527,6 +543,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
       }
       fetchMessagesFromAPI();
       alert(`¡Se han cargado con éxito ${uploadCount} mensajes demo en la base de datos!`);
+      logAction({
+        userEmail,
+        userName,
+        action: 'GENERATE_DEMO_DATA',
+        resource: 'WhatsApp',
+        details: { message: 'Generó datos demo para simulación de WhatsApp' }
+      });
     } catch (e) {
       alert('Error cargando los mensajes demo.');
     }
@@ -700,6 +723,13 @@ export default function WhatsAppDashboard({ userName }: WhatsAppDashboardProps) 
       setIsImporting(false);
       fetchMessagesFromAPI();
       alert(`¡Chat importado con éxito! Se cargaron ${uploadCount} mensajes al disco.`);
+      logAction({
+        userEmail,
+        userName,
+        action: 'IMPORT_WHATSAPP_CHAT',
+        resource: 'WhatsApp',
+        details: { customerName, message: `Importó un chat de WhatsApp con el cliente ${customerName}` }
+      });
     } catch (e) {
       alert('Error importando los mensajes al servidor.');
     }

@@ -8,6 +8,24 @@ export const authConfig = {
   session: { strategy: "jwt" },
   providers: [], 
   callbacks: {
+    async signIn({ user }) {
+      if (user) {
+        try {
+          const { logActionServer } = await import("./audit-server");
+          await logActionServer({
+            userId: user.id,
+            userEmail: user.email,
+            userName: user.name,
+            action: 'LOGIN',
+            resource: 'SESSION',
+            details: { message: `Usuario ${user.name} inició sesión.` }
+          });
+        } catch (e) {
+          console.error("Error logging sign in:", e);
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

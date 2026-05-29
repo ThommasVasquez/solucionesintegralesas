@@ -28,6 +28,22 @@ export default async function DashboardPage() {
             </div>
             <form action={async () => {
               'use server';
+              const session = await auth();
+              if (session?.user) {
+                try {
+                  const { logActionServer } = await import("@/lib/audit-server");
+                  await logActionServer({
+                    userId: session.user.id,
+                    userEmail: session.user.email,
+                    userName: session.user.name,
+                    action: 'LOGOUT',
+                    resource: 'SESSION',
+                    details: { message: `Usuario ${session.user.name} cerró sesión.` }
+                  });
+                } catch (e) {
+                  console.error("Error logging logout:", e);
+                }
+              }
               await signOut({ redirectTo: "/" });
             }}>
               <button className={styles.logoutBtn}>
@@ -89,6 +105,19 @@ export default async function DashboardPage() {
                 Gestionar Visitas →
               </Link>
             </div>
+
+            {(session.user?.role === 'BOSS' || session.user?.role === 'COORDINADOR') && (
+              <div className={styles.card} style={{ border: '1px dashed #6b7280' }}>
+                <div className={styles.iconWrapper} style={{ backgroundColor: '#6b728020' }}>
+                  <span style={{ color: '#6b7280' }}>📋</span>
+                </div>
+                <h3>Bitácora de Auditoría</h3>
+                <p>Historial y registro de movimientos de usuarios de la plataforma.</p>
+                <Link href="/dashboard/audit-logs" className={styles.cardAction} style={{ color: '#6b7280' }} prefetch={false}>
+                  Ver Bitácora →
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

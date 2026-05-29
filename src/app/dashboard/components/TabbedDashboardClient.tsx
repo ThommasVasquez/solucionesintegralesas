@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from "@/components/Navbar";
 import WhatsAppDashboard from "../whatsapp/WhatsAppDashboard";
+import { logAction } from '@/lib/audit-client';
 import { 
   FileText, 
   FileImage, 
@@ -52,6 +53,30 @@ export default function TabbedDashboardClient({
 
   const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive'>(shouldHideExcel ? 'whatsapp' : 'excel');
 
+  // Log panel view on load
+  useEffect(() => {
+    if (user?.email) {
+      logAction({
+        userEmail: user.email,
+        userName: user.name,
+        action: 'VIEW_DASHBOARD',
+        resource: title,
+        details: { message: `Ingresó al panel ${title}` }
+      });
+    }
+  }, [user, title]);
+
+  const handleTabChange = (tab: 'excel' | 'whatsapp' | 'drive') => {
+    setActiveTab(tab);
+    logAction({
+      userEmail: user.email,
+      userName: user.name,
+      action: 'SWITCH_TAB',
+      resource: title,
+      details: { tab, message: `Cambió a la pestaña "${tab === 'excel' ? 'Planilla Excel' : tab === 'whatsapp' ? 'Reportes WhatsApp' : 'Carpeta Drive'}" en el panel ${title}` }
+    });
+  };
+
   // Estados del Explorador de Archivos (Drive)
   const [files, setFiles] = useState<DriveFile[]>(initialFiles);
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,6 +119,13 @@ export default function TabbedDashboardClient({
               };
               setFiles(prevFiles => [newFile, ...prevFiles]);
               setIsUploading(false);
+              logAction({
+                userEmail: user.email,
+                userName: user.name,
+                action: 'UPLOAD_FILE',
+                resource: title,
+                details: { fileName: file.name, size: file.size, message: `Subió el archivo ${file.name} en el panel ${title}` }
+              });
             }, 300);
             return 100;
           }
@@ -134,21 +166,21 @@ export default function TabbedDashboardClient({
             <button 
               className={`${styles.tabBtn} ${activeTab === 'excel' ? styles.tabBtnActive : ''}`}
               style={activeTab === 'excel' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-              onClick={() => setActiveTab('excel')}
+              onClick={() => handleTabChange('excel')}
             >
               📄 Planilla Excel
             </button>
             <button 
               className={`${styles.tabBtn} ${activeTab === 'whatsapp' ? styles.tabBtnActive : ''}`}
               style={activeTab === 'whatsapp' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-              onClick={() => setActiveTab('whatsapp')}
+              onClick={() => handleTabChange('whatsapp')}
             >
               💬 Reportes WhatsApp
             </button>
             <button 
               className={`${styles.tabBtn} ${activeTab === 'drive' ? styles.tabBtnActive : ''}`}
               style={activeTab === 'drive' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-              onClick={() => setActiveTab('drive')}
+              onClick={() => handleTabChange('drive')}
             >
               📁 Carpeta Drive
             </button>
@@ -169,7 +201,7 @@ export default function TabbedDashboardClient({
 
       {activeTab === 'whatsapp' && (
         <div className={styles.whatsappWrapper}>
-          <WhatsAppDashboard userName={user.name || "Usuario"} />
+          <WhatsAppDashboard userName={user.name || "Usuario"} userEmail={user.email || ""} />
         </div>
       )}
 
@@ -186,6 +218,15 @@ export default function TabbedDashboardClient({
               rel="noopener noreferrer" 
               className={styles.externalDriveBtn}
               style={{ backgroundColor: brandColor }}
+              onClick={() => {
+                logAction({
+                  userEmail: user.email,
+                  userName: user.name,
+                  action: 'OPEN_DRIVE',
+                  resource: title,
+                  details: { message: `Abrió la carpeta externa de Google Drive en el panel ${title}` }
+                });
+              }}
             >
               <ExternalLink size={18} />
               Abrir en Google Drive ↗
@@ -273,7 +314,16 @@ export default function TabbedDashboardClient({
                       </div>
                     </div>
                     <button 
-                      onClick={() => alert(`Iniciando descarga de: ${file.name}`)}
+                      onClick={() => {
+                        alert(`Iniciando descarga de: ${file.name}`);
+                        logAction({
+                          userEmail: user.email,
+                          userName: user.name,
+                          action: 'DOWNLOAD_FILE',
+                          resource: title,
+                          details: { fileName: file.name, message: `Descargó el archivo ${file.name} del panel ${title}` }
+                        });
+                      }}
                       className={styles.downloadBtn}
                       title="Descargar archivo"
                     >
