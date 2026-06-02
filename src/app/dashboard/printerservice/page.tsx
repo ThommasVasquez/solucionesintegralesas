@@ -1,9 +1,7 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+'use client';
+
 import TabbedDashboardClient, { type DriveFile } from "../components/TabbedDashboardClient";
 import { BRAND_COLORS } from "@/app/page";
-
-export const runtime = 'edge';
 
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk/edit?usp=sharing";
 const DRIVE_URL = "https://drive.google.com/drive/folders/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk?usp=sharing";
@@ -16,19 +14,9 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Guia_Configuracion_Red_Escaner_SMB.pdf", type: "pdf", size: "850 KB", date: "25/04/2026", category: "Guías" }
 ];
 
-export default async function PrinterServicePage() {
-  const session = await auth();
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const isSergio = session.user?.email === "sergio@ingenova.com.co";
-
+export default function PrinterServicePage() {
   return (
     <TabbedDashboardClient 
-      user={{ name: session.user?.name, email: session.user?.email }}
-      isSergio={isSergio}
       sheetUrl={SHEET_URL}
       title="Gestión PrinterService"
       brandColor={BRAND_COLORS.PRINTERSERVICE}

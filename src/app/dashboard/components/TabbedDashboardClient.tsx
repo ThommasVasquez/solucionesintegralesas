@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import Navbar from "@/components/Navbar";
 import WhatsAppDashboard from "../whatsapp/WhatsAppDashboard";
 import { logAction } from '@/lib/audit-client';
@@ -25,11 +26,11 @@ export interface DriveFile {
 }
 
 interface TabbedDashboardClientProps {
-  user: {
+  user?: {
     name?: string | null;
     email?: string | null;
   };
-  isSergio: boolean;
+  isSergio?: boolean;
   sheetUrl: string;
   title: string;
   brandColor: string;
@@ -39,19 +40,34 @@ interface TabbedDashboardClientProps {
 }
 
 export default function TabbedDashboardClient({
-  user,
-  isSergio,
-  sheetUrl,
+  user: passedUser,
+  isSergio: passedIsSergio,
+  sheetUrl: passedSheetUrl,
   title,
   brandColor,
   driveUrl,
   initialFiles,
   hideExcelForSergio = false
 }: TabbedDashboardClientProps) {
+  const { data: session } = useSession();
+  const sessionUser = session?.user;
+
+  const user = passedUser?.email ? passedUser : { name: sessionUser?.name, email: sessionUser?.email };
+  const isSergio = passedIsSergio !== undefined ? passedIsSergio : (sessionUser?.email === "sergio@ingenova.com.co");
+  const sheetUrl = (isSergio && title === "Gestión de Visitas ProMascotas")
+    ? "https://docs.google.com/spreadsheets/d/1d0yCW0dVJjlhk4X4rQVVs_G62K8QEhEIgZQZHzltaqI/edit?usp=sharing"
+    : passedSheetUrl;
+
   // Ocultar planilla si es Sergio y la bandera está encendida.
   const shouldHideExcel = isSergio && hideExcelForSergio;
 
-  const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive'>(shouldHideExcel ? 'whatsapp' : 'excel');
+  const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive'>('whatsapp');
+
+  useEffect(() => {
+    if (!shouldHideExcel) {
+      setActiveTab('excel');
+    }
+  }, [shouldHideExcel]);
 
   // Log panel view on load
   useEffect(() => {

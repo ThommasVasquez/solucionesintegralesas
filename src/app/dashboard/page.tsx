@@ -1,20 +1,48 @@
-import { auth, signOut } from "@/lib/auth";
-import { redirect } from "next/navigation";
+'use client';
+
+import { useSession, signOut } from "next-auth/react";
 import { BRAND_COLORS } from "@/app/page";
 import Navbar from "@/components/Navbar";
 import styles from "./dashboard.module.css";
 import { Link } from "next-view-transitions";
+import { logAction } from "@/lib/audit-client";
 
-export const runtime = 'edge';
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
 
-export default async function DashboardPage() {
-  const session = await auth();
+  if (status === "loading") {
+    return (
+      <main className={styles.main}>
+        <Navbar />
+        <div className={styles.content} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+          <p>Cargando panel administrativo...</p>
+        </div>
+      </main>
+    );
+  }
 
   if (!session) {
-    redirect("/login");
+    return null; // El middleware se encarga de redireccionar si no está autenticado
   }
 
   const isSergio = session.user?.email === "sergio@ingenova.com.co";
+
+  const handleLogout = async () => {
+    if (session.user) {
+      try {
+        await logAction({
+          userEmail: session.user.email,
+          userName: session.user.name,
+          action: 'LOGOUT',
+          resource: 'SESSION',
+          details: { message: `Usuario ${session.user.name} cerró sesión.` }
+        });
+      } catch (e) {
+        console.error("Error logging logout:", e);
+      }
+    }
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <main className={styles.main}>
@@ -24,32 +52,11 @@ export default async function DashboardPage() {
           <div className={styles.header}>
             <div className={styles.welcome}>
               <h1>Panel Administrativo</h1>
-              <p>Bienvenido, {session.user?.name} ({session.user?.role})</p>
+              <p>Bienvenido, {session.user?.name} ({(session.user as any)?.role || 'Usuario'})</p>
             </div>
-            <form action={async () => {
-              'use server';
-              const session = await auth();
-              if (session?.user) {
-                try {
-                  const { logActionServer } = await import("@/lib/audit-server");
-                  await logActionServer({
-                    userId: session.user.id,
-                    userEmail: session.user.email,
-                    userName: session.user.name,
-                    action: 'LOGOUT',
-                    resource: 'SESSION',
-                    details: { message: `Usuario ${session.user.name} cerró sesión.` }
-                  });
-                } catch (e) {
-                  console.error("Error logging logout:", e);
-                }
-              }
-              await signOut({ redirectTo: "/" });
-            }}>
-              <button className={styles.logoutBtn}>
-                Cerrar Sesión
-              </button>
-            </form>
+            <button onClick={handleLogout} className={styles.logoutBtn}>
+              Cerrar Sesión
+            </button>
           </div>
 
           <div className={styles.grid}>
@@ -76,7 +83,6 @@ export default async function DashboardPage() {
                     Ver Registros →
                   </Link>
                 </div>
-
               </>
             )}
 

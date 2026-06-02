@@ -1,9 +1,7 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+'use client';
+
 import TabbedDashboardClient, { type DriveFile } from "../components/TabbedDashboardClient";
 import { BRAND_COLORS } from "@/app/page";
-
-export const runtime = 'edge';
 
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing";
 const DRIVE_URL = "https://drive.google.com/drive/folders/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54?usp=sharing";
@@ -16,24 +14,10 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Resolucion_Sanitaria_Funcionamiento_Domicilio.pdf", type: "pdf", size: "2.5 MB", date: "10/02/2026", category: "Certificaciones" }
 ];
 
-export default async function ProMascotasPage() {
-  const session = await auth();
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  // Si el usuario es Sergio, mostrar su enlace específico, de lo contrario, el general
-  const isSergio = session.user?.email === "sergio@ingenova.com.co";
-  const currentSheetUrl = isSergio
-    ? "https://docs.google.com/spreadsheets/d/1d0yCW0dVJjlhk4X4rQVVs_G62K8QEhEIgZQZHzltaqI/edit?usp=sharing"
-    : SHEET_URL;
-
+export default function ProMascotasPage() {
   return (
     <TabbedDashboardClient 
-      user={{ name: session.user?.name, email: session.user?.email }}
-      isSergio={isSergio}
-      sheetUrl={currentSheetUrl}
+      sheetUrl={SHEET_URL}
       title="Gestión de Visitas ProMascotas"
       brandColor={BRAND_COLORS.PROMASCOTAS}
       driveUrl={DRIVE_URL}

@@ -1,9 +1,7 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+'use client';
+
 import TabbedDashboardClient, { type DriveFile } from "../components/TabbedDashboardClient";
 import { BRAND_COLORS } from "@/app/page";
-
-export const runtime = 'edge';
 
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1joniM23XA3LxWo6ernD-w5bOppVsGFN38iCmhATC6Fs/edit?usp=sharing";
 const DRIVE_URL = "https://drive.google.com/drive/folders/1joniM23XA3LxWo6ernD-w5bOppVsGFN38iCmhATC6Fs?usp=sharing";
@@ -17,19 +15,9 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Manual_Usuario_Calentador_Pentair_MasterTemp.pdf", type: "pdf", size: "3.1 MB", date: "18/02/2026", category: "Manuales" }
 ];
 
-export default async function IngenovaPage() {
-  const session = await auth();
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const isSergio = session.user?.email === "sergio@ingenova.com.co";
-
+export default function IngenovaPage() {
   return (
     <TabbedDashboardClient 
-      user={{ name: session.user?.name, email: session.user?.email }}
-      isSergio={isSergio}
       sheetUrl={SHEET_URL}
       title="Administración Ingenova"
       brandColor={BRAND_COLORS.INGENOVA}

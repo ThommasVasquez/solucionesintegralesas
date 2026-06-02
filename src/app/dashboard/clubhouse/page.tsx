@@ -1,9 +1,7 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+'use client';
+
 import TabbedDashboardClient, { type DriveFile } from "../components/TabbedDashboardClient";
 import { BRAND_COLORS } from "@/app/page";
-
-export const runtime = 'edge';
 
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo/edit?usp=sharing";
 const DRIVE_URL = "https://drive.google.com/drive/folders/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo?usp=sharing";
@@ -16,19 +14,9 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Reglamento_Uso_Piscina_Conjunto_Residencial.pdf", type: "pdf", size: "980 KB", date: "15/01/2026", category: "Reglamentos" }
 ];
 
-export default async function ClubHousePage() {
-  const session = await auth();
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const isSergio = session.user?.email === "sergio@ingenova.com.co";
-
+export default function ClubHousePage() {
   return (
     <TabbedDashboardClient 
-      user={{ name: session.user?.name, email: session.user?.email }}
-      isSergio={isSergio}
       sheetUrl={SHEET_URL}
       title="Administración ClubHouse"
       brandColor={BRAND_COLORS.CLUBHOUSE}
