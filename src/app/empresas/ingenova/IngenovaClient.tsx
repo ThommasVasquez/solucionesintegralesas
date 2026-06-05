@@ -11,52 +11,52 @@ const waLink = (msg: string) => `${WA_BASE}?text=${encodeURIComponent(msg)}`;
 
 const HERO_SLIDES = [
   {
-    image: "/images/ingenova/floculador.webp",
-    title: "Medidor De Floc Test De Jarras Portátil 4 puestos ET 730 Lovibond",
-    subtitle: "Medición y Control",
-    desc: "Los medidores Floc están concebidos para una serie de aplicaciones, por ejemplo, el análisis de la eficiencia de agentes floculadores o precipitantes.",
-    ctaText: "Comprar Ahora",
-    ctaMsg: "Hola Aqua Integral, me gustaría recibir más información sobre el Medidor De Floc Test De Jarras Lovibond ET 730."
+    image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1200&auto=format&fit=crop",
+    title: "Diseño y Construcción de Plantas de Tratamiento",
+    subtitle: "Ingeniería Hidráulica",
+    desc: "Desarrollamos proyectos de infraestructura para potabilización y depuración de aguas, desde el diseño conceptual hasta la puesta en marcha de obras civiles.",
+    ctaText: "Cotizar Proyecto",
+    ctaMsg: "Hola Ingenova, me gustaría recibir más información sobre el diseño y construcción de plantas de tratamiento."
   },
   {
-    image: "/images/ingenova/clorador-salino.webp",
-    title: "Clorador Salino para piscina EvoBasic 35 gr/h BSV",
-    subtitle: "Tratamiento de Piscinas",
-    desc: "El Clorador Salino EvoBasic 35 gr/h de BSV es ideal para mantener tu piscina en condiciones óptimas.",
-    ctaText: "Comprar Ahora",
-    ctaMsg: "Hola Aqua Integral, me gustaría recibir más información sobre el Clorador Salino EvoBasic 35 gr/h BSV."
+    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop",
+    title: "Instalación de Redes Hidrosanitarias y Contraincendio",
+    subtitle: "Montajes Técnicos",
+    desc: "Montaje profesional de redes de tuberías comerciales e industriales bajo normas estrictas de ingeniería y sismorresistencia.",
+    ctaText: "Agendar Visita",
+    ctaMsg: "Hola Ingenova, me gustaría recibir más información sobre la instalación de redes hidrosanitarias y de contraincendio."
   },
   {
-    image: "/images/ingenova/suavizador-agua.webp",
-    title: "Sistema de suavización de agua gabinete ensamblado 1 Ft3 Purikor",
-    subtitle: "Agua Potable",
-    desc: "El sistema ablandador de agua Purikor para suavización de agua ofrece una solución para prevenir sarro en la tubería ocasionada por los minerales del calcio y magnesio disueltos en el agua.",
-    ctaText: "Comprar Ahora",
-    ctaMsg: "Hola Aqua Integral, me gustaría recibir más información sobre el Sistema de suavización de agua Purikor."
+    image: "https://images.unsplash.com/photo-1581094290190-e31e4d6f6c2b?q=80&w=1200&auto=format&fit=crop",
+    title: "Construcción de Estructuras y Obras Civiles",
+    subtitle: "Obras Civiles",
+    desc: "Ejecución de cimentaciones, cuartos de máquinas, tanques de almacenamiento y estructuras de concreto con altos estándares técnicos.",
+    ctaText: "Solicitar Presupuesto",
+    ctaMsg: "Hola Ingenova, me gustaría cotizar un proyecto de obra civil o construcción estructural."
   },
   {
-    image: "/images/ingenova/equipo-presion.webp",
-    title: "Equipo automático de presión Hydrofresh Pedrollo JSWm 2CX Tanque 24 horizontal",
-    subtitle: "Sistemas de Bombeo",
-    desc: "Ideal para garantizar la distribución de agua a presión en hogares, casas de veraneo y más. Su funcionamiento automático permite un suministro eficiente, asegurando comodidad y continuidad en el uso del agua.",
-    ctaText: "Comprar Ahora",
-    ctaMsg: "Hola Aqua Integral, me gustaría recibir más información sobre el Equipo automático de presión Hydrofresh Pedrollo."
+    image: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=1200&auto=format&fit=crop",
+    title: "Sistemas de Bombeo y Presión Comercial",
+    subtitle: "Equipos de Ingeniería",
+    desc: "Suministro, ensamble e instalación de equipos de bombeo de gran caudal y sistemas automáticos de presión para edificios e industrias.",
+    ctaText: "Cotizar Equipos",
+    ctaMsg: "Hola Ingenova, me interesa cotizar equipos de bombeo y sistemas de presión."
   },
   {
-    image: "/images/ingenova/bomba-sumergible.webp",
-    title: "Bomba sumergible multietapa Kanki Plus 3/4 HP",
-    subtitle: "Equipos de Bombeo",
-    desc: "La motobomba sumergible multietapas Kanki plus es una bomba sumergible para trabajo pesado.",
-    ctaText: "Comprar Ahora",
-    ctaMsg: "Hola Aqua Integral, me gustaría recibir más información sobre la Bomba sumergible multietapa Kanki Plus 3/4 HP."
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1200&auto=format&fit=crop",
+    title: "Consultoría, Geotecnia e Interventoría de Obra",
+    subtitle: "Consultoría Técnica",
+    desc: "Evaluaciones técnicas de terrenos, análisis geotécnicos e interventorías independientes para certificar la calidad de su obra.",
+    ctaText: "Hablar con un Consultor",
+    ctaMsg: "Hola Ingenova, solicito una consultoría o interventoría técnica para mi proyecto de construcción."
   },
   {
-    image: "/images/ingenova/instalacion-equipos.webp",
-    title: "Instalación de equipos y mantenimiento",
-    subtitle: "Servicio Técnico",
-    desc: "¡Confía en nuestros expertos! Te facilitamos y garantizamos una puesta en marcha de todos tus equipos.",
-    ctaText: "Conocer más",
-    ctaMsg: "Hola Aqua Integral, me gustaría recibir más información sobre la instalación de equipos y mantenimiento."
+    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=1200&auto=format&fit=crop",
+    title: "Mantenimiento Estructural de Piscinas y Áreas Húmedas",
+    subtitle: "Mantenimiento Especializado",
+    desc: "Rehabilitación civil, impermeabilización de vasos de concreto y renovación tecnológica de sistemas hidráulicos en piscinas y clubes.",
+    ctaText: "Solicitar Mantenimiento",
+    ctaMsg: "Hola Ingenova, necesito programar un mantenimiento estructural o renovación de zona húmeda."
   }
 ];
 
@@ -149,67 +149,67 @@ const BUBBLE_SERVICES = [
 
 const SOLUTIONS = [
   {
-    image: "/images/ingenova/descargar-manuales.webp",
-    title: "Manuales y Catálogos",
-    desc: "Accede de forma directa a las fichas técnicas, catálogos y manuales de operación de los equipos de las principales marcas aliadas.",
+    image: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=800&auto=format&fit=crop",
+    title: "Planos y Fichas Técnicas",
+    desc: "Acceso a planimetrías, manuales de instalación y especificaciones técnicas de los sistemas mecánicos e hidráulicos.",
     icon: "📄",
-    link: waLink("Hola Aqua Integral, necesito manuales y fichas técnicas de equipos.")
+    link: waLink("Hola Ingenova, necesito planos o fichas técnicas para un proyecto.")
   },
   {
-    image: "/images/ingenova/disena-planta.webp",
-    title: "Diseña tu planta de tratamiento",
-    desc: "Asesoría personalizada en el diseño y distribución de plantas de tratamiento de agua potable y residual.",
+    image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=800&auto=format&fit=crop",
+    title: "Diseño de Plantas y Redes",
+    desc: "Ingeniería de detalle para el diseño estructural e hidráulico de plantas de tratamiento y redes de distribución.",
     icon: "📐",
-    link: waLink("Hola Aqua Integral, quiero asesoría para diseñar mi planta de tratamiento.")
+    link: waLink("Hola Ingenova, busco asesoría para el diseño de una planta o red de distribución.")
   },
   {
-    image: "/images/ingenova/disena-cuarto.webp",
-    title: "Diseña tu cuarto de maquinas",
-    desc: "Instalación técnica de bombas, filtros, sistemas de dosificación y cloradores de última generación.",
+    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800&auto=format&fit=crop",
+    title: "Montaje de Cuartos de Máquinas",
+    desc: "Instalación e integración técnica de colectores, bombas de succión, tableros eléctricos y sistemas de automatización.",
     icon: "⚙️",
-    link: waLink("Hola Aqua Integral, me interesa diseñar o reparar el cuarto de máquinas de mi zona húmeda.")
+    link: waLink("Hola Ingenova, me interesa el servicio de montaje o renovación de cuarto de máquinas.")
   },
   {
-    image: "/images/ingenova/aprende.webp",
-    title: "Aprende con Aqua Integral",
-    desc: "Guías prácticas y consejos técnicos sobre el correcto balance químico del agua y cuidado de equipos.",
+    image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&auto=format&fit=crop",
+    title: "Capacitación y Buenas Prácticas",
+    desc: "Talleres prácticos y guías técnicas de operación segura de instalaciones mecánicas y control de calidad.",
     icon: "💡",
-    link: waLink("Hola Aqua Integral, me gustaría leer consejos y mejores prácticas para el cuidado del agua.")
+    link: waLink("Hola Ingenova, me interesa recibir información sobre capacitaciones operativas.")
   }
 ];
 
 const BEST_SELLERS = [
   {
-    image: "/images/ingenova/calentador-hayward.webp",
-    name: "Calentador a gas Hayward HC Dual 400",
-    desc: "Calentador Hayward de alta eficiencia para gas natural y propano. Diseñado para mantener tu piscina o jacuzzi a la temperatura ideal.",
+    image: "https://images.unsplash.com/photo-1503387762-592dedb8267e?q=80&w=600&auto=format&fit=crop",
+    name: "Cálculo y Modelado de Planos Hidráulicos",
+    desc: "Elaboración de planimetría en AutoCAD y Revit de redes hidrosanitarias y de gas de acuerdo a la normatividad vigente.",
     price: "Cotizar ahora",
-    tag: "Calefacción",
-    link: waLink("Hola Aqua Integral, quiero cotizar el Calentador a gas Hayward HC Dual 400.")
+    tag: "Ingeniería",
+    link: waLink("Hola Ingenova, quiero cotizar el modelado de planos hidráulicos para mi proyecto.")
   },
   {
-    image: "/images/ingenova/filtro-uv.webp",
-    name: "Filtro UV Purikor (Sistema UV 0.66 GPM)",
-    desc: "Sistema de desinfección por luz ultravioleta Purikor. Seguro, ecológico y altamente eficiente para agua potable.",
+    image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop",
+    name: "Impermeabilización Técnica de Tanques",
+    desc: "Aplicación certificada de aditivos epóxicos y mantos elásticos para asegurar la estanqueidad total en tanques de concreto.",
     price: "Cotizar ahora",
-    tag: "Desinfección",
-    link: waLink("Hola Aqua Integral, me gustaría cotizar el Sistema UV Purikor de 0.66 GPM.")
+    tag: "Construcción",
+    link: waLink("Hola Ingenova, me gustaría cotizar el servicio de impermeabilización técnica.")
   },
   {
-    image: "/images/ingenova/disco-difusor.webp",
-    name: "Disco Difusor de aire para blower 12\"",
-    desc: "Difusor de disco para burbujeo y aireación en plantas de tratamiento y sistemas de hidromasaje.",
+    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=600&auto=format&fit=crop",
+    name: "Montaje e Integración de Sistemas de Bombeo",
+    desc: "Instalación estructural y eléctrica de bombas centrífugas de gran caudal, sensores de nivel y tableros inteligentes.",
     price: "Cotizar ahora",
-    tag: "Aireación",
-    link: waLink("Hola Aqua Integral, solicito cotización para el Disco difusor de aire para blower 12\".")
+    tag: "Instalaciones",
+    link: waLink("Hola Ingenova, solicito cotización para el montaje de sistemas de bombeo.")
   },
   {
-    image: "/images/ingenova/kit-taylor.webp",
-    name: "Kit Taylor completo K-2005S",
-    desc: "El estándar profesional para análisis químico del agua. Mide cloro libre/combinado, pH, alcalinidad y dureza.",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=600&auto=format&fit=crop",
+    name: "Servicio de Interventoría de Obra Civil",
+    desc: "Supervisión y control técnico imparcial de la ejecución de cimentaciones, concretos y acabados estructurales.",
     price: "Cotizar ahora",
-    tag: "Medición",
-    link: waLink("Hola Aqua Integral, quiero comprar el Kit Taylor completo K-2005S.")
+    tag: "Consultoría",
+    link: waLink("Hola Ingenova, me interesa contratar la interventoría técnica para una obra civil.")
   }
 ];
 
@@ -383,7 +383,7 @@ export default function IngenovaClient() {
         <div className={s.welcomeContainer}>
           <div className={s.welcomeText}>
             <span className={s.subTitle}>Bienvenidos</span>
-            <h2 className={s.mainTitle}>AQUA INTEGRAL S.A.S.</h2>
+            <h2 className={s.mainTitle}>INGENOVA SOLUCIONES INTEGRALES AS</h2>
             <p className={s.welcomeParagraph}>
               Entendemos la importancia del agua, por eso, trabajamos en busca del acceso al agua limpia y segura para todos los seres vivos. <strong>«Nuestro compromiso con la naturaleza es devolverle algo de lo que nos ha dado, el agua como fuente de vida». ¡Juntos podemos lograrlo!</strong>
             </p>
@@ -622,7 +622,7 @@ export default function IngenovaClient() {
                 style={{ width: "auto", height: "45px", objectFit: "contain" }}
               />
               <p className={s.footerBrandDesc}>
-                Aqua Integral, soluciones integrales en el tratamiento y control de la calidad del agua, garantizando el acceso confiable al agua limpia y segura.
+                Ingenova, soluciones integrales en ingeniería, construcción de obras civiles e infraestructura técnica en Bogotá y Sabana Norte.
               </p>
               <div className={s.footerSocials}>
                 <a href="https://www.facebook.com/aquaintegralsas/" target="_blank" rel="noreferrer" aria-label="Facebook">FB</a>
@@ -677,7 +677,7 @@ export default function IngenovaClient() {
         <div className={s.footerBottom}>
           <div className={s.footerBottomContainer}>
             <p className={s.copyright}>
-              © {new Date().getFullYear()} AQUA INTEGRAL S.A.S. Todos los derechos reservados.
+              © {new Date().getFullYear()} INGENOVA SOLUCIONES INTEGRALES AS. Todos los derechos reservados.
             </p>
             <div className={s.paymentRow}>
               <span className={s.paymentMethod} title="PSE">PSE</span>
