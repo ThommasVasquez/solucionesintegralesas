@@ -62,29 +62,64 @@ export default function Navbar() {
     );
   };
 
+  const getLogoSrc = () => {
+    if (pathname.includes('viva-calentadores')) {
+      return {
+        full: '/viva-calentadores-logo.jpg',
+        icon: '/viva-calentadores-logo.jpg',
+        alt: 'Viva Calentadores Logo',
+        style: { width: 'auto', height: '55px', borderRadius: '8px' }
+      };
+    }
+    if (pathname.includes('ingenova')) {
+      return {
+        full: '/ingenova-logo.jpg',
+        icon: '/ingenova-logo.jpg',
+        alt: 'Ingenova Logo',
+        style: { width: 'auto', height: '55px', borderRadius: '8px' }
+      };
+    }
+    if (pathname.includes('printerservice')) {
+      return {
+        full: '/printerservice-logo.png',
+        icon: '/printerservice-logo.png',
+        alt: 'PrinterService Logo',
+        style: { width: 'auto', height: '55px' }
+      };
+    }
+    return {
+      full: '/logo.png',
+      icon: '/icon.png',
+      alt: 'Soluciones Integrales AS SAS Logo',
+      style: { width: 'auto', height: '55px' }
+    };
+  };
+
+  const currentLogo = getLogoSrc();
+
   return (
     <header ref={navRef} className={`${styles.navbar} glass`}>
       <div className={`container ${styles.navContainer}`}>
         <Link href="/" className={styles.logo} aria-label="Volver al inicio" prefetch={false}>
           <div className={styles.fullLogo}>
             <Image 
-              src="/logo.png" 
-              alt="Soluciones Integrales AS SAS Logo" 
+              src={currentLogo.full} 
+              alt={currentLogo.alt} 
               width={180} 
               height={55} 
               className={styles.logoImg}
-              style={{ width: 'auto', height: '55px' }}
+              style={currentLogo.style}
               priority
             />
           </div>
           <div className={styles.iconLogo}>
             <Image 
-              src="/icon.png" 
-              alt="Soluciones Integrales Icon" 
+              src={currentLogo.icon} 
+              alt={currentLogo.alt} 
               width={45} 
               height={45} 
               className={styles.logoImg}
-              style={{ width: 'auto', height: '45px' }}
+              style={{ width: 'auto', height: '45px', borderRadius: currentLogo.icon.includes('logo') ? '6px' : '0px' }}
               priority
             />
           </div>
