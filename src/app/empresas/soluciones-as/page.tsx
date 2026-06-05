@@ -77,7 +77,7 @@ export default function SolucionesASPage() {
         </div>
         <div className={styles.servicesGrid}>
           {[
-            { icon: '🏊', title: 'Ingenova', color: '#f39c12', href: '/empresas/ingenova', desc: 'Mantenimiento especializado de piscinas, jacuzzis y turcos. Repuestos originales y químicos certificados para aguas perfectas todo el año.' },
+            { icon: '🏊', title: 'Ingenova', color: '#cca043', href: '/empresas/ingenova', desc: 'Mantenimiento especializado de piscinas, jacuzzis y turcos. Repuestos originales y químicos certificados para aguas perfectas todo el año.' },
             { icon: '🔥', title: 'Viva Calentadores', color: '#e35422', href: '/empresas/viva-calentadores', desc: 'Servicios de instalación, mantenimiento y reparación de calentadores de agua a gas y eléctricos con técnicos expertos.' },
             { icon: '🐾', title: 'ProMascotas', color: '#e6a817', href: '/empresas/promascotas', desc: 'Profilaxis dental a domicilio para mascotas sin anestesia general. Servicio profesional con la comodidad que tu mascota merece.' },
           ].map((s) => (

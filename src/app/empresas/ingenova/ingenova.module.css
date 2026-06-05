@@ -7,16 +7,16 @@
    ═══════════════════════════════════════════════ */
 
 :root {
-  --ing-gold:        #1e73be;
-  --ing-gold-light:  #13a9c6;
-  --ing-gold-dark:   #1261a3;
-  --ing-navy:        #fcfeff;
+  --ing-gold:        #cca043;
+  --ing-gold-light:  #dfba6b;
+  --ing-gold-dark:   #9c7526;
+  --ing-navy:        #103854;
   --ing-navy-deep:   #ffffff;
-  --ing-navy-mid:    #f4f9fc;
-  --ing-white:       #292e42;
-  --ing-muted:       #606470;
-  --gold-gradient:   linear-gradient(135deg, #1e73be 0%, #13a9c6 100%);
-  --gold-shimmer:    linear-gradient(90deg, transparent, rgba(19, 169, 198, 0.3), transparent);
+  --ing-navy-mid:    #f4f7f9;
+  --ing-white:       #103854;
+  --ing-muted:       #526a7e;
+  --gold-gradient:   linear-gradient(135deg, #cca043 0%, #103854 100%);
+  --gold-shimmer:    linear-gradient(90deg, transparent, rgba(204, 160, 67, 0.3), transparent);
 }
 
 .page {
@@ -1063,7 +1063,7 @@
 }
 
 .reviewStars {
-  color: #f39c12;
+  color: var(--ing-gold);
   font-size: 1.4rem;
   letter-spacing: 2px;
   line-height: 1;

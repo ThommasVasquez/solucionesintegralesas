@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import s from "./ingenova.module.css";
+import Navbar from "@/components/Navbar";
 
 // Prefilled WhatsApp URLs
 const WA_BASE = "https://wa.me/573123043792";
@@ -249,8 +250,6 @@ const BRANDS = [
 ];
 
 export default function IngenovaClient() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeReview, setActiveReview] = useState(0);
   const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>({});
@@ -269,15 +268,6 @@ export default function IngenovaClient() {
       setActiveReview((prev) => (prev + 1) % TESTIMONIALS.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
-
-  // Sticky header scroll detection
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Intersection observer for scroll animations
@@ -314,63 +304,7 @@ export default function IngenovaClient() {
 
   return (
     <div className={s.page}>
-      {/* ══════════ NAVBAR ══════════ */}
-      <header className={`${s.header} ${isScrolled ? s.scrolled : ""}`}>
-        <div className={s.navContainer}>
-          <a href="#inicio" className={s.logoLink}>
-            <Image
-              src="/ingenova-logo.jpg"
-              alt="Ingenova Logo"
-              width={160}
-              height={65}
-              className={s.logoImg}
-              priority
-              style={{ width: "auto", height: "50px", objectFit: "contain" }}
-            />
-          </a>
-
-          {/* Desktop Nav */}
-          <nav className={s.navMenu}>
-            <a href="#inicio" className={s.navLink}>Inicio</a>
-            <a href="#bienvenidos" className={s.navLink}>Líneas</a>
-            <a href="#soluciones" className={s.navLink}>Soluciones</a>
-            <a href="#productos" className={s.navLink}>Productos</a>
-            <a href="#opiniones" className={s.navLink}>Opiniones</a>
-            <a href="#contacto" className={s.navLink}>Contacto</a>
-          </nav>
-
-          {/* CTAs */}
-          <div className={s.headerActions}>
-            <a href={WA_BASE} target="_blank" rel="noreferrer" className={s.btnNavWa}>
-              <span className={s.waDot} /> Cotizar por WhatsApp
-            </a>
-            <button 
-              className={`${s.burger} ${isDrawerOpen ? s.burgerOpen : ""}`} 
-              onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-              aria-label="Menú Móvil"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Drawer */}
-      <div className={`${s.drawer} ${isDrawerOpen ? s.drawerOpen : ""}`}>
-        <nav className={s.drawerNav}>
-          <a href="#inicio" className={s.drawerLink} onClick={() => setIsDrawerOpen(false)}>Inicio</a>
-          <a href="#bienvenidos" className={s.drawerLink} onClick={() => setIsDrawerOpen(false)}>Líneas de Negocio</a>
-          <a href="#soluciones" className={s.drawerLink} onClick={() => setIsDrawerOpen(false)}>Soluciones</a>
-          <a href="#productos" className={s.drawerLink} onClick={() => setIsDrawerOpen(false)}>Productos</a>
-          <a href="#opiniones" className={s.drawerLink} onClick={() => setIsDrawerOpen(false)}>Opiniones</a>
-          <a href="#contacto" className={s.drawerLink} onClick={() => setIsDrawerOpen(false)}>Contacto</a>
-          <a href={WA_BASE} target="_blank" rel="noreferrer" className={s.btnDrawerWa} onClick={() => setIsDrawerOpen(false)}>
-            Hablar con un Técnico
-          </a>
-        </nav>
-      </div>
+      <Navbar />
 
       {/* ══════════ HERO SLIDER ══════════ */}
       <section id="inicio" className={s.hero}>
@@ -472,7 +406,7 @@ export default function IngenovaClient() {
               <path 
                 className={s.wavePath}
                 d="M-85.0908 4.36328C-85.0908 4.36328 249.667 260.081 570.477 250.782C891.287 241.483 1058.67 4.36328 1435.27 4.36328C1811.87 4.36328 2058.29 213.587 2058.29 213.587" 
-                stroke="#1e73be" 
+                stroke="var(--ing-navy)" 
                 strokeWidth="5"
                 strokeLinecap="round"
               />

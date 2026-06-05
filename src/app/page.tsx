@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const BRAND_COLORS = {
   SOLUCIONES: '#1a5d91',
-  INGENOVA: '#f39c12',
+  INGENOVA: '#cca043',
   PROMASCOTAS: '#f1c40f',
   VIVA_CALENTADORES: '#e35422',
   PRINTERSERVICE: '#0ea5e9',

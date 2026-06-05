@@ -9,7 +9,7 @@ import styles from './Navbar.module.css';
 
 const COLORS = {
   SOLUCIONES: '#1a5d91',
-  INGENOVA: '#f39c12',
+  INGENOVA: '#cca043',
   PROMASCOTAS: '#f1c40f',
   VIVA_CALENTADORES: '#e35422',
 };
