@@ -74,12 +74,16 @@ export default function DashboardPage() {
                 </div>
 
                 <div className={styles.card}>
-                  <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.CLUBHOUSE + '20' }}>
-                    <span style={{ color: BRAND_COLORS.CLUBHOUSE }}>🏠</span>
+                  <div className={styles.iconWrapper} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '2px' }}>
+                    <img 
+                      src="/viva-calentadores-logo.jpg" 
+                      alt="Viva Calentadores Logo" 
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                    />
                   </div>
-                  <h3>ClubHouse</h3>
-                  <p>Administración y control de capacitación.</p>
-                  <Link href="/dashboard/clubhouse" className={styles.cardAction} style={{ color: BRAND_COLORS.CLUBHOUSE }} prefetch={false}>
+                  <h3>Viva Calentadores</h3>
+                  <p>Administración y control de servicios de calentadores.</p>
+                  <Link href="/dashboard/viva-calentadores" className={styles.cardAction} style={{ color: BRAND_COLORS.VIVA_CALENTADORES }} prefetch={false}>
                     Ver Registros →
                   </Link>
                 </div>

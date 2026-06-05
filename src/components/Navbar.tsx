@@ -11,7 +11,7 @@ const COLORS = {
   SOLUCIONES: '#1a5d91',
   INGENOVA: '#f39c12',
   PROMASCOTAS: '#f1c40f',
-  CLUBHOUSE: '#82b440',
+  VIVA_CALENTADORES: '#e35422',
 };
 
 export default function Navbar() {
@@ -161,9 +161,9 @@ export default function Navbar() {
                 <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>Ingenova</span>
                 <span className={styles.brandDesc}>Jacuzzis, Piscinas &amp; Turcos</span>
               </Link>
-              <Link href="/empresas/clubhouse" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)} prefetch={false}>
-                <span className={styles.brandTitle} style={{ color: COLORS.CLUBHOUSE }}>ClubHouse</span>
-                <span className={styles.brandDesc}>Administración &amp; Capacitación</span>
+              <Link href="/empresas/viva-calentadores" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)} prefetch={false}>
+                <span className={styles.brandTitle} style={{ color: COLORS.VIVA_CALENTADORES }}>Viva Calentadores</span>
+                <span className={styles.brandDesc}>Mantenimiento &amp; Reparación</span>
               </Link>
               <Link href="/empresas/promascotas" className={styles.menuItem} role="menuitem" onClick={() => setIsOpen(false)} prefetch={false}>
                 <span className={styles.brandTitle} style={{ color: COLORS.PROMASCOTAS }}>ProMascotas</span>

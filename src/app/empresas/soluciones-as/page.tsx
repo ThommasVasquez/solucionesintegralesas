@@ -4,7 +4,7 @@ import styles from '../empresa.module.css';
 
 export const metadata: Metadata = {
   title: 'Soluciones Integrales AS SAS — Respaldo Corporativo Técnico en Colombia',
-  description: 'La empresa matriz detrás de Ingenova, ClubHouse y ProMascotas. Soluciones técnicas integrales con respaldo corporativo, garantía y profesionalismo en Bogotá.',
+  description: 'La empresa matriz detrás de Ingenova, Viva Calentadores y ProMascotas. Soluciones técnicas integrales con respaldo corporativo, garantía y profesionalismo en Bogotá.',
 };
 
 const COLOR = '#1a5d91';
@@ -25,7 +25,7 @@ export default function SolucionesASPage() {
               Soluciones técnicas con <span style={{ color: '#5dade2' }}>respaldo corporativo.</span>
             </h1>
             <p className={styles.heroP}>
-              Somos la empresa matriz que centraliza la excelencia operativa de Ingenova, ClubHouse y ProMascotas. Más de 10 años garantizando profesionalismo, confianza y calidad en cada intervención técnica en Colombia.
+              Somos la empresa matriz que centraliza la excelencia operativa de Ingenova, Viva Calentadores y ProMascotas. Más de 10 años garantizando profesionalismo, confianza y calidad en cada intervención técnica en Colombia.
             </p>
             <div className={styles.heroCta}>
               <a href={WA} target="_blank" rel="noreferrer" className={styles.ctaPrimary}
@@ -78,7 +78,7 @@ export default function SolucionesASPage() {
         <div className={styles.servicesGrid}>
           {[
             { icon: '🏊', title: 'Ingenova', color: '#f39c12', href: '/empresas/ingenova', desc: 'Mantenimiento especializado de piscinas, jacuzzis y turcos. Repuestos originales y químicos certificados para aguas perfectas todo el año.' },
-            { icon: '🏅', title: 'ClubHouse', color: '#82b440', href: '/empresas/clubhouse', desc: 'Administración profesional de complejos acuáticos y escuelas de natación con instructores federados para todas las edades.' },
+            { icon: '🔥', title: 'Viva Calentadores', color: '#e35422', href: '/empresas/viva-calentadores', desc: 'Servicios de instalación, mantenimiento y reparación de calentadores de agua a gas y eléctricos con técnicos expertos.' },
             { icon: '🐾', title: 'ProMascotas', color: '#e6a817', href: '/empresas/promascotas', desc: 'Profilaxis dental a domicilio para mascotas sin anestesia general. Servicio profesional con la comodidad que tu mascota merece.' },
           ].map((s) => (
             <a key={s.title} href={s.href} className={styles.serviceCard} style={{ textDecoration: 'none', cursor: 'pointer' }}>

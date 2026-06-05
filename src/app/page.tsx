@@ -14,7 +14,7 @@ export const BRAND_COLORS = {
   SOLUCIONES: '#1a5d91',
   INGENOVA: '#f39c12',
   PROMASCOTAS: '#f1c40f',
-  CLUBHOUSE: '#82b440',
+  VIVA_CALENTADORES: '#e35422',
   PRINTERSERVICE: '#0ea5e9',
 };
 
@@ -32,15 +32,15 @@ const businessLines = [
     ]
   },
   { 
-    label: 'ClubHouse', 
-    title: 'Administración & Nado',
-    tag: 'Gestión & Capacitación',
-    color: BRAND_COLORS.CLUBHOUSE,
-    desc: 'Llevamos la gestión de complejos acuáticos a otro nivel. Desde la administración operativa de clubes y conjuntos hasta escuelas de natación para todas las edades con instructores certificados por la federación.',
+    label: 'Viva Calentadores', 
+    title: 'Calentadores de Agua',
+    tag: 'Mantenimiento & Instalación',
+    color: BRAND_COLORS.VIVA_CALENTADORES,
+    desc: 'Especialistas en agua caliente y bienestar para su hogar. Ofrecemos mantenimiento preventivo y correctivo, reparación e instalación de calentadores a gas y eléctricos de todas las marcas con técnicos certificados.',
     images: [
-      'https://images.unsplash.com/photo-1519315901367-f34ff9154487?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1530549387634-e7a5bc2a6132?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=70&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
@@ -267,7 +267,7 @@ export default function Home() {
               <span className={styles.sectionLabel}>Nuestra Historia</span>
               <h2>Más de 10 años brindando soluciones de confianza</h2>
               <p>En <strong>Soluciones Integrales AS SAS</strong>, nacimos con una misión clara: simplificar la vida de nuestros clientes a través de servicios técnicos de alta calidad y un respaldo corporativo inigualable.</p>
-              <p>Lo que comenzó como una especialización en zonas húmedas con <strong>Ingenova</strong>, ha evolucionado hasta convertirse en un ecosistema de servicios que abarca desde la administración de nado con <strong>ClubHouse</strong> hasta la salud animal con <strong>ProMascotas</strong>.</p>
+              <p>Lo que comenzó como una especialización en zonas húmedas con <strong>Ingenova</strong>, ha evolucionado hasta convertirse en un ecosistema de servicios que abarca desde el servicio técnico de calentadores con <strong>Viva Calentadores</strong> hasta la salud animal con <strong>ProMascotas</strong>.</p>
               <div className={styles.stats}>
                 <div className={styles.statItem}>
                   <span className={styles.statNum}>+2k</span>

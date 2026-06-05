@@ -20,8 +20,8 @@ export default function Footer() {
             />
           </Link>
           <p className={styles.description}>
-            Líderes en mantenimiento de áreas húmedas, administración de
-            complejos acuáticos y cuidado especializado de mascotas bajo un solo
+            Líderes en mantenimiento de áreas húmedas, servicio e instalación de
+            calentadores y cuidado especializado de mascotas bajo un solo
             respaldo corporativo.
           </p>
         </div>
@@ -33,7 +33,7 @@ export default function Footer() {
               <Link href="#servicios">Ingenova (Piscinas)</Link>
             </li>
             <li>
-              <Link href="#servicios">ClubHouse (Capacitación)</Link>
+              <Link href="#servicios">Viva Calentadores (Calentadores)</Link>
             </li>
             <li>
               <Link href="#servicios">ProMascotas (Salud Animal)</Link>

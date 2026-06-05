@@ -10,7 +10,7 @@ const BRAND_DOMAINS: Record<string, string> = {
   'ingenova.com.co':     '/empresas/ingenova',
   'www.ingenova.com.co': '/empresas/ingenova',
   // Future:
-  // 'clubhousecol.com':   '/empresas/clubhouse',
+  // 'vivacalentadores.com':   '/empresas/viva-calentadores',
   // 'promascotas.com.co': '/empresas/promascotas',
 };
 
