@@ -666,7 +666,7 @@ export default function IngenovaClient() {
                 </li>
                 <li>
                   <span className={s.contactIcon}>✉️</span>
-                  <a href="mailto:comercial@aquaintegral.co">comercial@aquaintegral.co</a>
+                  <a href="mailto:comercial@ingenova.com.co">comercial@ingenova.com.co</a>
                 </li>
               </ul>
             </div>
