@@ -78,6 +78,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const isHomePage = pathname === '/';
+  const isMainIngenova = pathname === '/empresas/ingenova';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -186,8 +187,20 @@ export default function Navbar() {
         <nav className={styles.links} aria-label="Navegación principal">
           {pathname.includes('ingenova') ? (
             <>
-              <a href="#inicio" className={`${styles.link} ${styles.ingenovaLink}`}>Inicio</a>
-              <a href="#soluciones" className={`${styles.link} ${styles.ingenovaLink}`}>Servicios</a>
+              <Link 
+                href={isMainIngenova ? "#inicio" : "/empresas/ingenova#inicio"} 
+                className={`${styles.link} ${styles.ingenovaLink}`}
+                prefetch={false}
+              >
+                Inicio
+              </Link>
+              <Link 
+                href={isMainIngenova ? "#soluciones" : "/empresas/ingenova#soluciones"} 
+                className={`${styles.link} ${styles.ingenovaLink}`}
+                prefetch={false}
+              >
+                Servicios
+              </Link>
               <div 
                 ref={productsDropdownRef}
                 className={styles.megaMenuContainer}
@@ -230,7 +243,13 @@ export default function Navbar() {
                   ))}
                 </div>
               </div>
-              <a href="#contacto" className={`${styles.link} ${styles.ingenovaLink}`}>Contacto</a>
+              <Link 
+                href={isMainIngenova ? "#contacto" : "/empresas/ingenova#contacto"} 
+                className={`${styles.link} ${styles.ingenovaLink}`}
+                prefetch={false}
+              >
+                Contacto
+              </Link>
             </>
           ) : isHomePage ? (
             <>
