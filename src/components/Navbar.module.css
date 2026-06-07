@@ -20,6 +20,7 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
+  position: relative;
 }
 
 .logo {
@@ -233,6 +234,112 @@
 }
 
 .navDropdownBtn:hover {
-  color: #000;
+  color: #cca043;
 }
+
+.ingenovaLink:hover {
+  color: #cca043 !important;
+}
+
+/* ── MEGA MENU ── */
+.megaMenuContainer {
+  position: static;
+  display: flex;
+  align-items: center;
+}
+
+.megaMenu {
+  position: absolute;
+  top: 90px;
+  left: 2rem;
+  right: 2rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 3px solid #cca043;
+  border-radius: 0 0 16px 16px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(15px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 999;
+}
+
+/* Bridging hover gap between trigger and absolute menu */
+.megaMenu::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: transparent;
+}
+
+.megaMenuContainer:hover .chevron {
+  transform: rotate(180deg);
+}
+
+.megaMenuColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.megaMenuColumnTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding-bottom: 0.5rem;
+}
+
+.megaMenuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.megaMenuLink {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #555;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.megaMenuLink:hover {
+  color: #cca043 !important;
+  transform: translateX(3px);
+}
+
+.bullet {
+  color: #cca043;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+@media (min-width: 901px) and (max-width: 1200px) {
+  .megaMenu {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 2rem;
+  }
+}
+
 

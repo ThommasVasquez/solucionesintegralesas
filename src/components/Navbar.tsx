@@ -14,15 +14,57 @@ const COLORS = {
   VIVA_CALENTADORES: '#e35422',
 };
 
-const INGENOVA_PRODUCTS = [
-  { name: 'Bomba de Calor Inverter Fairland X20-22', price: '$19,620,125', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20Inverter%20Fairland%20X20-22%20por%20%2419.620.125.' },
-  { name: 'Bomba de Calor Inverter 119.000 BTU', price: '$15,675,659', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20Inverter%20119.000%20BTU%20por%20%2415.675.659.' },
-  { name: 'Bomba de Calor ProHeat Full Inverter 65k', price: '$9,124,920', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20ProHeat%20Full%20Inverter%2065k%20BTU%20por%20%249.124.920.' },
-  { name: 'Bomba de Calor Frío/Calor 44.000 BTU', price: '$6,348,412', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20Fr%C3%ADo%20y%20Calor%2044.000%20BTU%20por%20%246.348.412.' },
-  { name: 'Bomba de Calor HidroControl 14.000 BTU', price: '$2,706,774', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20HidroControl%2014.000%20BTU%20por%20%242.706.774.' },
-  { name: 'Alarma de Inmersión Aqualarm', price: '$1,880,676', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20comprar%20la%20Alarma%20de%20Inmers%C3%B3n%20Aqualarm%20por%20%241.880.676.' },
-  { name: 'Modificador de Alcalinidad Alka (20 Kg)', price: '$128,520', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20comprar%20Alka%20por%2020%20Kg%20por%20%24128.520.' },
-  { name: 'Bicarbonato de Sodio (25 Kg)', price: '$76,874', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20comprar%20Bicarbonato%20de%20Sodio%20por%2025%20Kg%20por%20%2476.874.' }
+const INGENOVA_CATEGORIES = [
+  {
+    title: 'Agua Potable',
+    items: [
+      { name: 'Desinfección ultravioleta' },
+      { name: 'Dosificación' },
+      { name: 'Filtración' },
+      { name: 'Osmosis inversa' },
+      { name: 'Plantas de tratamiento' },
+      { name: 'Producto químico' },
+      { name: 'Suavización de agua' }
+    ]
+  },
+  {
+    title: 'Tratamiento de agua residual',
+    items: [
+      { name: 'Equipos de agua residual' },
+      { name: 'Plantas de tratamiento de agua residual' },
+      { name: 'Químicos para tratamiento de aguas residuales' }
+    ]
+  },
+  {
+    title: 'Piscinas',
+    items: [
+      { name: 'Accesorios' },
+      { name: 'Calefacción' },
+      { name: 'Desinfeccion' },
+      { name: 'Equipos para piscina' },
+      { name: 'Filtros y bombas' },
+      { name: 'Producto químico' }
+    ]
+  },
+  {
+    title: 'Análisis de agua',
+    items: [
+      { name: 'Comparadores visuales' },
+      { name: 'Equipos para medir la calidad del agua' },
+      { name: 'Reactivos, laboratorio y otros' }
+    ]
+  },
+  {
+    title: 'Bombas de agua',
+    items: [
+      { name: 'Accesorios de instalación' },
+      { name: 'Bombas centrifugas' },
+      { name: 'Bombas multietapas' },
+      { name: 'Bombas Periféricas' },
+      { name: 'Bombeo sumergible' },
+      { name: 'Presurización' }
+    ]
+  }
 ];
 
 export default function Navbar() {
@@ -144,11 +186,11 @@ export default function Navbar() {
         <nav className={styles.links} aria-label="Navegación principal">
           {pathname.includes('ingenova') ? (
             <>
-              <a href="#inicio" className={styles.link}>Inicio</a>
-              <a href="#soluciones" className={styles.link}>Servicios</a>
+              <a href="#inicio" className={`${styles.link} ${styles.ingenovaLink}`}>Inicio</a>
+              <a href="#soluciones" className={`${styles.link} ${styles.ingenovaLink}`}>Servicios</a>
               <div 
                 ref={productsDropdownRef}
-                className={styles.dropdownContainer}
+                className={styles.megaMenuContainer}
                 onMouseEnter={() => setIsProductsOpen(true)}
                 onMouseLeave={() => setIsProductsOpen(false)}
                 aria-haspopup="true"
@@ -166,24 +208,30 @@ export default function Navbar() {
                   </svg>
                 </button>
                 
-                <div className={`${styles.dropdownMenu} ${isProductsOpen ? styles.menuVisible : ''} ${styles.productsDropdown}`} style={{ left: '0', right: 'auto', top: 'calc(100% + 10px)' }} role="menu">
-                  {INGENOVA_PRODUCTS.map((prod, idx) => (
-                    <a 
-                      key={idx} 
-                      href={prod.link} 
-                      target="_blank" 
-                      rel="noreferrer" 
-                      className={styles.menuItem} 
-                      role="menuitem"
-                      onClick={() => setIsProductsOpen(false)}
-                    >
-                      <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>{prod.name}</span>
-                      <span className={styles.brandDesc}>{prod.price}</span>
-                    </a>
+                <div className={`${styles.megaMenu} ${isProductsOpen ? styles.menuVisible : ''}`} role="menu">
+                  {INGENOVA_CATEGORIES.map((cat, idx) => (
+                    <div key={idx} className={styles.megaMenuColumn}>
+                      <h4 className={styles.megaMenuColumnTitle} style={{ color: COLORS.INGENOVA }}>{cat.title}</h4>
+                      <ul className={styles.megaMenuList}>
+                        {cat.items.map((item, itemIdx) => (
+                          <li key={itemIdx}>
+                            <a 
+                              href={`https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20recibir%20informaci%C3%B3n%20y%20precios%20sobre%20la%20categor%C3%ADa%20"${encodeURIComponent(cat.title + ' - ' + item.name)}".`}
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className={styles.megaMenuLink}
+                              onClick={() => setIsProductsOpen(false)}
+                            >
+                              <span className={styles.bullet}>○</span> {item.name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
                 </div>
               </div>
-              <a href="#contacto" className={styles.link}>Contacto</a>
+              <a href="#contacto" className={`${styles.link} ${styles.ingenovaLink}`}>Contacto</a>
             </>
           ) : isHomePage ? (
             <>
