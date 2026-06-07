@@ -134,28 +134,60 @@ const SOLUTIONS = [
     title: "Construcción de Piscinas y Jacuzzis",
     desc: "Diseño civil completo, excavación estructural, vaciado de concreto, impermeabilización y revestimientos de lujo.",
     icon: "🏊",
-    link: waLink("Hola Ingenova, me interesa cotizar la construcción de una piscina o jacuzzi.")
+    link: waLink("Hola Ingenova, me interesa cotizar la construcción de una piscina o jacuzzi."),
+    detailedDesc: "Diseño y construcción integral de zonas húmedas personalizadas. Nos encargamos de todo el proceso de ingeniería civil, desde el levantamiento de planos y excavación de terreno, pasando por el vaciado de concreto reforzado con aditivos impermeabilizantes, hasta la instalación de acabados de lujo (vitrocerámica, piedra natural, iluminación LED) y puesta en marcha del sistema de bombeo y filtración.",
+    features: [
+      "Diseño 3D y planos de ingeniería detallados",
+      "Excavación estructural y preparación técnica del terreno",
+      "Vaciado de concreto de alta resistencia con aditivos impermeabilizantes Sika",
+      "Instalación de revestimientos premium (mosaico vitrocerámico, piedra antideslizante)",
+      "Equipamiento completo: filtros, bombas y automatización de última generación"
+    ]
   },
   {
     image: "https://images.unsplash.com/photo-1628744448840-55bef34d2bc0?q=80&w=800&auto=format&fit=crop",
     title: "Mantenimiento de Cubiertas y Techos",
     desc: "Reparación de filtraciones y goteras, impermeabilización de terrazas e instalación de cubiertas termoacústicas.",
     icon: "🏠",
-    link: waLink("Hola Ingenova, necesito mantenimiento o instalación de cubiertas.")
+    link: waLink("Hola Ingenova, necesito mantenimiento o instalación de cubiertas."),
+    detailedDesc: "Soluciones de protección de techados para hogares, locales comerciales y bodegas industriales. Realizamos mantenimientos preventivos y correctivos, impermeabilización asfáltica y acrílica de terrazas, reparación técnica de canaletas de desagüe y goteras, e instalación de tejas termoacústicas y cubiertas de policarbonato o metalúrgicas de larga vida útil.",
+    features: [
+      "Localización exacta de goteras y filtraciones de agua",
+      "Impermeabilización de terrazas y losas con mantos asfálticos y acrílicos",
+      "Mantenimiento, limpieza e instalación de canaletas y bajantes de agua lluvia",
+      "Suministro e instalación de tejas termoacústicas UPVC y policarbonato",
+      "Refuerzo estructural de techos y corrección de pendientes"
+    ]
   },
   {
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
     title: "Impermeabilización de Fachadas",
     desc: "Lavado a presión, sellado de juntas de dilatación, aplicación de hidrófugos y pintura exterior de fachadas.",
     icon: "🏢",
-    link: waLink("Hola Ingenova, solicito presupuesto para mantenimiento de fachadas.")
+    link: waLink("Hola Ingenova, solicito presupuesto para mantenimiento de fachadas."),
+    detailedDesc: "Mantenimiento y embellecimiento de fachadas en edificios de propiedad horizontal, residencias y sedes empresariales. Nuestro servicio incluye lavado con hidrolavadora a alta presión para remover hongos y suciedad, sellado elástico de juntas de dilatación para prevenir grietas, aplicación de hidrófugos repelentes de agua y pintura exterior de alta durabilidad con garantía de intemperie.",
+    features: [
+      "Lavado profundo a presión para remover moho, hollín y contaminantes",
+      "Sellado de fisuras y juntas con poliuretano elástico de alto rendimiento",
+      "Aplicación de hidrófugo siliconado transparente contra humedad y moho",
+      "Pintura exterior de alta especificación para protección climática",
+      "Trabajo seguro en alturas con andamios certificados y personal especializado"
+    ]
   },
   {
     image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=800&auto=format&fit=crop",
     title: "Suministro de Maquinaria y Equipos",
     desc: "Venta e instalación de bombas de calor Inverter, filtros de arena, motobombas y sistemas automáticos para piscinas.",
     icon: "⚙️",
-    link: waLink("Hola Ingenova, me interesa cotizar equipos para mi piscina.")
+    link: waLink("Hola Ingenova, me interesa cotizar equipos para mi piscina."),
+    detailedDesc: "Suministro e instalación llave en mano de toda la maquinaria para su cuarto de bombas o sistema de tratamiento de agua. Somos distribuidores autorizados de las mejores marcas del mercado de piscinas y tratamiento (AstralPool, Hayward, Pentair, Lovibond). Ofrecemos bombas de calor Full Inverter para climatización eficiente, motobombas autocebantes, filtros de arena y zeolita, cloradores salinos y dosificadores inteligentes.",
+    features: [
+      "Venta de equipos de marcas líderes con garantía directa del fabricante",
+      "Instalación y acoplamiento hidráulico y eléctrico por técnicos expertos",
+      "Automatización de sistemas de filtrado y control de temperatura",
+      "Climatización ecológica y de bajo consumo (bombas de calor Inverter)",
+      "Asesoría técnica para dimensionamiento de cuartos de máquinas"
+    ]
   }
 ];
 
@@ -234,6 +266,26 @@ export default function IngenovaClient() {
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeReview, setActiveReview] = useState(0);
   const [visibleItems, setVisibleItems] = useState<{ [key: string]: boolean }>({});
+  
+  const [selectedSolution, setSelectedSolution] = useState<typeof SOLUTIONS[0] | null>(null);
+  const solutionModalRef = useRef<HTMLDivElement>(null);
+
+  // Close modal on escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedSolution(null);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleSolutionBackdropClick = (e: React.MouseEvent) => {
+    if (solutionModalRef.current && !solutionModalRef.current.contains(e.target as Node)) {
+      setSelectedSolution(null);
+    }
+  };
 
   // Hero slide interval
   useEffect(() => {
@@ -438,9 +490,12 @@ export default function IngenovaClient() {
                   <div className={s.solutionIcon}>{sol.icon}</div>
                   <h3 className={s.solutionTitle}>{sol.title}</h3>
                   <p className={s.solutionDesc}>{sol.desc}</p>
-                  <a href={sol.link} target="_blank" rel="noreferrer" className={s.solutionBtn}>
+                  <button 
+                    onClick={() => setSelectedSolution(sol)} 
+                    className={s.solutionBtn}
+                  >
                     Ver más
-                  </a>
+                  </button>
                 </div>
               </div>
             ))}
@@ -669,6 +724,61 @@ export default function IngenovaClient() {
           </div>
         </div>
       </footer>
+
+      {/* ── SERVICE DETAIL MODAL ── */}
+      {selectedSolution && (
+        <div className={s.modalOverlay} onClick={handleSolutionBackdropClick}>
+          <div ref={solutionModalRef} className={s.modalContent}>
+            <button 
+              className={s.closeBtn} 
+              onClick={() => setSelectedSolution(null)}
+              aria-label="Cerrar modal"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={s.closeIcon}>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            
+            <div className={s.modalGrid}>
+              <div className={s.modalImageArea}>
+                <img 
+                  src={selectedSolution.image} 
+                  alt={selectedSolution.title}
+                  className={s.modalImg}
+                />
+              </div>
+              
+              <div className={s.modalDetailsArea}>
+                <span className={s.modalCategoryTag}>Servicio Especializado › {selectedSolution.title}</span>
+                <h2 className={s.modalTitle}>{selectedSolution.title}</h2>
+                
+                <p className={s.modalDesc}>{selectedSolution.detailedDesc}</p>
+
+                <h4 className={s.featuresTitle}>¿Qué incluye este servicio?:</h4>
+                <ul className={s.featuresList}>
+                  {selectedSolution.features.map((feature, idx) => (
+                    <li key={idx} className={s.featureItem}>
+                      <span className={s.featureBullet}>✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <a 
+                  href={selectedSolution.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={s.whatsappBtn}
+                >
+                  <span className={s.whatsappIcon}>💬</span>
+                  Solicitar Cotización y Visita por WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
