@@ -14,10 +14,23 @@ const COLORS = {
   VIVA_CALENTADORES: '#e35422',
 };
 
+const INGENOVA_PRODUCTS = [
+  { name: 'Bomba de Calor Inverter Fairland X20-22', price: '$19,620,125', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20Inverter%20Fairland%20X20-22%20por%20%2419.620.125.' },
+  { name: 'Bomba de Calor Inverter 119.000 BTU', price: '$15,675,659', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20Inverter%20119.000%20BTU%20por%20%2415.675.659.' },
+  { name: 'Bomba de Calor ProHeat Full Inverter 65k', price: '$9,124,920', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20ProHeat%20Full%20Inverter%2065k%20BTU%20por%20%249.124.920.' },
+  { name: 'Bomba de Calor Frío/Calor 44.000 BTU', price: '$6,348,412', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20Fr%C3%ADo%20y%20Calor%2044.000%20BTU%20por%20%246.348.412.' },
+  { name: 'Bomba de Calor HidroControl 14.000 BTU', price: '$2,706,774', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20cotizar%20la%20Bomba%20de%20Calor%20HidroControl%2014.000%20BTU%20por%20%242.706.774.' },
+  { name: 'Alarma de Inmersión Aqualarm', price: '$1,880,676', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20comprar%20la%20Alarma%20de%20Inmers%C3%B3n%20Aqualarm%20por%20%241.880.676.' },
+  { name: 'Modificador de Alcalinidad Alka (20 Kg)', price: '$128,520', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20comprar%20Alka%20por%2020%20Kg%20por%20%24128.520.' },
+  { name: 'Bicarbonato de Sodio (25 Kg)', price: '$76,874', link: 'https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20comprar%20Bicarbonato%20de%20Sodio%20por%2025%20Kg%20por%20%2476.874.' }
+];
+
 export default function Navbar() {
   const navRef = useRef<HTMLElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const productsDropdownRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -29,6 +42,9 @@ export default function Navbar() {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
+      }
+      if (productsDropdownRef.current && !productsDropdownRef.current.contains(e.target as Node)) {
+        setIsProductsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -170,6 +186,47 @@ export default function Navbar() {
             </div>
           )}
           
+          {pathname.includes('ingenova') && (
+            <div 
+              ref={productsDropdownRef}
+              className={styles.dropdownContainer}
+              onMouseEnter={() => setIsProductsOpen(true)}
+              onMouseLeave={() => setIsProductsOpen(false)}
+              aria-haspopup="true"
+              aria-expanded={isProductsOpen}
+            >
+              <button 
+                className={styles.ctaBtn} 
+                style={{ backgroundColor: COLORS.INGENOVA, boxShadow: '0 10px 25px rgba(204, 160, 67, 0.2)' }}
+                aria-label="Ver productos"
+                onClick={() => setIsProductsOpen(prev => !prev)}
+              >
+                <span className={styles.fullText}>Productos</span>
+                <span className={styles.mobileText}>Productos</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={styles.chevron} aria-hidden="true">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              
+              <div className={`${styles.dropdownMenu} ${isProductsOpen ? styles.menuVisible : ''} ${styles.productsDropdown}`} role="menu">
+                {INGENOVA_PRODUCTS.map((prod, idx) => (
+                  <a 
+                    key={idx} 
+                    href={prod.link} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className={styles.menuItem} 
+                    role="menuitem"
+                    onClick={() => setIsProductsOpen(false)}
+                  >
+                    <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>{prod.name}</span>
+                    <span className={styles.brandDesc}>{prod.price}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div 
             ref={dropdownRef}
             className={styles.dropdownContainer}

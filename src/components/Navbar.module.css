@@ -206,3 +206,13 @@
   .dropdownMenu { min-width: 200px; right: -5px; }
 }
 
+.productsDropdown {
+  min-width: 340px;
+}
+
+@media (max-width: 480px) {
+  .productsDropdown {
+    min-width: 280px;
+  }
+}
+
