@@ -142,7 +142,50 @@ export default function Navbar() {
         </Link>
         
         <nav className={styles.links} aria-label="Navegación principal">
-          {isHomePage ? (
+          {pathname.includes('ingenova') ? (
+            <>
+              <a href="#inicio" className={styles.link}>Inicio</a>
+              <a href="#soluciones" className={styles.link}>Servicios</a>
+              <div 
+                ref={productsDropdownRef}
+                className={styles.dropdownContainer}
+                onMouseEnter={() => setIsProductsOpen(true)}
+                onMouseLeave={() => setIsProductsOpen(false)}
+                aria-haspopup="true"
+                aria-expanded={isProductsOpen}
+                style={{ paddingBottom: '0' }}
+              >
+                <button 
+                  className={styles.navDropdownBtn}
+                  aria-label="Ver productos"
+                  onClick={() => setIsProductsOpen(prev => !prev)}
+                >
+                  Productos
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={styles.chevron} aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                
+                <div className={`${styles.dropdownMenu} ${isProductsOpen ? styles.menuVisible : ''} ${styles.productsDropdown}`} style={{ left: '0', right: 'auto', top: 'calc(100% + 10px)' }} role="menu">
+                  {INGENOVA_PRODUCTS.map((prod, idx) => (
+                    <a 
+                      key={idx} 
+                      href={prod.link} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className={styles.menuItem} 
+                      role="menuitem"
+                      onClick={() => setIsProductsOpen(false)}
+                    >
+                      <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>{prod.name}</span>
+                      <span className={styles.brandDesc}>{prod.price}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+              <a href="#contacto" className={styles.link}>Contacto</a>
+            </>
+          ) : isHomePage ? (
             <>
               <Link href="/#servicios" className={styles.link} prefetch={false}>Servicios</Link>
               <Link href="/#nosotros" className={styles.link} prefetch={false}>Nosotros</Link>
@@ -186,47 +229,6 @@ export default function Navbar() {
             </div>
           )}
           
-          {pathname.includes('ingenova') && (
-            <div 
-              ref={productsDropdownRef}
-              className={styles.dropdownContainer}
-              onMouseEnter={() => setIsProductsOpen(true)}
-              onMouseLeave={() => setIsProductsOpen(false)}
-              aria-haspopup="true"
-              aria-expanded={isProductsOpen}
-            >
-              <button 
-                className={styles.ctaBtn} 
-                style={{ backgroundColor: COLORS.INGENOVA, boxShadow: '0 10px 25px rgba(204, 160, 67, 0.2)' }}
-                aria-label="Ver productos"
-                onClick={() => setIsProductsOpen(prev => !prev)}
-              >
-                <span className={styles.fullText}>Productos</span>
-                <span className={styles.mobileText}>Productos</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={styles.chevron} aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-              
-              <div className={`${styles.dropdownMenu} ${isProductsOpen ? styles.menuVisible : ''} ${styles.productsDropdown}`} role="menu">
-                {INGENOVA_PRODUCTS.map((prod, idx) => (
-                  <a 
-                    key={idx} 
-                    href={prod.link} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className={styles.menuItem} 
-                    role="menuitem"
-                    onClick={() => setIsProductsOpen(false)}
-                  >
-                    <span className={styles.brandTitle} style={{ color: COLORS.INGENOVA }}>{prod.name}</span>
-                    <span className={styles.brandDesc}>{prod.price}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-
           <div 
             ref={dropdownRef}
             className={styles.dropdownContainer}

@@ -216,3 +216,23 @@
   }
 }
 
+.navDropdownBtn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  color: #444;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+}
+
+.navDropdownBtn:hover {
+  color: #000;
+}
+
