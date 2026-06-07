@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navbar from '@/components/Navbar';
 import styles from './page.module.css';
 import Footer from '@/components/Footer';
+import { Link } from 'next-view-transitions';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,6 +26,7 @@ const businessLines = [
     tag: 'Mantenimiento & Repuestos',
     color: BRAND_COLORS.INGENOVA,
     desc: 'Somos expertos en el corazón de sus zonas húmedas. Ofrecemos mantenimiento preventivo y correctivo, venta de motobombas, filtros y químicos de alta calidad para garantizar aguas cristalinas y sistemas eficientes.',
+    href: '/empresas/ingenova',
     images: [
       'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=70&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1595113316349-9fa4eb24f884?q=70&w=800&auto=format&fit=crop',
@@ -37,6 +39,7 @@ const businessLines = [
     tag: 'Mantenimiento & Instalación',
     color: BRAND_COLORS.VIVA_CALENTADORES,
     desc: 'Especialistas en agua caliente y bienestar para su hogar. Ofrecemos mantenimiento preventivo y correctivo, reparación e instalación de calentadores a gas y eléctricos de todas las marcas con técnicos certificados.',
+    href: '/empresas/viva-calentadores',
     images: [
       'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=70&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=70&w=800&auto=format&fit=crop',
@@ -49,6 +52,7 @@ const businessLines = [
     tag: 'Cuidado Dental Pet',
     color: BRAND_COLORS.PROMASCOTAS,
     desc: 'La sonrisa de su mejor amigo es nuestra prioridad. Realizamos limpieza dental profunda sin anestesia general (según evaluación), eliminando sarro y mal aliento directamente en la comodidad de su hogar.',
+    href: '/empresas/promascotas',
     images: [
       'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=70&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=70&w=800&auto=format&fit=crop',
@@ -61,6 +65,7 @@ const businessLines = [
     tag: 'Infraestructura Técnica',
     color: BRAND_COLORS.SOLUCIONES,
     desc: 'Más que un servicio, somos su aliado estratégico. Soluciones Integrales AS SAS centraliza la excelencia operativa para brindar confianza, garantía y profesionalismo en cada intervención técnica.',
+    href: '/empresas/soluciones-as',
     images: [
       'https://images.unsplash.com/photo-1497366216548-37526070297c?q=70&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=70&w=800&auto=format&fit=crop',
@@ -71,7 +76,7 @@ const businessLines = [
 
 
 export default function Home() {
-  const cardsRef     = useRef<HTMLDivElement[]>([]);
+  const cardsRef     = useRef<HTMLAnchorElement[]>([]);
   const textsRef     = useRef<HTMLDivElement[]>([]);
   const heroRef      = useRef<HTMLElement>(null);
 
@@ -212,7 +217,13 @@ export default function Home() {
           {businessLines.map((line, i) => {
             const isFocused = activeCardIdx === i;
             return (
-              <div key={`card-${i}`} ref={el => { if (el) cardsRef.current[i] = el; }} className={styles.card}>
+              <Link 
+                key={`card-${i}`} 
+                href={line.href}
+                ref={el => { if (el) cardsRef.current[i] = el; }} 
+                className={styles.card}
+                style={{ '--hover-color': line.color } as React.CSSProperties}
+              >
                 {line.images.map((imgSrc, imgIdx) => (
                   <Image 
                     key={imgIdx}
@@ -233,7 +244,7 @@ export default function Home() {
                 <div className={styles.cardInfo}>
                   <span style={{ color: line.color }}>{line.label}</span>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
