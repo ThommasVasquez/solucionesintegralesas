@@ -269,6 +269,12 @@
   z-index: 999;
 }
 
+.megaMenu.menuVisible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
 /* Bridging hover gap between trigger and absolute menu */
 .megaMenu::before {
   content: '';
