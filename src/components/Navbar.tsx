@@ -215,15 +215,14 @@ export default function Navbar() {
                       <ul className={styles.megaMenuList}>
                         {cat.items.map((item, itemIdx) => (
                           <li key={itemIdx}>
-                            <a 
-                              href={`https://wa.me/573123043792?text=Hola%20Ingenova%2C%20me%20interesa%20recibir%20informaci%C3%B3n%20y%20precios%20sobre%20la%20categor%C3%ADa%20"${encodeURIComponent(cat.title + ' - ' + item.name)}".`}
-                              target="_blank" 
-                              rel="noreferrer" 
+                            <Link 
+                              href={`/empresas/ingenova/productos?categoria=${encodeURIComponent(cat.title)}&subcategoria=${encodeURIComponent(item.name)}`}
                               className={styles.megaMenuLink}
                               onClick={() => setIsProductsOpen(false)}
+                              prefetch={false}
                             >
                               <span className={styles.bullet}>○</span> {item.name}
-                            </a>
+                            </Link>
                           </li>
                         ))}
                       </ul>

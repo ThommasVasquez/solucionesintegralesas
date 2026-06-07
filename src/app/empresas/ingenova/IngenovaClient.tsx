@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import s from "./ingenova.module.css";
-import Navbar from "@/components/Navbar";
 
 // Prefilled WhatsApp URLs
 const WA_BASE = "https://wa.me/573123043792";
@@ -286,7 +285,6 @@ export default function IngenovaClient() {
 
   return (
     <div className={s.page}>
-      <Navbar />
 
       {/* ══════════ HERO SLIDER ══════════ */}
       <section id="inicio" className={s.hero}>
