@@ -48,14 +48,6 @@ const HERO_SLIDES = [
     desc: "Venta y montaje de bombas de calor Inverter, sistemas de filtración, cloradores salinos y automatización para cuartos de máquinas.",
     ctaText: "Cotizar Equipos",
     ctaMsg: "Hola Ingenova, quiero cotizar equipos o sistemas de calefacción/filtración para piscina."
-  },
-  {
-    image: "https://images.unsplash.com/photo-1595113316349-9fa4eb24f884?q=80&w=1200&auto=format&fit=crop",
-    title: "Mantenimiento Técnico y Dosificación de Químicos",
-    subtitle: "Mantenimiento de Piscinas",
-    desc: "Servicios preventivos de balance químico del agua, dosificación de cloro/alguicidas y mantenimiento especializado de motobombas.",
-    ctaText: "Agendar Mantenimiento",
-    ctaMsg: "Hola Ingenova, deseo cotizar el mantenimiento periódico o suministro de químicos para mi piscina."
   }
 ];
 
@@ -68,7 +60,7 @@ const BUBBLE_SERVICES = [
         <path d="M51.4 26.5h1C62.3 26.5 72.2 26.5 82 26.5c.8 0 1.5-.1 1.8-.9V24.8c-.4-.7-1.1-.8-1.8-.8-2.8 0-5.6 0-8.4-.1-.3 0-.6 0-1-.1V24c0-2.5 0-4.9 0-7.3 0-1.2 0-2.5-.1-3.7-.8-6.4-5.8-11.7-11.9-12.8C54.1-.9 47.9 2.2 44.9 8.2c-.1.2-.2.4-.3.6-.1 0-.1-.1-.1-.1-.1-.1-.2-.3-.3-.4C41.5 3.1 37.3.3 31.5 0 23.8-.3 17 5.8 16.5 13.5c-.2 3.1-.1 6.3-.1 9.5 0 .3 0 .6 0 1h-1.1c-4.4 0-8.8 0-13.2 0-.3 0-.7 0-1 .1C.5 24.3.3 24.7.3 25.4c0 .3.1.6.3.8.2.2.5.3.8.3.3 0 .6 0 .8 0h14.3v1C16.4 28.7 16.4 30 16.4 31.2c0 .9.5 1.4 1.3 1.4.7 0 1.1-.5 1.2-1.4v-.7c0-3 0-6 0-9 0-2.7-.1-5.4.1-8.1.5-6.9 7.3-12.1 14-10.9 6 1.1 10.2 6.1 10.3 12.3 0 2.8 0 5.6 0 8.4 0 .2 0 .5 0 .7h-3V23c0-2.9 0-5.7-.1-8.6-.2-6.4-7-10.7-12.8-8-3.8 1.8-5.5 5-5.5 9.1 0 10.5 0 21 0 31.5v1.2c-.5-.4-.9-.6-1.3-.9-1.2-.8-2-1.8-1.8-3.4.1-1 .1-2 0-3 0-1.5 0-3 0-4.5 0-.7-.4-1.2-1.1-1.2-.7-.1-1.2.4-1.3 1.1 0 .2 0 .5 0 .7v8c0 .5-.2 1-.5 1.3C12 50.3 6.2 50 2.6 45.7c-.9-1.1-1.6-1.1-2.4 0v.8c.1 0 .1.1.2.2 4.1 5.7 11.7 6.5 16.8 1.8.2-.2.4-.3.5-.5 2.3 2.3 5 3.6 8.2 3.6 3.2 0 5.8-1.3 8.1-3.6 2.3 2.3 5 3.6 8.2 3.6 3.2 0 5.8-1.3 8.1-3.6 2.3 2.3 5 3.6 8.2 3.6 3.2 0 5.8-1.3 8.1-3.6.2.2.4.4.6.6 3.1 2.7 6.6 3.6 10.6 2.5 2.6-.7 4.6-2.4 6.2-4.6v-.8c-.8-1.1-1.5-1.1-2.4 0-3.9 4.7-10.1 4.7-13.9 0-.7-.9-1.5-.9-2.3 0-3.6 4.4-9.5 4.7-13.3.6-.3-.3-.5-.7-.5-1.1 0-6.1 0-12.2 0-18.3 0-24.4 0-30.5 0" fill="currentColor"/>
       </svg>
     ),
-    link: waLink("Hola Ingenova, me interesa el servicio de construcción y mantenimiento de Piscinas.")
+    link: waLink("Hola Ingenova, me interesa el servicio de diseño y construcción de Piscinas.")
   },
   {
     id: "item-p-2",
@@ -108,6 +100,7 @@ const BUBBLE_SERVICES = [
         <path d="M45.5 7.3c1.8 0 3.5 0 5.3 0 2.3 0 4.7 0 7 0 .7 0 1.3-.2 1.7-.8V1c-.3-.6-.8-.8-1.5-.8-4.3 0-8.6 0-12.9 0-.6 0-1.3 0-1.9.1-3 .4-5.2 2.4-5.6 5.3-.2 1.4-.1 2.9-.1 4.3 0 .2 0 .4-.1.7-1.2.2-1.4.5-1.4 1.7 0 1.1 0 2.3 0 3.4V16.8h-2.1c0-.2-.1-.4-.1-.5-.2-1.1-.9-1.9-2-2-1.2-.1-2.4-.1-3.6.1-.5 0-1 .2-1.3.5s-.6.7-.6 1.2c0 .2 0 .4 0 .6H23.3v-1.7c0-.6 0-1.1 0-1.7 0-1-.4-2-1.1-2.7s-1.7-1.1-2.7-1.1c-.9 0-1.8 0-2.7 0-2.5 0-4.1 1.6-4.1 4.2 0 .5 0 .9 0 1.4-.1 0-.2 0-.2.1-5.7.8-9.4 4-11.3 9.4-.3.9-.4 1.8-.6 2.8v2.6c.1.6.2 1.3.4 1.9C1.5 36.2 2.9 38.5 4.9 40.3s4.4 3 7 3.4c.2 0 .4.1.7.1v5H12c-3.3 0-6.6 0-9.8 0-.7 0-1.3.2-1.7.8V50.3c.3.6.8.8 1.5.8h55.9c.7 0 1.2-.2 1.5-.8v-.7c-.3-.6-.8-.8-1.5-.8H23.2v-.1h-.8v-5H26.3c0 .2 0 .4 0 .6.1.5.3 1 .7 1.3.4.4.9.5 1.4.6 1 .0 2 0 3 0 1.4 0 2.2-.7 2.4-2.1 0-.1.0-.2.1-.4h15.3c1.7 0 1.9-.2 1.9-1.9v-4.1H51.8c2 0 4 0 6-.1.7 0 1.2-.2 1.5-.8V23.7c-.3-.6-.8-.8-1.5-.8-2.1.0-4.1 0-6.1 0h-.7V18.9c0-1.9-.2-2.1-2.1-2.1H46.4v-4.8c0-1.6 0-3.2 0-4.8 0-.5-.1-1-.6-1.2-.3-.1-.5-.2-.8-.2 0-1-.0-2 .1-3 0-.1.3-.3.5-.3zm-30.5 7.6c0-.4.2-.7.5-1s.6-.4 1-.4h3c.4 0 .8.1 1 .4s.5.7.5 1.1v1.6H15v-1.7zm5 33.8h-5v-4.9h5v4.9zm6.2-7.3H25.7c-3.9 0-7.7 0-11.6-.1-5.2 0-9.4-3.2-10.8-8.1C1.3 26.7 5.9 19.9 12.7 19.2c.5 0 1 0 1.4 0H25.6h.7v22.3zm24.9-16.3h6v10.2H51.2V25.2zm-12.8-12.1H44V16.8H38.4V13.1zm10.4 6.1v22.3H33.9c0-.2 0-.4 0-.6 0-1.6 0-3.2 0-4.8.1-.2 0-.5 0-.7-.1-.3-.2-.5-.4-.7-.2-.2-.5-.3-.7-.3-.3 0-.5.1-.7.3-.2.2-.3.4-.3.7c0 .3 0 .7.1 1 0 2.3 0 4.6 0 6.9V44H28.7V16.6H31.5c0 .2 0 .4 0 .7.0 2.5 0 5.1.0 7.6 0 1 .9 1.6 1.7 1.1.5-.3.6-.8.6-1.3 0-1.7 0-3.3 0-5V19.2H48.8zm-6.2-11.9c0 .5 0 1.1 0 1.6s0 1.1 0 1.7H39.7c.1-1.6.0-3.3.3-4.9.3-2 2-3.2 4.4-3.2 2.6 0 5.3 0 7.9 0H57.2v2.4H55.2L45.9 5c-.3 0-.6 0-.9 0-1.4.1-2.2.9-2.3 2.3H42.7zm-19.3 17.1c.1.2 0 .3-.1.5-.1.1-.2.3-.3.4s-.3.1-.5.2-.3 0-.5 0c-1-.0-2 0-3 0-.2 0-.3-.1-.5-.2s-.3-.2-.4-.3-.2-.3-.2-.5 0-.3.1-.5c.0-.6.5-1.1 1.2-1.1h1.4c.5 0 1 .1 1.5.1.7.0 1.1.5 1.2 1.1s.1.3.1.3zm0 5.9c0 .2 0 .3-.1.5-.1.1-.2.3-.3.4s-.3.1-.5.2-.3 0-.5 0c-1-.0-2 0-3 0-.3 0-.6-.1-.8-.3-.2-.2-.3-.5-.3-.8s.5-1.1 1.2-1.1h1.5 1.5c.3-.0.6.1.8.3.2.2.3.5.3.8zm0 5.9c0 .6-.5 1.1-1.2 1.2-.5 0-1-.1-1.5-.1-.5 0-1 0-1.5-.1-.7-.1-1.2-.6-1.2-1.2 0-.6.5-1.1 1.2-1.2.9-.2 1.9-.2 2.9 0 .8.1 1.3.6 1.3 1.4zm10.5-5.9c0 .2 0 .3-.1.5-.1.1-.2.3-.3.4s-.3.1-.5.2-.3 0-.5 0c-.3 0-.6-.1-.8-.3-.2-.2-.3-.5-.3-.8 0-.3.1-.6.3-.8s.5-.3.8-.3c.3 0 .6.1.8.3.2.2.3.5.3.8z" fill="currentColor"/>
       </svg>
     ),
+    link: waLink("Hola Ingenova, me interesa recibir información sobre equipos de bombeo para piscinas.")
   },
   {
     id: "item-p-6",
@@ -124,7 +117,7 @@ const BUBBLE_SERVICES = [
         </defs>
       </svg>
     ),
-    link: waLink("Hola Aqua Integral, me interesa recibir información sobre sus servicios de mantenimiento y equipamiento.")
+    link: waLink("Hola Ingenova, me interesa recibir información sobre sus servicios de construcción, fachadas y cubiertas.")
   }
 ];
 
@@ -180,7 +173,7 @@ const SOLUTIONS = [
     desc: "Venta e instalación de bombas de calor Inverter, filtros de arena, motobombas y sistemas automáticos para piscinas.",
     icon: "⚙️",
     link: waLink("Hola Ingenova, me interesa cotizar equipos para mi piscina."),
-    detailedDesc: "Suministro e instalación llave en mano de toda la maquinaria para su cuarto de bombas o sistema de tratamiento de agua. Somos distribuidores autorizados de las mejores marcas del mercado de piscinas y tratamiento (AstralPool, Hayward, Pentair, Lovibond). Ofrecemos bombas de calor Full Inverter para climatización eficiente, motobombas autocebantes, filtros de arena y zeolita, cloradores salinos y dosificadores inteligentes.",
+    detailedDesc: "Suministro e instalación llave en mano de toda la maquinaria para el cuarto de máquinas de su piscina. Somos distribuidores autorizados de las mejores marcas del mercado (AstralPool, Hayward, Pentair). Ofrecemos bombas de calor Full Inverter para climatización eficiente, motobombas autocebantes, filtros de arena y sistemas de automatización.",
     features: [
       "Venta de equipos de marcas líderes con garantía directa del fabricante",
       "Instalación y acoplamiento hidráulico y eléctrico por técnicos expertos",
@@ -217,12 +210,12 @@ const BEST_SELLERS = [
     link: waLink("Hola Ingenova, me interesa comprar la Alarma de Inmersión Aqualarm por $1.880.676.")
   },
   {
-    image: "https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?q=600&w=600&auto=format&fit=crop",
-    name: "Modificador de Alcalinidad Alka (20 Kg)",
-    desc: "Producto químico de alta solubilidad para balancear y estabilizar la alcalinidad total y el pH del agua de la piscina.",
-    price: "$128,520",
-    tag: "Químicos",
-    link: waLink("Hola Ingenova, me interesa comprar Alka por 20 Kg por $128,520.")
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=600&auto=format&fit=crop",
+    name: "Filtro de Arena Hayward Pro Series 24\"",
+    desc: "Filtro de arena de alta eficiencia para recirculación de agua en piscinas residenciales. Con válvula de 6 vías.",
+    price: "$3,100,000",
+    tag: "Filtración",
+    link: waLink("Hola Ingenova, me interesa cotizar el Filtro de Arena Hayward Pro Series 24\" por $3.100.000.")
   }
 ];
 
@@ -236,17 +229,17 @@ const TESTIMONIALS = [
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
   },
   {
-    quote: "Se encuentran bastantes opciones en equipos para acueducto y tratamiento de agua. La asesoría es técnica y muy profesional.",
+    quote: "Se encuentran bastantes opciones en equipos y accesorios para piscinas. La asesoría en el diseño de cuartos de máquinas es técnica y muy profesional.",
     author: "John A.",
-    role: "Cliente Comercial",
+    role: "Constructor de Piscinas",
     location: "Bogotá",
     stars: 5,
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop"
   },
   {
-    quote: "La atención es excelente, brindan buena asesoría y los productos son de muy buena calidad para el tratamiento de aguas.",
+    quote: "La atención es excelente, brindan buena asesoría y la ejecución de la obra civil para nuestra piscina campestre superó las expectativas.",
     author: "Juan David N.",
-    role: "Administrador de Sistemas de Agua",
+    role: "Propietario de Finca",
     location: "Cundinamarca",
     stars: 5,
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop"
@@ -417,7 +410,7 @@ export default function IngenovaClient() {
             <span className={s.subTitle}>Bienvenidos</span>
             <h2 className={s.mainTitle}>INGENOVA SOLUCIONES INTEGRALES AS</h2>
             <p className={s.welcomeParagraph}>
-              Entendemos la importancia del agua, por eso, trabajamos en busca del acceso al agua limpia y segura para todos los seres vivos. <strong>«Nuestro compromiso con la naturaleza es devolverle algo de lo que nos ha dado, el agua como fuente de vida». ¡Juntos podemos lograrlo!</strong>
+              En Ingenova somos especialistas en el diseño, construcción y acabados de piscinas y jacuzzis, así como en soluciones integrales para la impermeabilización de fachadas y el mantenimiento de cubiertas y techos. Nuestro compromiso es brindar calidad técnica y durabilidad en cada proyecto, asegurando la satisfacción de nuestros clientes con soluciones de ingeniería eficientes.
             </p>
             <a href="#contacto" className={s.btnPrimaryGold}>Agendar Asesoría</a>
           </div>
@@ -515,7 +508,7 @@ export default function IngenovaClient() {
             <span className={s.subTitle}>Equipos y Medición</span>
             <h2 className={s.mainTitle}>lo más Vendido</h2>
             <p className={s.sectionSubtext}>
-              Distribuimos e instalamos los mejores equipos para el tratamiento y control del agua.
+              Distribuimos e instalamos los mejores equipos para la climatización y recirculación de su piscina.
             </p>
           </div>
 
@@ -553,7 +546,7 @@ export default function IngenovaClient() {
               <p>Haz clic ahora para hablar con un representante</p>
             </div>
             <a 
-              href={waLink("Hola Aqua Integral, me gustaría recibir asesoría personalizada sobre sus productos y servicios.")} 
+              href={waLink("Hola Ingenova, me gustaría recibir asesoría personalizada sobre el diseño o equipamiento de mi piscina.")} 
               target="_blank" 
               rel="noreferrer" 
               className={s.btnPrimaryGold}

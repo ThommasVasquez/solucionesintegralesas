@@ -260,7 +260,7 @@
   padding: 2.5rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
   opacity: 0;
   visibility: hidden;

@@ -8,40 +8,25 @@ import s from './productos.module.css';
 import { INGENOVA_PRODUCTS_DATA, Product } from '@/lib/ingenova-products-data';
 
 const CATEGORY_TREE = {
-  'Agua Potable': [
-    'Desinfección ultravioleta',
-    'Dosificación',
-    'Filtración',
-    'Osmosis inversa',
-    'Plantas de tratamiento',
-    'Producto químico',
-    'Suavización de agua'
+  'Climatización': [
+    'Bombas de calor Inverter',
+    'Calentadores a gas',
+    'Calentadores eléctricos'
   ],
-  'Tratamiento de agua residual': [
-    'Equipos de agua residual',
-    'Plantas de tratamiento de agua residual',
-    'Químicos para tratamiento de aguas residuales'
+  'Filtración y Bombeo': [
+    'Filtros de arena',
+    'Motobombas autocebantes',
+    'Medios filtrantes'
   ],
-  'Piscinas': [
-    'Accesorios',
-    'Calefacción',
-    'Desinfeccion',
-    'Equipos para piscina',
-    'Filtros y bombas',
-    'Producto químico'
+  'Accesorios de Vaso': [
+    'Boquillas de retorno',
+    'Skimmers y desagües',
+    'Iluminación LED subacuática'
   ],
-  'Análisis de agua': [
-    'Comparadores visuales',
-    'Equipos para medir la calidad del agua',
-    'Reactivos, laboratorio y otros'
-  ],
-  'Bombas de agua': [
-    'Accesorios de instalación',
-    'Bombas centrifugas',
-    'Bombas multietapas',
-    'Bombas Periféricas',
-    'Bombeo sumergible',
-    'Presurización'
+  'Seguridad y Confort': [
+    'Alarmas de inmersión',
+    'Escaleras y pasamanos',
+    'Cubiertas de seguridad'
   ]
 };
 
@@ -49,7 +34,7 @@ export default function ProductsCatalogClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
-  const [activeCategory, setActiveCategory] = useState<string>('Agua Potable');
+  const [activeCategory, setActiveCategory] = useState<string>('Climatización');
   const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -62,7 +47,7 @@ export default function ProductsCatalogClient() {
     if (cat && Object.keys(CATEGORY_TREE).includes(cat)) {
       setActiveCategory(cat);
     } else if (!cat) {
-      setActiveCategory('Agua Potable');
+      setActiveCategory('Climatización');
     }
     
     if (sub) {
@@ -88,9 +73,9 @@ export default function ProductsCatalogClient() {
   };
 
   const clearFilters = () => {
-    setActiveCategory('Agua Potable');
+    setActiveCategory('Climatización');
     setActiveSubcategory(null);
-    window.history.pushState(null, '', '?categoria=Agua+Potable');
+    window.history.pushState(null, '', '?categoria=Climatizaci%C3%B3n');
   };
 
   // Filter products based on state
@@ -141,7 +126,7 @@ export default function ProductsCatalogClient() {
             Línea <span className={s.titleHighlight}>Ingenova</span>
           </h1>
           <p className={s.subtitle}>
-            Equipos y soluciones especializadas para tratamiento de agua potable, aguas residuales, presurización y piscinas, con respaldo técnico de Aqua Integral.
+            Equipos y soluciones especializadas para climatización, filtración, iluminación y seguridad de piscinas y jacuzzis, con respaldo técnico de Aqua Integral.
           </p>
         </div>
 
@@ -185,7 +170,7 @@ export default function ProductsCatalogClient() {
               <div className={s.resultsCount}>
                 Mostrando <strong>{filteredProducts.length}</strong> producto{filteredProducts.length !== 1 ? 's' : ''} en {activeSubcategory ? `${activeCategory} › ${activeSubcategory}` : activeCategory}
               </div>
-              {(activeSubcategory !== null || activeCategory !== 'Agua Potable') && (
+              {(activeSubcategory !== null || activeCategory !== 'Climatización') && (
                 <button onClick={clearFilters} className={s.clearFiltersBtn}>
                   Restablecer filtros
                 </button>

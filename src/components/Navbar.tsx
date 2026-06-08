@@ -16,53 +16,35 @@ const COLORS = {
 
 const INGENOVA_CATEGORIES = [
   {
-    title: 'Agua Potable',
+    title: 'Climatización',
     items: [
-      { name: 'Desinfección ultravioleta' },
-      { name: 'Dosificación' },
-      { name: 'Filtración' },
-      { name: 'Osmosis inversa' },
-      { name: 'Plantas de tratamiento' },
-      { name: 'Producto químico' },
-      { name: 'Suavización de agua' }
+      { name: 'Bombas de calor Inverter' },
+      { name: 'Calentadores a gas' },
+      { name: 'Calentadores eléctricos' }
     ]
   },
   {
-    title: 'Tratamiento de agua residual',
+    title: 'Filtración y Bombeo',
     items: [
-      { name: 'Equipos de agua residual' },
-      { name: 'Plantas de tratamiento de agua residual' },
-      { name: 'Químicos para tratamiento de aguas residuales' }
+      { name: 'Filtros de arena' },
+      { name: 'Motobombas autocebantes' },
+      { name: 'Medios filtrantes' }
     ]
   },
   {
-    title: 'Piscinas',
+    title: 'Accesorios de Vaso',
     items: [
-      { name: 'Accesorios' },
-      { name: 'Calefacción' },
-      { name: 'Desinfeccion' },
-      { name: 'Equipos para piscina' },
-      { name: 'Filtros y bombas' },
-      { name: 'Producto químico' }
+      { name: 'Boquillas de retorno' },
+      { name: 'Skimmers y desagües' },
+      { name: 'Iluminación LED subacuática' }
     ]
   },
   {
-    title: 'Análisis de agua',
+    title: 'Seguridad y Confort',
     items: [
-      { name: 'Comparadores visuales' },
-      { name: 'Equipos para medir la calidad del agua' },
-      { name: 'Reactivos, laboratorio y otros' }
-    ]
-  },
-  {
-    title: 'Bombas de agua',
-    items: [
-      { name: 'Accesorios de instalación' },
-      { name: 'Bombas centrifugas' },
-      { name: 'Bombas multietapas' },
-      { name: 'Bombas Periféricas' },
-      { name: 'Bombeo sumergible' },
-      { name: 'Presurización' }
+      { name: 'Alarmas de inmersión' },
+      { name: 'Escaleras y pasamanos' },
+      { name: 'Cubiertas de seguridad' }
     ]
   }
 ];
