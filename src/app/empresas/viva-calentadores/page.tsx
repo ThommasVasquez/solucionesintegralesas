@@ -54,7 +54,7 @@ export default function VivaCalentadoresPage() {
               <Image src="https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=75&w=500&auto=format&fit=crop" alt="Calentador de agua a gas" fill style={{ objectFit: 'cover' }} sizes="(max-width:900px) 50vw, 25vw" />
             </div>
             <div className={styles.heroImg}>
-              <Image src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=75&w=500&auto=format&fit=crop" alt="Técnico realizando mantenimiento de calentador" fill style={{ objectFit: 'cover' }} sizes="(max-width:900px) 50vw, 25vw" />
+              <Image src="https://images.unsplash.com/photo-1657852168786-97ffaa652483?q=75&w=500&auto=format&fit=crop" alt="Calentador de agua a gas y cilindro GLP" fill style={{ objectFit: 'cover' }} sizes="(max-width:900px) 50vw, 25vw" />
             </div>
           </div>
         </div>

@@ -43,7 +43,7 @@ const businessLines = [
     images: [
       'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=70&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=70&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1657852168786-97ffaa652483?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
