@@ -22,15 +22,15 @@ export const BRAND_COLORS = {
 const businessLines = [
   { 
     label: 'Ingenova', 
-    title: 'Jacuzzis, Piscinas & Turcos',
-    tag: 'Mantenimiento & Repuestos',
+    title: 'Construcción Civil & Piscinas',
+    tag: 'Obra Civil & Acabados',
     color: BRAND_COLORS.INGENOVA,
-    desc: 'Somos expertos en el corazón de sus zonas húmedas. Ofrecemos mantenimiento preventivo y correctivo, venta de motobombas, filtros y químicos de alta calidad para garantizar aguas cristalinas y sistemas eficientes.',
+    desc: 'Diseño y ejecución de obras de construcción civil, remodelación residencial y comercial, adecuación de espacios, impermeabilización de fachadas y cubiertas, y acabados de lujo para piscinas.',
     href: '/empresas/ingenova',
     images: [
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=70&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1595113316349-9fa4eb24f884?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1583316174775-bd6dc0e9f298?q=70&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
@@ -278,7 +278,7 @@ export default function Home() {
               <span className={styles.sectionLabel}>Nuestra Historia</span>
               <h2>Más de 10 años brindando soluciones de confianza</h2>
               <p>En <strong>Soluciones Integrales AS SAS</strong>, nacimos con una misión clara: simplificar la vida de nuestros clientes a través de servicios técnicos de alta calidad y un respaldo corporativo inigualable.</p>
-              <p>Lo que comenzó como una especialización en zonas húmedas con <strong>Ingenova</strong>, ha evolucionado hasta convertirse en un ecosistema de servicios que abarca desde el servicio técnico de calentadores con <strong>Viva Calentadores</strong> hasta la salud animal con <strong>ProMascotas</strong>.</p>
+              <p>Lo que comenzó como una especialización en construcción civil y acabados de piscinas con <strong>Ingenova</strong>, ha evolucionado hasta convertirse en un ecosistema de servicios que abarca desde el servicio técnico de calentadores con <strong>Viva Calentadores</strong> hasta la salud animal con <strong>ProMascotas</strong>.</p>
               <div className={styles.stats}>
                 <div className={styles.statItem}>
                   <span className={styles.statNum}>+2k</span>
