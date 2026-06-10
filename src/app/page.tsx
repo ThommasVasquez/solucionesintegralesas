@@ -42,8 +42,8 @@ const businessLines = [
     href: '/empresas/viva-calentadores',
     images: [
       'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=70&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1621905252507-b354bc25edac?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
