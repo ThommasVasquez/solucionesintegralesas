@@ -10,12 +10,12 @@ const waLink = (msg: string) => `${WA_BASE}?text=${encodeURIComponent(msg)}`;
 
 const HERO_SLIDES = [
   {
-    image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200&auto=format&fit=crop",
-    title: "Construcción y Acabados de Piscinas",
-    subtitle: "Zonas Húmedas",
-    desc: "Diseño civil completo, excavación, estructura de concreto reforzado, impermeabilización y revestimientos de lujo a la medida.",
-    ctaText: "Cotizar Piscina",
-    ctaMsg: "Hola Ingenova, me gustaría cotizar el diseño y construcción de una piscina o jacuzzi."
+    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop",
+    title: "Construcción Civil y Remodelaciones",
+    subtitle: "Obra Civil Profesional",
+    desc: "Ampliaciones, mampostería, pintura, adecuación de locales comerciales, enchapados, pisos y acabados de alta calidad.",
+    ctaText: "Cotizar Obra",
+    ctaMsg: "Hola Ingenova, me interesa recibir una cotización sobre obras civiles y remodelaciones."
   },
   {
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop",
@@ -34,12 +34,12 @@ const HERO_SLIDES = [
     ctaMsg: "Hola Ingenova, me gustaría cotizar la reparación o instalación de cubiertas/techo."
   },
   {
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200&auto=format&fit=crop",
-    title: "Rehabilitación y Enchape de Zonas Húmedas",
-    subtitle: "Remodelación Técnica",
-    desc: "Renovación civil y cambio de enchape en piscinas antiguas, jacuzzis y zonas de playa con materiales antideslizantes de alta calidad.",
-    ctaText: "Solicitar Visita",
-    ctaMsg: "Hola Ingenova, deseo agendar una visita técnica para remodelación de piscina o zona húmeda."
+    image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200&auto=format&fit=crop",
+    title: "Construcción y Acabados de Piscinas",
+    subtitle: "Zonas Húmedas",
+    desc: "Diseño civil, excavación estructural, vaciado de concreto monolítico impermeable y revestimientos en vitrocerámica de lujo.",
+    ctaText: "Cotizar Piscina",
+    ctaMsg: "Hola Ingenova, me gustaría cotizar el diseño, construcción y acabados de una piscina o jacuzzi."
   },
   {
     image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=1200&auto=format&fit=crop",
@@ -54,23 +54,23 @@ const HERO_SLIDES = [
 const BUBBLE_SERVICES = [
   {
     id: "item-p-1",
-    title: "Piscinas",
+    title: "Acabados Piscinas",
     icon: (
       <svg viewBox="0 0 84 67" className={s.bubbleSvg}>
         <path d="M51.4 26.5h1C62.3 26.5 72.2 26.5 82 26.5c.8 0 1.5-.1 1.8-.9V24.8c-.4-.7-1.1-.8-1.8-.8-2.8 0-5.6 0-8.4-.1-.3 0-.6 0-1-.1V24c0-2.5 0-4.9 0-7.3 0-1.2 0-2.5-.1-3.7-.8-6.4-5.8-11.7-11.9-12.8C54.1-.9 47.9 2.2 44.9 8.2c-.1.2-.2.4-.3.6-.1 0-.1-.1-.1-.1-.1-.1-.2-.3-.3-.4C41.5 3.1 37.3.3 31.5 0 23.8-.3 17 5.8 16.5 13.5c-.2 3.1-.1 6.3-.1 9.5 0 .3 0 .6 0 1h-1.1c-4.4 0-8.8 0-13.2 0-.3 0-.7 0-1 .1C.5 24.3.3 24.7.3 25.4c0 .3.1.6.3.8.2.2.5.3.8.3.3 0 .6 0 .8 0h14.3v1C16.4 28.7 16.4 30 16.4 31.2c0 .9.5 1.4 1.3 1.4.7 0 1.1-.5 1.2-1.4v-.7c0-3 0-6 0-9 0-2.7-.1-5.4.1-8.1.5-6.9 7.3-12.1 14-10.9 6 1.1 10.2 6.1 10.3 12.3 0 2.8 0 5.6 0 8.4 0 .2 0 .5 0 .7h-3V23c0-2.9 0-5.7-.1-8.6-.2-6.4-7-10.7-12.8-8-3.8 1.8-5.5 5-5.5 9.1 0 10.5 0 21 0 31.5v1.2c-.5-.4-.9-.6-1.3-.9-1.2-.8-2-1.8-1.8-3.4.1-1 .1-2 0-3 0-1.5 0-3 0-4.5 0-.7-.4-1.2-1.1-1.2-.7-.1-1.2.4-1.3 1.1 0 .2 0 .5 0 .7v8c0 .5-.2 1-.5 1.3C12 50.3 6.2 50 2.6 45.7c-.9-1.1-1.6-1.1-2.4 0v.8c.1 0 .1.1.2.2 4.1 5.7 11.7 6.5 16.8 1.8.2-.2.4-.3.5-.5 2.3 2.3 5 3.6 8.2 3.6 3.2 0 5.8-1.3 8.1-3.6 2.3 2.3 5 3.6 8.2 3.6 3.2 0 5.8-1.3 8.1-3.6 2.3 2.3 5 3.6 8.2 3.6 3.2 0 5.8-1.3 8.1-3.6.2.2.4.4.6.6 3.1 2.7 6.6 3.6 10.6 2.5 2.6-.7 4.6-2.4 6.2-4.6v-.8c-.8-1.1-1.5-1.1-2.4 0-3.9 4.7-10.1 4.7-13.9 0-.7-.9-1.5-.9-2.3 0-3.6 4.4-9.5 4.7-13.3.6-.3-.3-.5-.7-.5-1.1 0-6.1 0-12.2 0-18.3 0-24.4 0-30.5 0" fill="currentColor"/>
       </svg>
     ),
-    link: waLink("Hola Ingenova, me interesa el servicio de diseño y construcción de Piscinas.")
+    link: waLink("Hola Ingenova, me interesa cotizar la construcción o acabados de mi piscina.")
   },
   {
     id: "item-p-2",
-    title: "Fachadas",
+    title: "Obra Civil",
     icon: (
       <svg viewBox="0 0 66 64" className={s.bubbleSvg}>
         <path d="M10 10h46v44H10zM5 5v54h56V5zm15 15h10v10H20zm16 0h10v10H36zM20 34h10v10H20zm16 0h10v10H36z" fill="currentColor"/>
       </svg>
     ),
-    link: waLink("Hola Ingenova, me interesa recibir información sobre mantenimiento e impermeabilización de Fachadas.")
+    link: waLink("Hola Ingenova, me interesa cotizar proyectos de obra civil y remodelaciones.")
   },
   {
     id: "item-p-3",
@@ -80,27 +80,27 @@ const BUBBLE_SERVICES = [
         <path d="M33 5L5 28h10v33h36V28h10L33 5zm10 51H23V34h20v22z" fill="currentColor"/>
       </svg>
     ),
-    link: waLink("Hola Ingenova, me interesa recibir información sobre instalación o reparación de Cubiertas.")
+    link: waLink("Hola Ingenova, necesito impermeabilización o instalación de cubiertas.")
   },
   {
     id: "item-p-4",
+    title: "Fachadas",
+    icon: (
+      <svg viewBox="0 0 66 64" className={s.bubbleSvg}>
+        <path d="M10 10h46v44H10zM5 5v54h56V5zm15 15h10v10H20zm16 0h10v10H36zM20 34h10v10H20zm16 0h10v10H36z" fill="currentColor"/>
+      </svg>
+    ),
+    link: waLink("Hola Ingenova, me interesa cotizar la impermeabilización o mantenimiento de fachadas.")
+  },
+  {
+    id: "item-p-5",
     title: "Maquinaria",
     icon: (
       <svg viewBox="0 0 70 67" className={s.bubbleSvg}>
         <path d="M35 15c-11 0-20 9-20 20s9 20 20 20 20-9 20-20-9-20-20-20zm0 35c-8.3 0-15-6.7-15-15s6.7-15 15-15 15 6.7 15 15-6.7 15-15 15z" fill="currentColor"/>
       </svg>
     ),
-    link: waLink("Hola Ingenova, me interesa cotizar maquinaria y equipos para piscinas.")
-  },
-  {
-    id: "item-p-5",
-    title: "Bombeo",
-    icon: (
-      <svg viewBox="0 0 60 52" className={s.bubbleSvg}>
-        <path d="M45.5 7.3c1.8 0 3.5 0 5.3 0 2.3 0 4.7 0 7 0 .7 0 1.3-.2 1.7-.8V1c-.3-.6-.8-.8-1.5-.8-4.3 0-8.6 0-12.9 0-.6 0-1.3 0-1.9.1-3 .4-5.2 2.4-5.6 5.3-.2 1.4-.1 2.9-.1 4.3 0 .2 0 .4-.1.7-1.2.2-1.4.5-1.4 1.7 0 1.1 0 2.3 0 3.4V16.8h-2.1c0-.2-.1-.4-.1-.5-.2-1.1-.9-1.9-2-2-1.2-.1-2.4-.1-3.6.1-.5 0-1 .2-1.3.5s-.6.7-.6 1.2c0 .2 0 .4 0 .6H23.3v-1.7c0-.6 0-1.1 0-1.7 0-1-.4-2-1.1-2.7s-1.7-1.1-2.7-1.1c-.9 0-1.8 0-2.7 0-2.5 0-4.1 1.6-4.1 4.2 0 .5 0 .9 0 1.4-.1 0-.2 0-.2.1-5.7.8-9.4 4-11.3 9.4-.3.9-.4 1.8-.6 2.8v2.6c.1.6.2 1.3.4 1.9C1.5 36.2 2.9 38.5 4.9 40.3s4.4 3 7 3.4c.2 0 .4.1.7.1v5H12c-3.3 0-6.6 0-9.8 0-.7 0-1.3.2-1.7.8V50.3c.3.6.8.8 1.5.8h55.9c.7 0 1.2-.2 1.5-.8v-.7c-.3-.6-.8-.8-1.5-.8H23.2v-.1h-.8v-5H26.3c0 .2 0 .4 0 .6.1.5.3 1 .7 1.3.4.4.9.5 1.4.6 1 .0 2 0 3 0 1.4 0 2.2-.7 2.4-2.1 0-.1.0-.2.1-.4h15.3c1.7 0 1.9-.2 1.9-1.9v-4.1H51.8c2 0 4 0 6-.1.7 0 1.2-.2 1.5-.8V23.7c-.3-.6-.8-.8-1.5-.8-2.1.0-4.1 0-6.1 0h-.7V18.9c0-1.9-.2-2.1-2.1-2.1H46.4v-4.8c0-1.6 0-3.2 0-4.8 0-.5-.1-1-.6-1.2-.3-.1-.5-.2-.8-.2 0-1-.0-2 .1-3 0-.1.3-.3.5-.3zm-30.5 7.6c0-.4.2-.7.5-1s.6-.4 1-.4h3c.4 0 .8.1 1 .4s.5.7.5 1.1v1.6H15v-1.7zm5 33.8h-5v-4.9h5v4.9zm6.2-7.3H25.7c-3.9 0-7.7 0-11.6-.1-5.2 0-9.4-3.2-10.8-8.1C1.3 26.7 5.9 19.9 12.7 19.2c.5 0 1 0 1.4 0H25.6h.7v22.3zm24.9-16.3h6v10.2H51.2V25.2zm-12.8-12.1H44V16.8H38.4V13.1zm10.4 6.1v22.3H33.9c0-.2 0-.4 0-.6 0-1.6 0-3.2 0-4.8.1-.2 0-.5 0-.7-.1-.3-.2-.5-.4-.7-.2-.2-.5-.3-.7-.3-.3 0-.5.1-.7.3-.2.2-.3.4-.3.7c0 .3 0 .7.1 1 0 2.3 0 4.6 0 6.9V44H28.7V16.6H31.5c0 .2 0 .4 0 .7.0 2.5 0 5.1.0 7.6 0 1 .9 1.6 1.7 1.1.5-.3.6-.8.6-1.3 0-1.7 0-3.3 0-5V19.2H48.8zm-6.2-11.9c0 .5 0 1.1 0 1.6s0 1.1 0 1.7H39.7c.1-1.6.0-3.3.3-4.9.3-2 2-3.2 4.4-3.2 2.6 0 5.3 0 7.9 0H57.2v2.4H55.2L45.9 5c-.3 0-.6 0-.9 0-1.4.1-2.2.9-2.3 2.3H42.7zm-19.3 17.1c.1.2 0 .3-.1.5-.1.1-.2.3-.3.4s-.3.1-.5.2-.3 0-.5 0c-1-.0-2 0-3 0-.2 0-.3-.1-.5-.2s-.3-.2-.4-.3-.2-.3-.2-.5 0-.3.1-.5c.0-.6.5-1.1 1.2-1.1h1.4c.5 0 1 .1 1.5.1.7.0 1.1.5 1.2 1.1s.1.3.1.3zm0 5.9c0 .2 0 .3-.1.5-.1.1-.2.3-.3.4s-.3.1-.5.2-.3 0-.5 0c-1-.0-2 0-3 0-.3 0-.6-.1-.8-.3-.2-.2-.3-.5-.3-.8s.5-1.1 1.2-1.1h1.5 1.5c.3-.0.6.1.8.3.2.2.3.5.3.8zm0 5.9c0 .6-.5 1.1-1.2 1.2-.5 0-1-.1-1.5-.1-.5 0-1 0-1.5-.1-.7-.1-1.2-.6-1.2-1.2 0-.6.5-1.1 1.2-1.2.9-.2 1.9-.2 2.9 0 .8.1 1.3.6 1.3 1.4zm10.5-5.9c0 .2 0 .3-.1.5-.1.1-.2.3-.3.4s-.3.1-.5.2-.3 0-.5 0c-.3 0-.6-.1-.8-.3-.2-.2-.3-.5-.3-.8 0-.3.1-.6.3-.8s.5-.3.8-.3c.3 0 .6.1.8.3.2.2.3.5.3.8z" fill="currentColor"/>
-      </svg>
-    ),
-    link: waLink("Hola Ingenova, me interesa recibir información sobre equipos de bombeo para piscinas.")
+    link: waLink("Hola Ingenova, me interesa cotizar equipos y maquinaria para piscina.")
   },
   {
     id: "item-p-6",
@@ -117,54 +117,54 @@ const BUBBLE_SERVICES = [
         </defs>
       </svg>
     ),
-    link: waLink("Hola Ingenova, me interesa recibir información sobre sus servicios de construcción, fachadas y cubiertas.")
+    link: waLink("Hola Ingenova, me interesa recibir información sobre sus servicios de construcción civil y acabados.")
   }
 ];
 
 const SOLUTIONS = [
   {
-    image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=800&auto=format&fit=crop",
-    title: "Construcción de Piscinas y Jacuzzis",
-    desc: "Diseño civil completo, excavación estructural, vaciado de concreto, impermeabilización y revestimientos de lujo.",
-    icon: "🏊",
-    link: waLink("Hola Ingenova, me interesa cotizar la construcción de una piscina o jacuzzi."),
-    detailedDesc: "Diseño y construcción integral de zonas húmedas personalizadas. Nos encargamos de todo el proceso de ingeniería civil, desde el levantamiento de planos y excavación de terreno, pasando por el vaciado de concreto reforzado con aditivos impermeabilizantes, hasta la instalación de acabados de lujo (vitrocerámica, piedra natural, iluminación LED) y puesta en marcha del sistema de bombeo y filtración.",
+    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800&auto=format&fit=crop",
+    title: "Construcción Civil y Remodelaciones",
+    desc: "Ejecución de obras de mampostería, pañetes, pisos, pintura y remodelaciones estructurales residenciales y comerciales.",
+    icon: "🧱",
+    link: waLink("Hola Ingenova, me interesa cotizar obras de construcción civil o remodelación."),
+    detailedDesc: "Llevamos a cabo proyectos de obra civil de mediana complejidad, adecuaciones de espacios y remodelaciones generales. Nos especializamos en mampostería, pañetes, colocación de pisos cerámicos y porcelanatos, pintura profesional de interiores/exteriores y acabados de lujo para locales comerciales y residenciales.",
     features: [
-      "Diseño 3D y planos de ingeniería detallados",
-      "Excavación estructural y preparación técnica del terreno",
-      "Vaciado de concreto de alta resistencia con aditivos impermeabilizantes Sika",
-      "Instalación de revestimientos premium (mosaico vitrocerámico, piedra antideslizante)",
-      "Equipamiento completo: filtros, bombas y automatización de última generación"
+      "Remodelación completa de locales comerciales, oficinas y viviendas",
+      "Construcción de muros, divisiones y mampostería estructural",
+      "Instalación técnica de pisos, baldosas y enchapados de alta gama",
+      "Aplicación de pintura arquitectónica y acabados estéticos de larga duración",
+      "Obras civiles complementarias y adecuaciones de redes hidrosanitarias"
     ]
   },
   {
-    image: "https://images.unsplash.com/photo-1628744448840-55bef34d2bc0?q=80&w=800&auto=format&fit=crop",
-    title: "Mantenimiento de Cubiertas y Techos",
-    desc: "Reparación de filtraciones y goteras, impermeabilización de terrazas e instalación de cubiertas termoacústicas.",
-    icon: "🏠",
-    link: waLink("Hola Ingenova, necesito mantenimiento o instalación de cubiertas."),
-    detailedDesc: "Soluciones de protección de techados para hogares, locales comerciales y bodegas industriales. Realizamos mantenimientos preventivos y correctivos, impermeabilización asfáltica y acrílica de terrazas, reparación técnica de canaletas de desagüe y goteras, e instalación de tejas termoacústicas y cubiertas de policarbonato o metalúrgicas de larga vida útil.",
+    image: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=800&auto=format&fit=crop",
+    title: "Construcción y Acabados de Piscinas",
+    desc: "Diseño estructural, excavación, concreto reforzado impermeable y enchapes de lujo en vitrocerámica.",
+    icon: "🏊",
+    link: waLink("Hola Ingenova, me interesa cotizar la construcción o acabados de mi piscina."),
+    detailedDesc: "Especialistas en el diseño, construcción civil y revestimiento estético de piscinas, jacuzzis y zonas húmedas. Realizamos desde el movimiento de tierra y vaciado de concreto sismorresistente con aditivos de estanqueidad, hasta el enchape en vitrocerámica (mosaico), playas en piedra térmica y acabados de lujo con iluminación LED.",
     features: [
-      "Localización exacta de goteras y filtraciones de agua",
-      "Impermeabilización de terrazas y losas con mantos asfálticos y acrílicos",
-      "Mantenimiento, limpieza e instalación de canaletas y bajantes de agua lluvia",
-      "Suministro e instalación de tejas termoacústicas UPVC y policarbonato",
-      "Refuerzo estructural de techos y corrección de pendientes"
+      "Planificación y diseño estructural sismorresistente",
+      "Excavación, cimentación y vaciado de concreto monolítico impermeable",
+      "Enchape y acabados premium (mosaico vitrocerámico, piedra natural y antideslizante)",
+      "Construcción de jacuzzis integrados, playas húmedas y cascadas",
+      "Pruebas de estanqueidad hidráulica y acabados de rebose"
     ]
   },
   {
     image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
-    title: "Impermeabilización de Fachadas",
-    desc: "Lavado a presión, sellado de juntas de dilatación, aplicación de hidrófugos y pintura exterior de fachadas.",
+    title: "Impermeabilización de Fachadas y Cubiertas",
+    desc: "Lavado a alta presión, sellado de juntas, hidrófugos de fachada y montaje de tejas termoacústicas.",
     icon: "🏢",
-    link: waLink("Hola Ingenova, solicito presupuesto para mantenimiento de fachadas."),
-    detailedDesc: "Mantenimiento y embellecimiento de fachadas en edificios de propiedad horizontal, residencias y sedes empresariales. Nuestro servicio incluye lavado con hidrolavadora a alta presión para remover hongos y suciedad, sellado elástico de juntas de dilatación para prevenir grietas, aplicación de hidrófugos repelentes de agua y pintura exterior de alta durabilidad con garantía de intemperie.",
+    link: waLink("Hola Ingenova, me interesa cotizar impermeabilización de fachadas y cubiertas."),
+    detailedDesc: "Soluciones definitivas para la protección climática de edificaciones residenciales y comerciales. Realizamos lavado a presión de fachadas, sellado elástico de juntas de dilatación, aplicación de hidrófugos repelentes de agua, impermeabilización de terrazas con mantos asfálticos y acrílicos, e instalación de cubiertas termoacústicas UPVC.",
     features: [
-      "Lavado profundo a presión para remover moho, hollín y contaminantes",
-      "Sellado de fisuras y juntas con poliuretano elástico de alto rendimiento",
-      "Aplicación de hidrófugo siliconado transparente contra humedad y moho",
-      "Pintura exterior de alta especificación para protección climática",
-      "Trabajo seguro en alturas con andamios certificados y personal especializado"
+      "Sellado de fisuras y juntas con poliuretano de alta elasticidad",
+      "Aplicación de hidrófugo siliconado transparente contra humedades",
+      "Impermeabilización asfáltica y acrílica de terrazas y losas de concreto",
+      "Lavado de fachadas a presión para remoción de hongos y moho",
+      "Suministro e instalación de tejas termoacústicas y policarbonato"
     ]
   },
   {
@@ -173,7 +173,7 @@ const SOLUTIONS = [
     desc: "Venta e instalación de bombas de calor Inverter, filtros de arena, motobombas y sistemas automáticos para piscinas.",
     icon: "⚙️",
     link: waLink("Hola Ingenova, me interesa cotizar equipos para mi piscina."),
-    detailedDesc: "Suministro e instalación llave en mano de toda la maquinaria para el cuarto de máquinas de su piscina. Somos distribuidores autorizados de las mejores marcas del mercado (AstralPool, Hayward, Pentair). Ofrecemos bombas de calor Full Inverter para climatización eficiente, motobombas autocebantes, filtros de arena y sistemas de automatización.",
+    detailedDesc: "Suministro e instalación de equipos y maquinaria especializada para el correcto funcionamiento de piscinas y jacuzzis. Somos distribuidores autorizados de las mejores marcas del mercado (AstralPool, Hayward, Pentair). Ofrecemos bombas de calor Full Inverter para climatización eficiente, motobombas autocebantes, filtros de arena y sistemas de automatización.",
     features: [
       "Venta de equipos de marcas líderes con garantía directa del fabricante",
       "Instalación y acoplamiento hidráulico y eléctrico por técnicos expertos",
@@ -410,7 +410,7 @@ export default function IngenovaClient() {
             <span className={s.subTitle}>Bienvenidos</span>
             <h2 className={s.mainTitle}>INGENOVA SOLUCIONES INTEGRALES AS</h2>
             <p className={s.welcomeParagraph}>
-              En Ingenova somos especialistas en el diseño, construcción y acabados de piscinas y jacuzzis, así como en soluciones integrales para la impermeabilización de fachadas y el mantenimiento de cubiertas y techos. Nuestro compromiso es brindar calidad técnica y durabilidad en cada proyecto, asegurando la satisfacción de nuestros clientes con soluciones de ingeniería eficientes.
+              En Ingenova somos especialistas en obras de construcción civil, remodelaciones residenciales y comerciales, adecuaciones estructurales y acabados de alta especificación. Asimismo, diseñamos y construimos piscinas y jacuzzis con revestimientos de lujo y sistemas de recirculación eficientes. Nuestro compromiso es brindar calidad técnica, seguridad y durabilidad en cada proyecto.
             </p>
             <a href="#contacto" className={s.btnPrimaryGold}>Agendar Asesoría</a>
           </div>
