@@ -54,9 +54,9 @@ const businessLines = [
     desc: 'La sonrisa de su mejor amigo es nuestra prioridad. Realizamos limpieza dental profunda sin anestesia general (según evaluación), eliminando sarro y mal aliento directamente en la comodidad de su hogar.',
     href: '/empresas/promascotas',
     images: [
-      'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=70&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1583511655826-05700d52f4d9?q=70&w=800&auto=format&fit=crop'
     ]
   },
   { 
@@ -68,8 +68,8 @@ const businessLines = [
     href: '/empresas/soluciones-as',
     images: [
       'https://images.unsplash.com/photo-1497366216548-37526070297c?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=70&w=800&auto=format&fit=crop'
+      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?q=70&w=800&auto=format&fit=crop'
     ]
   },
 ];
