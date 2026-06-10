@@ -26,7 +26,7 @@ const HERO_SLIDES = [
     ctaMsg: "Hola Ingenova, solicito una cotización para el mantenimiento o impermeabilización de fachadas."
   },
   {
-    image: "https://images.unsplash.com/photo-1628744448840-55bef34d2bc0?q=80&w=1200&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1635424710928-0544e8512eae?q=80&w=1200&auto=format&fit=crop",
     title: "Reparación y Montaje de Cubiertas y Techos",
     subtitle: "Cubiertas y Tejados",
     desc: "Instalación de cubiertas termoacústicas, impermeabilización total de terrazas y reparación profesional de goteras y humedades.",
@@ -250,7 +250,7 @@ const BRANDS = [
   { name: "AstralPool", logo: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200&auto=format&fit=crop" },
   { name: "Hayward", logo: "https://images.unsplash.com/photo-1608501078713-8e445a709b39?q=80&w=200&auto=format&fit=crop" },
   { name: "Pentair", logo: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=200&auto=format&fit=crop" },
-  { name: "Taylor", logo: "https://images.unsplash.com/photo-1542013936693-8848e5740a7a?q=80&w=200&auto=format&fit=crop" },
+  { name: "Taylor", logo: "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=200&auto=format&fit=crop" },
   { name: "Lovibond", logo: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=200&auto=format&fit=crop" },
   { name: "BSV", logo: "https://images.unsplash.com/photo-1585130401366-fe05a8d813c4?q=80&w=200&auto=format&fit=crop" }
 ];

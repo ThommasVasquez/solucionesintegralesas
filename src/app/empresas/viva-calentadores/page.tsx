@@ -51,7 +51,7 @@ export default function VivaCalentadoresPage() {
               <Image src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=75&w=900&auto=format&fit=crop" alt="Ducha en baño moderno" fill style={{ objectFit: 'cover' }} sizes="(max-width:900px) 100vw, 50vw" />
             </div>
             <div className={styles.heroImg}>
-              <Image src="https://images.unsplash.com/photo-1621905252507-b354bc25edac?q=75&w=500&auto=format&fit=crop" alt="Calentador de agua a gas" fill style={{ objectFit: 'cover' }} sizes="(max-width:900px) 50vw, 25vw" />
+              <Image src="https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=75&w=500&auto=format&fit=crop" alt="Calentador de agua a gas" fill style={{ objectFit: 'cover' }} sizes="(max-width:900px) 50vw, 25vw" />
             </div>
             <div className={styles.heroImg}>
               <Image src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=75&w=500&auto=format&fit=crop" alt="Técnico realizando mantenimiento de calentador" fill style={{ objectFit: 'cover' }} sizes="(max-width:900px) 50vw, 25vw" />

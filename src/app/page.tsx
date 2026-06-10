@@ -42,7 +42,7 @@ const businessLines = [
     href: '/empresas/viva-calentadores',
     images: [
       'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=70&w=800&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1621905252507-b354bc25edac?q=70&w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1585338107529-13afc5f02586?q=70&w=800&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=70&w=800&auto=format&fit=crop'
     ]
   },
@@ -97,15 +97,11 @@ export default function Home() {
 
 
   useEffect(() => {
-    if (activeCardIdx === null) {
-      setImageCycleIdx(0);
-      return;
-    }
     const id = setInterval(() => {
       setImageCycleIdx(prev => prev + 1);
     }, 3000);
     return () => clearInterval(id);
-  }, [activeCardIdx]);
+  }, []);
 
 
   useEffect(() => {
@@ -232,7 +228,7 @@ export default function Home() {
                     fill 
                     className={styles.cardImg}
                     style={{ 
-                      opacity: (isFocused ? (imageCycleIdx % line.images.length === imgIdx) : imgIdx === 0) ? 1 : 0,
+                      opacity: (imageCycleIdx % line.images.length === imgIdx) ? 1 : 0,
                       transition: 'opacity 1s ease',
                       objectFit: 'cover'
                     }}
