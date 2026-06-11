@@ -35,14 +35,14 @@ export async function GET(req: NextRequest) {
     if (brandId && chatId) {
       messages = await sql`
         SELECT * FROM whatsapp_messages 
-        WHERE ("brandId" = ${brandId} OR "brandId" = 'unknown') AND "chatId" = ${chatId} 
+        WHERE "brandId" = ${brandId} AND "chatId" = ${chatId} 
         ORDER BY timestamp DESC 
         LIMIT ${limit}
       `;
     } else if (brandId) {
       messages = await sql`
         SELECT * FROM whatsapp_messages 
-        WHERE "brandId" = ${brandId} OR "brandId" = 'unknown' 
+        WHERE "brandId" = ${brandId} 
         ORDER BY timestamp DESC 
         LIMIT ${limit}
       `;
