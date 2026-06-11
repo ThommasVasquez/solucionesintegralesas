@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
+import { neon } from '@neondatabase/serverless';
 
 export const runtime = 'edge';
 
@@ -42,7 +42,8 @@ export async function POST() {
     // 2. Vaciar base de datos
     try {
       if (process.env.DATABASE_URL) {
-        await db.auditLog.deleteMany();
+        const sql = neon(process.env.DATABASE_URL);
+        await sql`DELETE FROM audit_logs`;
       }
     } catch (dbError) {
       console.warn('Error vaciando AuditLog en DB:', dbError);

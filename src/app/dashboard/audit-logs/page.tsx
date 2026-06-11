@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
+import { neon } from "@neondatabase/serverless";
 import Link from "next/link";
 import styles from "./audit-logs.module.css";
 import Navbar from "@/components/Navbar";
@@ -82,29 +82,32 @@ export default async function AuditLogsPage(props: {
   if (logs.length === 0) {
     try {
       if (process.env.DATABASE_URL) {
-        const dbLogs = await db.auditLog.findMany({
-          orderBy: { createdAt: 'desc' },
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                name: true
-              }
-            }
-          },
-          take: 100 // Cargar un límite razonable
-        });
+        const sql = neon(process.env.DATABASE_URL);
+        const dbLogs = await sql`
+          SELECT 
+            al.id, 
+            al."userId", 
+            al.action, 
+            al.resource, 
+            al.details, 
+            al."createdAt" as "createdAt",
+            u.email as "userEmail",
+            u.name as "userName"
+          FROM audit_logs al
+          LEFT JOIN users u ON al."userId" = u.id
+          ORDER BY al."createdAt" DESC
+          LIMIT 100
+        `;
 
         logs = dbLogs.map((dl: any) => ({
           id: dl.id,
           userId: dl.userId,
-          userEmail: dl.user?.email || 'N/A',
-          userName: dl.user?.name || 'Desconocido',
+          userEmail: dl.userEmail || 'N/A',
+          userName: dl.userName || 'Desconocido',
           action: dl.action,
           resource: dl.resource,
           details: dl.details,
-          timestamp: dl.createdAt.toISOString()
+          timestamp: dl.createdAt instanceof Date ? dl.createdAt.toISOString() : String(dl.createdAt)
         }));
       }
     } catch (dbError) {

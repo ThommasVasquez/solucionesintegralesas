@@ -1,4 +1,4 @@
-import { db } from './db';
+import { neon } from '@neondatabase/serverless';
 
 export interface AuditLogEntry {
   id: string;
@@ -97,33 +97,25 @@ export async function logActionServer(payload: {
         const targetEmail = userEmail || 'unknown@example.com';
         const targetName = userName || 'Desconocido';
 
-        // Intentar buscar el usuario en la DB
-        const dbUser = await db.user.findUnique({
-          where: { id: targetUserId },
-        });
+        const sql = neon(process.env.DATABASE_URL);
 
-        if (!dbUser) {
+        // Intentar buscar el usuario en la DB
+        const users = await sql`
+          SELECT id FROM users WHERE id = ${targetUserId} LIMIT 1
+        `;
+
+        if (users.length === 0) {
           // Crear usuario fantasma temporal para satisfacer la clave foránea
-          await db.user.create({
-            data: {
-              id: targetUserId,
-              email: targetEmail,
-              name: targetName,
-              password: 'N/A',
-            },
-          });
+          await sql`
+            INSERT INTO users (id, name, email, password, role, "createdAt", "updatedAt")
+            VALUES (${targetUserId}, ${targetName}, ${targetEmail}, 'N/A', 'AGENDADOR', ${new Date()}, ${new Date()})
+          `;
         }
 
-        await db.auditLog.create({
-          data: {
-            id: logEntry.id,
-            userId: targetUserId,
-            action,
-            resource,
-            details: details ? JSON.parse(JSON.stringify(details)) : null,
-            createdAt: timestamp,
-          },
-        });
+        await sql`
+          INSERT INTO audit_logs (id, "userId", action, resource, details, "createdAt")
+          VALUES (${logEntry.id}, ${targetUserId}, ${action}, ${resource}, ${details ? JSON.stringify(details) : null}, ${timestamp})
+        `;
       }
     } catch (dbError) {
       console.warn('[Audit Log Server] Falló la inserción en base de datos (se usó respaldo en archivo):', dbError);
