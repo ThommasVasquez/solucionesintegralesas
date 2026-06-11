@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { getStoredMessages, clearStoredMessages } from '@/lib/whatsapp-store';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export const runtime = 'edge';
 
@@ -9,6 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+// CORS preflight handler
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
@@ -16,17 +17,31 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const messages = await getStoredMessages();
+    const { searchParams } = new URL(req.url);
+    const brandId = searchParams.get('brandId');   // filtro opcional
+    const chatId  = searchParams.get('chatId');    // filtro opcional
+    const limit   = parseInt(searchParams.get('limit') ?? '50');
+
+    const messages = await prisma.whatsAppMessage.findMany({
+      where: {
+        ...(brandId ? { brandId } : {}),
+        ...(chatId  ? { chatId }  : {}),
+      },
+      orderBy: { timestamp: 'desc' },
+      take: limit,
+    });
+
+    // Retorna tanto 'data' como 'messages' para ser compatible con el dashboard y nuevos consumidores
     return NextResponse.json(
-      { messages },
-      { status: 200, headers: corsHeaders }
+      { success: true, messages, data: messages },
+      { headers: corsHeaders }
     );
   } catch (error) {
     console.error('Error en GET /api/whatsapp/messages:', error);
     return NextResponse.json(
-      { error: 'Error leyendo mensajes' },
+      { success: false, error: 'Error leyendo mensajes' },
       { status: 500, headers: corsHeaders }
     );
   }
@@ -34,13 +49,7 @@ export async function GET() {
 
 export async function DELETE() {
   try {
-    const success = await clearStoredMessages();
-    if (!success) {
-      return NextResponse.json(
-        { error: 'No se pudo vaciar el almacenamiento' },
-        { status: 500, headers: corsHeaders }
-      );
-    }
+    await prisma.whatsAppMessage.deleteMany();
     return NextResponse.json(
       { success: true },
       { status: 200, headers: corsHeaders }
@@ -48,9 +57,8 @@ export async function DELETE() {
   } catch (error) {
     console.error('Error en DELETE /api/whatsapp/messages:', error);
     return NextResponse.json(
-      { error: 'Error vaciando mensajes' },
+      { success: false, error: 'Error vaciando mensajes' },
       { status: 500, headers: corsHeaders }
     );
   }
 }
-

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { addStoredMessage } from '@/lib/whatsapp-store';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export const runtime = 'edge';
 
@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-// Manejo de CORS preflight (OPTIONS)
+// CORS preflight handler
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
@@ -17,45 +17,48 @@ export async function OPTIONS() {
   });
 }
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { id, chatId, sender, content, timestamp, direction } = body;
+    const body = await req.json();
+    const { id, brandId, chatId, sender, content, timestamp, direction } = body;
 
-    // Validación de campos
-    if (!id || !chatId || !sender || !content || !timestamp || !direction) {
+    if (!id || !content || !direction) {
       return NextResponse.json(
-        { error: 'Faltan campos obligatorios en el mensaje' },
+        { success: false, error: 'Payload incompleto' },
         { status: 400, headers: corsHeaders }
       );
     }
 
-    const { success, isDuplicate } = await addStoredMessage({
-      id,
-      chatId,
-      sender,
-      content,
-      timestamp,
-      direction,
-    });
-
-    if (!success) {
+    // Evitar duplicados (el script puede reintentar)
+    const existing = await prisma.whatsAppMessage.findUnique({ where: { id } });
+    if (existing) {
       return NextResponse.json(
-        { error: 'No se pudo escribir el mensaje en el almacenamiento' },
-        { status: 500, headers: corsHeaders }
+        { success: true, duplicate: true },
+        { headers: corsHeaders }
       );
     }
 
+    await prisma.whatsAppMessage.create({
+      data: {
+        id,
+        brandId:   brandId  ?? 'unknown',
+        chatId:    chatId   ?? 'unknown',
+        sender:    sender   ?? 'unknown',
+        content,
+        direction,
+        timestamp: timestamp ? new Date(timestamp) : new Date(),
+      },
+    });
+
     return NextResponse.json(
-      { success: true, isDuplicate },
-      { status: 200, headers: corsHeaders }
+      { success: true },
+      { headers: corsHeaders }
     );
   } catch (error) {
-    console.error('Error en POST /api/whatsapp/message:', error);
+    console.error('[/api/whatsapp/message]', error);
     return NextResponse.json(
-      { error: 'Error interno procesando el mensaje' },
+      { success: false, error: 'Error interno' },
       { status: 500, headers: corsHeaders }
     );
   }
 }
-
