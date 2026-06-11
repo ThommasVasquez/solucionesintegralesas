@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { neon } from '@neondatabase/serverless';
 
 export const runtime = 'edge';
@@ -25,16 +24,44 @@ export async function GET(req: NextRequest) {
     const chatId  = searchParams.get('chatId');    // filtro opcional
     const limit   = parseInt(searchParams.get('limit') ?? '50');
 
-    const messages = await prisma.whatsAppMessage.findMany({
-      where: {
-        ...(brandId ? { brandId } : {}),
-        ...(chatId  ? { chatId }  : {}),
-      },
-      orderBy: { timestamp: 'desc' },
-      take: limit,
-    });
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not defined');
+    }
 
-    // Mapear objetos Prisma a objetos planos serializables para evitar crashes del runtime WASM en Cloudflare Edge
+    const sql = neon(process.env.DATABASE_URL);
+    let messages: any[] = [];
+
+    // Ejecutar consultas SQL directas vía HTTP para un rendimiento óptimo y libre de timeouts de WASM en Edge
+    if (brandId && chatId) {
+      messages = await sql`
+        SELECT * FROM whatsapp_messages 
+        WHERE "brandId" = ${brandId} AND "chatId" = ${chatId} 
+        ORDER BY timestamp DESC 
+        LIMIT ${limit}
+      `;
+    } else if (brandId) {
+      messages = await sql`
+        SELECT * FROM whatsapp_messages 
+        WHERE "brandId" = ${brandId} 
+        ORDER BY timestamp DESC 
+        LIMIT ${limit}
+      `;
+    } else if (chatId) {
+      messages = await sql`
+        SELECT * FROM whatsapp_messages 
+        WHERE "chatId" = ${chatId} 
+        ORDER BY timestamp DESC 
+        LIMIT ${limit}
+      `;
+    } else {
+      messages = await sql`
+        SELECT * FROM whatsapp_messages 
+        ORDER BY timestamp DESC 
+        LIMIT ${limit}
+      `;
+    }
+
+    // Mapear objetos a una estructura limpia con fechas serializables
     const plainMessages = messages.map((m: any) => ({
       id: m.id,
       brandId: m.brandId,
@@ -42,8 +69,8 @@ export async function GET(req: NextRequest) {
       sender: m.sender,
       content: m.content,
       direction: m.direction,
-      timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp,
-      createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+      timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : String(m.timestamp),
+      createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : String(m.createdAt),
     }));
 
     // Retorna tanto 'data' como 'messages' para ser compatible con el dashboard y nuevos consumidores

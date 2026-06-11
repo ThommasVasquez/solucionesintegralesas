@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { neon } from '@neondatabase/serverless';
 
 export const runtime = 'edge';
 
@@ -29,26 +29,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Evitar duplicados (el script puede reintentar)
-    const existing = await prisma.whatsAppMessage.findUnique({ where: { id } });
-    if (existing) {
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not defined');
+    }
+
+    const sql = neon(process.env.DATABASE_URL);
+
+    // Evitar duplicados usando query SQL directa vía HTTP para evitar sobrecarga de WASM
+    const existing = await sql`SELECT id FROM whatsapp_messages WHERE id = ${id} LIMIT 1`;
+    if (existing.length > 0) {
       return NextResponse.json(
         { success: true, duplicate: true },
         { headers: corsHeaders }
       );
     }
 
-    await prisma.whatsAppMessage.create({
-      data: {
-        id,
-        brandId:   brandId  ?? 'unknown',
-        chatId:    chatId   ?? 'unknown',
-        sender:    sender   ?? 'unknown',
-        content,
-        direction,
-        timestamp: timestamp ? new Date(timestamp) : new Date(),
-      },
-    });
+    const dbBrandId = brandId ?? 'unknown';
+    const dbChatId = chatId ?? 'unknown';
+    const dbSender = sender ?? 'unknown';
+    const dbTimestamp = timestamp ? new Date(timestamp) : new Date();
+
+    await sql`
+      INSERT INTO whatsapp_messages (id, "brandId", "chatId", sender, content, direction, timestamp, "createdAt")
+      VALUES (${id}, ${dbBrandId}, ${dbChatId}, ${dbSender}, ${content}, ${direction}, ${dbTimestamp}, ${new Date()})
+    `;
 
     return NextResponse.json(
       { success: true },
