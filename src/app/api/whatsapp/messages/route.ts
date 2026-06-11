@@ -33,9 +33,21 @@ export async function GET(req: NextRequest) {
       take: limit,
     });
 
+    // Mapear objetos Prisma a objetos planos serializables para evitar crashes del runtime WASM en Cloudflare Edge
+    const plainMessages = messages.map((m: any) => ({
+      id: m.id,
+      brandId: m.brandId,
+      chatId: m.chatId,
+      sender: m.sender,
+      content: m.content,
+      direction: m.direction,
+      timestamp: m.timestamp instanceof Date ? m.timestamp.toISOString() : m.timestamp,
+      createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+    }));
+
     // Retorna tanto 'data' como 'messages' para ser compatible con el dashboard y nuevos consumidores
     return NextResponse.json(
-      { success: true, messages, data: messages },
+      { success: true, messages: plainMessages, data: plainMessages },
       { headers: corsHeaders }
     );
   } catch (error: any) {
