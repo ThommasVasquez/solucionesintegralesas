@@ -99,17 +99,15 @@ model GoogleSheetConfig {
 }
 
 model WhatsAppMessage {
-  id        String   @id @default(cuid())
-  brandId   String   @default("unknown")
-  chatId    String   // Identificador de la conversación (ej: número de teléfono o nombre del cliente)
-  sender    String   // Nombre del remitente en el mensaje
-  content   String   // Contenido del mensaje
-  timestamp DateTime // Fecha y hora en la que fue enviado/recibido
-  direction String   // 'INBOUND' (Entrante de cliente) o 'OUTBOUND' (Saliente del negocio)
+  id        String   @id
+  brandId   String
+  chatId    String
+  sender    String
+  content   String
+  direction String
+  timestamp DateTime @default(now())
   createdAt DateTime @default(now())
 
-  @@index([chatId])
-  @@index([timestamp])
   @@map("whatsapp_messages")
 }
 
