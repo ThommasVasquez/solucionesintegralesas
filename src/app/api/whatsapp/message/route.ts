@@ -54,10 +54,10 @@ export async function POST(req: NextRequest) {
       { success: true },
       { headers: corsHeaders }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('[/api/whatsapp/message]', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno' },
+      { success: false, error: 'Error interno', details: error?.message || String(error), stack: error?.stack },
       { status: 500, headers: corsHeaders }
     );
   }

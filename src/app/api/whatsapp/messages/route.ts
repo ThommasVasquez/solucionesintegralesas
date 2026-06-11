@@ -38,10 +38,10 @@ export async function GET(req: NextRequest) {
       { success: true, messages, data: messages },
       { headers: corsHeaders }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en GET /api/whatsapp/messages:', error);
     return NextResponse.json(
-      { success: false, error: 'Error leyendo mensajes' },
+      { success: false, error: 'Error leyendo mensajes', details: error?.message || String(error), stack: error?.stack },
       { status: 500, headers: corsHeaders }
     );
   }
