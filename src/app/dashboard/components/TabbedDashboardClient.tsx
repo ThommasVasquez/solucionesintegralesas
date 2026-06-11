@@ -99,134 +99,13 @@ export default function TabbedDashboardClient({
   const [files, setFiles] = useState<DriveFile[]>(initialFiles);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadingFileName, setUploadingFileName] = useState('');
-  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [modalType, setModalType] = useState<'file' | 'folder' | 'create_folder'>('file');
 
   // Categorías de carpetas
-  const categories = ['Todos', ...Array.from(new Set([...files.map(f => f.category), ...customCategories]))];
+  const categories = ['Todos', ...Array.from(new Set(files.map(f => f.category)))];
 
-  // Helper para deducir tipo de archivo por extensión
-  const getFileType = (fileName: string): 'pdf' | 'doc' | 'xls' | 'img' => {
-    const ext = fileName.split('.').pop()?.toLowerCase();
-    if (ext === 'pdf') return 'pdf';
-    if (['doc', 'docx'].includes(ext || '')) return 'doc';
-    if (['xls', 'xlsx', 'csv'].includes(ext || '')) return 'xls';
-    return 'img';
-  };
 
-  // Simulación de subida de archivo
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setIsUploading(true);
-      setUploadProgress(0);
-      setUploadingFileName(file.name);
-      
-      const interval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              const newFile: DriveFile = {
-                name: file.name,
-                type: getFileType(file.name),
-                size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-                date: new Date().toLocaleDateString(),
-                category: selectedCategory === 'Todos' ? 'General' : selectedCategory
-              };
-              setFiles(prevFiles => [newFile, ...prevFiles]);
-              setIsUploading(false);
-              logAction({
-                userEmail: user.email,
-                userName: user.name,
-                action: 'UPLOAD_FILE',
-                resource: title,
-                details: { fileName: file.name, size: file.size, message: `Subió el archivo ${file.name} en el panel ${title}` }
-              });
-            }, 300);
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 100);
-    }
-  };
-
-  // Crear Carpeta manualmente
-  const handleCreateFolder = () => {
-    const folderName = prompt("Ingrese el nombre de la nueva carpeta:");
-    if (folderName && folderName.trim()) {
-      const trimmed = folderName.trim();
-      if (categories.includes(trimmed)) {
-        alert("Ya existe una carpeta con ese nombre.");
-        return;
-      }
-      setCustomCategories(prev => [...prev, trimmed]);
-      setSelectedCategory(trimmed);
-      logAction({
-        userEmail: user.email,
-        userName: user.name,
-        action: 'CREATE_FOLDER',
-        resource: title,
-        details: { folderName: trimmed, message: `Creó la carpeta "${trimmed}" en el panel ${title}` }
-      });
-    }
-  };
-
-  // Subir Carpeta (webkitdirectory)
-  const handleFolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const folderFiles = Array.from(e.target.files);
-      const firstFile = folderFiles[0];
-      const folderName = firstFile.webkitRelativePath.split('/')[0] || 'Carpeta Subida';
-      
-      if (categories.includes(folderName)) {
-        alert(`Ya existe una carpeta llamada "${folderName}". Los archivos se guardarán en ella.`);
-      }
-
-      setIsUploading(true);
-      setUploadProgress(0);
-      setUploadingFileName(`Carpeta "${folderName}" (${folderFiles.length} archivos)`);
-      
-      const interval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              const newFiles: DriveFile[] = folderFiles.map(file => ({
-                name: file.name,
-                type: getFileType(file.name),
-                size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-                date: new Date().toLocaleDateString(),
-                category: folderName
-              }));
-              
-              setCustomCategories(prevCats => [...prevCats, folderName]);
-              setFiles(prevFiles => [...newFiles, ...prevFiles]);
-              setSelectedCategory(folderName);
-              setIsUploading(false);
-              
-              logAction({
-                userEmail: user.email,
-                userName: user.name,
-                action: 'UPLOAD_FOLDER',
-                resource: title,
-                details: { 
-                  folderName, 
-                  fileCount: folderFiles.length,
-                  message: `Subió la carpeta "${folderName}" con ${folderFiles.length} archivos en el panel ${title}` 
-                }
-              });
-            }, 300);
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 100);
-    }
-  };
 
   // Filtrado de archivos
   const filteredFiles = files.filter(file => {
@@ -341,8 +220,10 @@ export default function TabbedDashboardClient({
               
               <div className={styles.uploadZone}>
                 <button 
-                  onClick={handleCreateFolder}
-                  disabled={isUploading}
+                  onClick={() => {
+                    setModalType('create_folder');
+                    setShowUploadModal(true);
+                  }}
                   className={styles.uploadBtn}
                   style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}
                 >
@@ -350,49 +231,31 @@ export default function TabbedDashboardClient({
                   Crear Carpeta
                 </button>
 
-                <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}>
+                <button 
+                  onClick={() => {
+                    setModalType('folder');
+                    setShowUploadModal(true);
+                  }}
+                  className={styles.uploadBtn}
+                  style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}
+                >
                   <FolderOpen size={18} />
                   Subir Carpeta
-                  <input 
-                    type="file" 
-                    // @ts-ignore
-                    webkitdirectory="true"
-                    directory="true"
-                    multiple
-                    onChange={handleFolderChange}
-                    className={styles.hiddenInput} 
-                    disabled={isUploading}
-                  />
-                </label>
+                </button>
 
-                <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor }}>
+                <button 
+                  onClick={() => {
+                    setModalType('file');
+                    setShowUploadModal(true);
+                  }}
+                  className={styles.uploadBtn}
+                  style={{ borderColor: brandColor, color: brandColor }}
+                >
                   <Upload size={18} />
                   Subir Archivo
-                  <input 
-                    type="file" 
-                    onChange={handleFileChange}
-                    className={styles.hiddenInput} 
-                    disabled={isUploading}
-                  />
-                </label>
+                </button>
               </div>
             </div>
-
-            {/* Upload progress */}
-            {isUploading && (
-              <div className={styles.uploadProgressBarContainer}>
-                <div className={styles.uploadProgressInfo}>
-                  <span className={styles.progressFileName}>Subiendo: {uploadingFileName}</span>
-                  <span className={styles.progressPercent}>{uploadProgress}%</span>
-                </div>
-                <div className={styles.progressBarBg}>
-                  <div 
-                    className={styles.progressBarFill} 
-                    style={{ width: `${uploadProgress}%`, backgroundColor: brandColor }}
-                  />
-                </div>
-              </div>
-            )}
 
             {/* Folder Tabs (Categories) */}
             <div className={styles.folderRow}>
@@ -451,6 +314,55 @@ export default function TabbedDashboardClient({
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUploadModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h3>
+                {modalType === 'file' && '📤 Subir Archivo'}
+                {modalType === 'folder' && '📂 Subir Carpeta'}
+                {modalType === 'create_folder' && '➕ Crear Carpeta'}
+              </h3>
+              <button onClick={() => setShowUploadModal(false)} className={styles.closeModalBtn}>×</button>
+            </div>
+            <div className={styles.modalBody}>
+              <p>
+                Para garantizar la seguridad de la información, el almacenamiento ilimitado y la privacidad de tu empresa, los archivos reales se gestionan directamente en el espacio seguro de <strong>Google Drive</strong>.
+              </p>
+              <div className={styles.modalInstructions}>
+                <h4>Instrucciones:</h4>
+                <ol>
+                  <li>Haz clic en el botón <strong>"Abrir Google Drive"</strong> a continuación.</li>
+                  <li>Se abrirá la carpeta oficial de tu empresa en una nueva pestaña.</li>
+                  <li>
+                    {modalType === 'create_folder' 
+                      ? 'Haz clic en "Nuevo" > "Nueva carpeta" dentro de Google Drive.'
+                      : 'Arrastra y suelta tus archivos o carpetas directamente en la ventana de Google Drive, o haz clic en "Nuevo" > "Subir archivo / carpeta".'}
+                  </li>
+                </ol>
+              </div>
+              <button 
+                onClick={() => {
+                  window.open(driveUrl, '_blank');
+                  setShowUploadModal(false);
+                  logAction({
+                    userEmail: user.email,
+                    userName: user.name,
+                    action: modalType === 'file' ? 'UPLOAD_FILE_REDIRECT' : modalType === 'folder' ? 'UPLOAD_FOLDER_REDIRECT' : 'CREATE_FOLDER_REDIRECT',
+                    resource: title,
+                    details: { message: `Redirigió al usuario a Google Drive para ${modalType} en el panel ${title}` }
+                  });
+                }}
+                className={styles.modalSubmitBtn}
+                style={{ backgroundColor: brandColor }}
+              >
+                Abrir Google Drive ↗
+              </button>
             </div>
           </div>
         </div>
