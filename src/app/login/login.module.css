@@ -137,3 +137,36 @@
     padding: 1.5rem;
   }
 }
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.passwordInput {
+  padding-right: 2.75rem !important; /* Leave room for eye icon */
+}
+
+.toggleBtn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
+  outline: none;
+}
+
+.toggleBtn:hover {
+  color: #0f172a;
+  background-color: #f1f5f9;
+}
+
