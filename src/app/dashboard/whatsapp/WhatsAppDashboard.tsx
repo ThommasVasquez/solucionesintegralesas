@@ -293,6 +293,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
 
             const payload = {
                 id: msgId,
+                brandId: '${brandId || "unknown"}',
                 chatId: chatName.toLowerCase().replace(/\\s+/g, '_'),
                 sender: sender,
                 content: content,
