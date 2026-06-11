@@ -45,13 +45,25 @@ export async function POST(req: NextRequest) {
     }
 
     const dbBrandId = brandId ?? 'unknown';
-    const dbChatId = chatId ?? 'unknown';
-    const dbSender = sender ?? 'unknown';
+    
+    // Deterministic short hash function for chatId anonymization
+    const getShortHash = (str: string) => {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return 'Cliente_' + Math.abs(hash).toString(16).toUpperCase().padStart(6, '0');
+    };
+
+    const dbChatId = chatId ? getShortHash(chatId) : 'unknown';
+    const dbSender = 'Cliente';
+    const dbContent = ''; // Discard the actual text content for absolute privacy
     const dbTimestamp = timestamp ? new Date(timestamp) : new Date();
 
     await sql`
       INSERT INTO whatsapp_messages (id, "brandId", "chatId", sender, content, direction, timestamp, "createdAt")
-      VALUES (${id}, ${dbBrandId}, ${dbChatId}, ${dbSender}, ${content}, ${direction}, ${dbTimestamp}, ${new Date()})
+      VALUES (${id}, ${dbBrandId}, ${dbChatId}, ${dbSender}, ${dbContent}, ${direction}, ${dbTimestamp}, ${new Date()})
     `;
 
     return NextResponse.json(

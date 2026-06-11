@@ -52,16 +52,8 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
     }
   }, []);
 
-  // Estados del parser de archivos manual
-  const [parsedRawMessages, setParsedRawMessages] = useState<{ sender: string; content: string; timestamp: string }[]>([]);
-  const [uniqueSenders, setUniqueSenders] = useState<string[]>([]);
-  const [customerName, setCustomerName] = useState<string>('');
-  const [agentName, setAgentName] = useState<string>('');
-  const [isImporting, setIsImporting] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
   const [showScriptModal, setShowScriptModal] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Estados de filtros de fecha
   const [period, setPeriod] = useState<'today' | 'yesterday' | '7days' | '30days' | 'custom'>('30days');
@@ -559,192 +551,6 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
     }
   };
 
-  // Drag & Drop
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      processFile(e.target.files[0]);
-    }
-  };
-
-  const processFile = (file: File) => {
-    if (!file.name.endsWith('.txt')) {
-      alert('Por favor, sube únicamente archivos de texto (.txt) exportados de WhatsApp.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      if (!text) return;
-
-      const lines = text.split('\n');
-      const tempRaw: { sender: string; content: string; timestamp: string }[] = [];
-      const sendersSet = new Set<string>();
-      let currentMsg: { sender: string; content: string; timestamp: string } | null = null;
-
-      const androidRegex = /^(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*(?:AM|PM|am|pm)?\s*-\s*([^:]+):\s*(.*)$/i;
-      const iosRegex = /^\[?(\d{1,2})[/\-](\d{1,2})[/\-](\d{2,4}),?\s+(\d{1,2}):(\d{2})(?::\d{2})?\s*(?:AM|PM|am|pm)?\]?\s*([^:]+):\s*(.*)$/i;
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-
-        let match = line.match(androidRegex) || line.match(iosRegex);
-
-        if (match) {
-          if (currentMsg) {
-            tempRaw.push(currentMsg);
-          }
-
-          const day = parseInt(match[1]);
-          const month = parseInt(match[2]) - 1;
-          let year = parseInt(match[3]);
-          if (year < 100) year += 2000;
-          
-          const hourStr = match[4];
-          const min = parseInt(match[5]);
-          let hour = parseInt(hourStr);
-
-          const lowerLine = line.toLowerCase();
-          if (lowerLine.includes('pm') && hour < 12) hour += 12;
-          if (lowerLine.includes('am') && hour === 12) hour = 0;
-
-          const date = new Date(year, month, day, hour, min);
-          
-          let finalDate = date;
-          if (isNaN(date.getTime())) {
-            finalDate = new Date(year, day - 1, month + 1, hour, min);
-          }
-          if (isNaN(finalDate.getTime())) {
-            finalDate = new Date();
-          }
-
-          const sender = match[6].trim();
-          const content = match[7].trim();
-
-          if (sender && content && !sender.includes('cambió') && !sender.includes('creó') && !sender.includes('eliminó') && !content.includes('cifradas de extremo a extremo')) {
-            sendersSet.add(sender);
-            currentMsg = {
-              sender,
-              content,
-              timestamp: finalDate.toISOString()
-            };
-          } else {
-            currentMsg = null;
-          }
-        } else {
-          if (currentMsg) {
-            currentMsg.content += ' ' + line;
-          }
-        }
-      }
-
-      if (currentMsg) {
-        tempRaw.push(currentMsg);
-      }
-
-      if (tempRaw.length === 0) {
-        alert('No se pudieron encontrar mensajes válidos en este archivo.');
-        return;
-      }
-
-      const senders = Array.from(sendersSet);
-      setParsedRawMessages(tempRaw);
-      setUniqueSenders(senders);
-      
-      const counts: Record<string, number> = {};
-      tempRaw.forEach(m => { counts[m.sender] = (counts[m.sender] || 0) + 1; });
-      
-      const sortedSenders = [...senders].sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
-      
-      const suspectedAgent = sortedSenders.find(s => s.toLowerCase() === 'yo' || s.toLowerCase() === 'me' || s.toLowerCase().includes('soporte') || s.toLowerCase().includes('as')) || sortedSenders[0] || '';
-      const suspectedCustomer = sortedSenders.find(s => s !== suspectedAgent) || sortedSenders[1] || '';
-
-      setAgentName(suspectedAgent);
-      setCustomerName(suspectedCustomer);
-      setIsImporting(true);
-    };
-    reader.readAsText(file);
-  };
-
-  const handleConfirmImport = async () => {
-    if (!customerName || !agentName) {
-      alert('Debes definir quién es el cliente y quién es el agente.');
-      return;
-    }
-
-    const chatId = customerName.toLowerCase().replace(/\s+/g, '_');
-
-    const formatted: WhatsAppMessage[] = parsedRawMessages.map((msg, index) => {
-      let direction: 'INBOUND' | 'OUTBOUND' = 'INBOUND';
-      if (msg.sender === agentName) {
-        direction = 'OUTBOUND';
-      }
-      
-      return {
-        id: `import-${Date.now()}-${index}`,
-        chatId,
-        sender: msg.sender,
-        content: msg.content,
-        timestamp: msg.timestamp,
-        direction,
-      };
-    });
-
-    try {
-      let uploadCount = 0;
-      for (const msg of formatted) {
-        const res = await fetch('/api/whatsapp/message', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(msg)
-        });
-        if (res.ok) uploadCount++;
-      }
-      
-      setParsedRawMessages([]);
-      setUniqueSenders([]);
-      setIsImporting(false);
-      fetchMessagesFromAPI();
-      alert(`¡Chat importado con éxito! Se cargaron ${uploadCount} mensajes al disco.`);
-      logAction({
-        userEmail,
-        userName,
-        action: 'IMPORT_WHATSAPP_CHAT',
-        resource: 'WhatsApp',
-        details: { customerName, message: `Importó un chat de WhatsApp con el cliente ${customerName}` }
-      });
-    } catch (e) {
-      alert('Error importando los mensajes al servidor.');
-    }
-  };
-
-  const handleCancelImport = () => {
-    setParsedRawMessages([]);
-    setUniqueSenders([]);
-    setIsImporting(false);
-  };
-
   // Filtrado de mensajes según fechas
   const filteredMessages = useMemo(() => {
     if (!isClient) return [];
@@ -789,6 +595,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         totalReceived: 0,
         totalAnswered: 0,
         responseRate: 0,
+        uniqueClientsCount: 0,
         avgResponseTime: null as number | null,
         groupedByDay: [] as { dayLabel: string; inbound: number; outbound: number }[],
         groupedByHour: Array(24).fill(0) as number[],
@@ -917,10 +724,13 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
+    const uniqueClientsCount = new Set(filteredMessages.map(m => m.chatId)).size;
+
     return {
       totalReceived: inboundCount,
       totalAnswered: outboundCount,
       responseRate,
+      uniqueClientsCount,
       avgResponseTime,
       groupedByDay,
       groupedByHour,
@@ -1325,62 +1135,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         </div>
       )}
 
-      {/* Zona de Carga Manual */}
-      {!isImporting && messages.length === 0 && (
-        <div 
-          className={`${styles.uploadZone} ${dragActive ? styles.uploadActive : ''}`}
-          onDragEnter={handleDrag}
-          onDragOver={handleDrag}
-          onDragLeave={handleDrag}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            className={styles.hiddenInput} 
-            accept=".txt" 
-            onChange={handleFileChange}
-          />
-          <Upload className={styles.uploadIcon} />
-          <h4>¿Tienes un historial guardado? Cárgalo aquí</h4>
-          <p>Arrastra aquí tu archivo `.txt` exportado de WhatsApp o haz clic para importarlo de inmediato al disco.</p>
-        </div>
-      )}
 
-      {/* Asistente de Importación */}
-      {isImporting && (
-        <div className={styles.importAssistant}>
-          <h3>
-            <FileText size={20} style={{ color: '#25d366' }} />
-            Asistente de Importación de Chat
-          </h3>
-          <p>Hemos encontrado <strong>{parsedRawMessages.length}</strong> mensajes. Elige quién es el cliente y quién eres tú para clasificar la dirección:</p>
-          
-          <div className={styles.assistantGrid}>
-            <div className={styles.senderSelectBox}>
-              <label>Cliente (Mensajes Recibidos)</label>
-              <select value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={styles.selectInput}>
-                <option value="">Selecciona...</option>
-                {uniqueSenders.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            
-            <div className={styles.senderSelectBox}>
-              <label>Tú / Negocio (Mensajes Contestados)</label>
-              <select value={agentName} onChange={(e) => setAgentName(e.target.value)} className={styles.selectInput}>
-                <option value="">Selecciona...</option>
-                {uniqueSenders.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.assistantActions}>
-            <button onClick={handleCancelImport} className={styles.btnSecundario}>Cancelar</button>
-            <button onClick={handleConfirmImport} className={styles.btnSuccess}>Confirmar e Importar</button>
-          </div>
-        </div>
-      )}
 
       {/* Controles de Filtros */}
       <div className={styles.filtersRow}>
@@ -1413,8 +1168,8 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             <MessageSquare />
           </div>
           <div className={styles.kpiInfo}>
-            <span className={styles.kpiLabel}>Recibidos (Clientes)</span>
-            <span className={styles.kpiValue}>{stats.totalReceived}</span>
+            <span className={styles.kpiLabel}>Tráfico Recibido</span>
+            <span className={styles.kpiValue}>{stats.totalReceived} msg</span>
           </div>
         </div>
 
@@ -1423,18 +1178,18 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             <MessageSquare />
           </div>
           <div className={styles.kpiInfo}>
-            <span className={styles.kpiLabel}>Contestados (Tú)</span>
-            <span className={styles.kpiValue}>{stats.totalAnswered}</span>
+            <span className={styles.kpiLabel}>Tráfico Enviado</span>
+            <span className={styles.kpiValue}>{stats.totalAnswered} msg</span>
           </div>
         </div>
 
         <div className={styles.kpiCard}>
           <div className={styles.kpiIcon} style={{ backgroundColor: '#ff9f4315', color: '#ff9f43' }}>
-            <TrendingUp />
+            <User />
           </div>
           <div className={styles.kpiInfo}>
-            <span className={styles.kpiLabel}>Tasa de Respuesta</span>
-            <span className={styles.kpiValue}>{stats.responseRate}%</span>
+            <span className={styles.kpiLabel}>Clientes Únicos</span>
+            <span className={styles.kpiValue}>{stats.uniqueClientsCount}</span>
           </div>
         </div>
 
@@ -1485,102 +1240,16 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         </div>
       </div>
 
-      <div className={styles.chartsGrid}>
-        <div className={styles.chartCard}>
-          <h3>
-            <Clock size={18} style={{ color: '#25d366' }} />
-            Horas Pico de Consulta (Mensajes Entrantes)
-          </h3>
-          <div className={styles.chartContainer}>
-            {messages.length > 0 ? renderHourlyChart() : (
-              <div className={styles.emptyChart}>
-                <Clock size={40} strokeWidth={1} style={{ opacity: 0.5 }} />
-                <p>Esperando datos de hora...</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.chartCard}>
-          <h3>
-            <User size={18} style={{ color: '#1a5d91' }} />
-            Clientes más Activos
-          </h3>
-          <div className={styles.chartContainer} style={{ height: 'auto', minHeight: '180px', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'stretch' }}>
-            {stats.topCustomers.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-                {stats.topCustomers.map((cust, idx) => (
-                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 500 }}>
-                      <span>{cust.name}</span>
-                      <span style={{ color: 'var(--text-muted)' }}>{cust.count} mensajes</span>
-                    </div>
-                    <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div 
-                        style={{ 
-                          width: `${(cust.count / stats.topCustomers[0].count) * 100}%`, 
-                          height: '100%', 
-                          backgroundColor: idx === 0 ? '#25d366' : idx === 1 ? '#1ebd5d' : '#1a5d91', 
-                          borderRadius: '4px' 
-                        }} 
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className={styles.emptyChart}>
-                <User size={40} strokeWidth={1} style={{ opacity: 0.5 }} />
-                <p>No hay contactos registrados todavía.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Historial de últimos mensajes */}
-      {filteredMessages.length > 0 && (
-        <div className={styles.tableCard}>
-          <h3>Historial Reciente de Mensajes en Vivo</h3>
-          <table className={styles.msgTable}>
-            <thead>
-              <tr>
-                <th>Fecha / Hora</th>
-                <th>Conversación (Contacto)</th>
-                <th>Remitente</th>
-                <th>Dirección</th>
-                <th>Mensaje</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...filteredMessages]
-                .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                .slice(0, 10)
-                .map((msg) => {
-                  const dateObj = new Date(msg.timestamp);
-                  const dateStr = `${dateObj.getDate().toString().padStart(2,'0')}/${(dateObj.getMonth()+1).toString().padStart(2,'0')} ${dateObj.getHours().toString().padStart(2,'0')}:${dateObj.getMinutes().toString().padStart(2,'0')}`;
-                  
-                  return (
-                    <tr key={msg.id}>
-                      <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>{dateStr}</td>
-                      <td style={{ fontWeight: 500, color: '#1a5d91' }}>{msg.chatId.replace(/_/g, ' ')}</td>
-                      <td style={{ fontWeight: 600 }}>{msg.sender}</td>
-                      <td>
-                        <span className={`${styles.directionBadge} ${msg.direction === 'INBOUND' ? styles.inboundBadge : styles.outboundBadge}`}>
-                          {msg.direction === 'INBOUND' ? 'Entrante (Cliente)' : 'Contestado (Yo)'}
-                        </span>
-                      </td>
-                      <td style={{ maxWidth: '350px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {msg.content}
-                      </td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
+      {/* Estado vacío cuando no hay mensajes */}
+      {messages.length === 0 && (
+        <div className={styles.uploadZone} style={{ cursor: 'default', borderStyle: 'solid', padding: '60px 20px' }}>
+          <Activity size={48} className={styles.uploadIcon} style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite', margin: '0 auto 16px', color: '#25d366' }} />
+          <h4 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '8px' }}>Esperando tráfico de WhatsApp en vivo...</h4>
+          <p style={{ maxWidth: '600px', margin: '0 auto', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.6' }}>
+            No hay estadísticas registradas todavía. Usa el botón <strong>"Conectar WhatsApp Web"</strong> para obtener las instrucciones de instalación del script en tu navegador Chrome. Una vez activo, el tráfico entrante y saliente se registrará y actualizará aquí de inmediato.
+          </p>
         </div>
       )}
-
     </div>
   );
 }
