@@ -433,17 +433,18 @@ export default function TabbedDashboardClient({
                     </div>
                     <button 
                       onClick={() => {
-                        alert(`Iniciando descarga de: ${file.name}`);
+                        alert(`Los archivos reales están almacenados de forma segura en Google Drive. Te redirigiremos a la carpeta para que puedas ver y descargar el archivo "${file.name}".`);
+                        window.open(driveUrl, '_blank');
                         logAction({
                           userEmail: user.email,
                           userName: user.name,
                           action: 'DOWNLOAD_FILE',
                           resource: title,
-                          details: { fileName: file.name, message: `Descargó el archivo ${file.name} del panel ${title}` }
+                          details: { fileName: file.name, message: `Redirigió al usuario a Google Drive para descargar ${file.name} en el panel ${title}` }
                         });
                       }}
                       className={styles.downloadBtn}
-                      title="Descargar archivo"
+                      title="Descargar archivo de Google Drive"
                     >
                       <Download size={18} />
                     </button>
