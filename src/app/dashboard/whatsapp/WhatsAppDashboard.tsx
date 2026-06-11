@@ -142,7 +142,10 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         ];
 
         // Marca inicial: localStorage de WhatsApp Web o, en su defecto, la de este dashboard
-        const savedBrand = localStorage.getItem('as_tracker_active_brand') || '${brandId || "printer_service"}';
+        let savedBrand = localStorage.getItem('as_tracker_active_brand');
+        if (!savedBrand || savedBrand === 'unknown' || savedBrand === 'null') {
+            savedBrand = '${brandId || "printer_service"}';
+        }
 
         brands.forEach(b => {
             const opt = document.createElement('option');
@@ -187,11 +190,8 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         document.body.appendChild(container);
     }
 
-    if (document.body) {
-        injectSelector();
-    } else {
-        document.addEventListener('DOMContentLoaded', injectSelector);
-    }
+    // Mantener el selector inyectado en el DOM (por si WhatsApp Web borra elementos del body al cargar)
+    setInterval(injectSelector, 2000);
 
     // Función para obtener el nombre del cliente del chat actual
     function getActiveChatName() {
@@ -386,7 +386,10 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             const sender = isOutbound ? 'Yo' : chatName;
             const direction = isInbound ? 'INBOUND' : 'OUTBOUND';
 
-            const selectedBrand = localStorage.getItem('as_tracker_active_brand') || '${brandId || "unknown"}';
+            let selectedBrand = localStorage.getItem('as_tracker_active_brand');
+            if (!selectedBrand || selectedBrand === 'unknown' || selectedBrand === 'null') {
+                selectedBrand = '${brandId || "printer_service"}';
+            }
             const payload = {
                 id: msgId,
                 brandId: selectedBrand,
