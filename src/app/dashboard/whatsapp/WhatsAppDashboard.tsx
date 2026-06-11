@@ -71,7 +71,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   const tampermonkeyScript = `// ==UserScript==
 // @name         WhatsApp Web Real-Time Tracker for Soluciones AS
 // @namespace    http://tampermonkey.net/
-// @version      1.9
+// @version      2.0
 // @description  Envía mensajes entrantes y salientes de WhatsApp Web en tiempo real a la API local
 // @match        https://web.whatsapp.com/*
 // @connect      *
@@ -196,12 +196,15 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
 
     // Función para obtener el nombre del cliente del chat actual
     function getActiveChatName() {
-        const header = document.querySelector('[data-testid="conversation-header"]') || 
-                       document.querySelector('#main header') ||
-                       document.querySelector('header');
-        if (!header) return null;
+        const main = document.getElementById('main');
+        if (!main) return null;
+
+        const header = main.querySelector('[data-testid="conversation-header"]') || 
+                       main.querySelector('header') ||
+                       main;
         
-        const titleSpan = header.querySelector('span[title]') || 
+        const titleSpan = header.querySelector('[data-testid="conversation-info-details"] span[title]') ||
+                          header.querySelector('span[title]') || 
                           header.querySelector('span[dir="auto"]') || 
                           header.querySelector('div[dir="auto"]');
         if (titleSpan) {
