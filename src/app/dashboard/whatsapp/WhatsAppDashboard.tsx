@@ -71,7 +71,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   const tampermonkeyScript = `// ==UserScript==
 // @name         WhatsApp Web Real-Time Tracker for Soluciones AS
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      3.0
 // @description  Envía mensajes entrantes y salientes de WhatsApp Web en tiempo real a la API local
 // @match        https://web.whatsapp.com/*
 // @connect      *
@@ -95,104 +95,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
     window.asTrackerSentIds = sentMessageIds;
     let currentChatName = null;
 
-    // Inyectar el selector flotante de marcas/empresas en la esquina inferior izquierda de WhatsApp Web
-    function injectSelector() {
-        if (document.getElementById('as-brand-selector-container')) return;
-
-        const container = document.createElement('div');
-        container.id = 'as-brand-selector-container';
-        container.style.position = 'fixed';
-        container.style.bottom = '20px';
-        container.style.left = '20px';
-        container.style.zIndex = '999999';
-        container.style.backgroundColor = 'rgba(240, 242, 245, 0.9)';
-        container.style.backdropFilter = 'blur(10px)';
-        container.style.webkitBackdropFilter = 'blur(10px)';
-        container.style.border = '1px solid rgba(0, 0, 0, 0.15)';
-        container.style.borderRadius = '24px';
-        container.style.padding = '8px 16px';
-        container.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
-        container.style.display = 'flex';
-        container.style.alignItems = 'center';
-        container.style.gap = '10px';
-        container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-        container.style.fontSize = '12px';
-        container.style.color = '#111b21';
-        container.style.fontWeight = 'bold';
-        container.style.transition = 'all 0.3s ease';
-
-        const label = document.createElement('span');
-        label.textContent = 'Empresa Activa:';
-
-        const select = document.createElement('select');
-        select.style.padding = '4px 12px';
-        select.style.borderRadius = '12px';
-        select.style.border = '1px solid rgba(0, 0, 0, 0.2)';
-        select.style.backgroundColor = 'white';
-        select.style.color = '#111b21';
-        select.style.outline = 'none';
-        select.style.cursor = 'pointer';
-        select.style.fontSize = '12px';
-        select.style.fontWeight = '600';
-
-        const brands = [
-            { id: 'printer_service', name: 'Printer Service' },
-            { id: 'viva_calentadores', name: 'Viva Calentadores' },
-            { id: 'pro_mascotas', name: 'ProMascotas' },
-            { id: 'ingenova', name: 'Ingenova' }
-        ];
-
-        // Marca inicial: localStorage de WhatsApp Web o, en su defecto, la de este dashboard
-        let savedBrand = localStorage.getItem('as_tracker_active_brand');
-        if (!savedBrand || savedBrand === 'unknown' || savedBrand === 'null') {
-            savedBrand = '${brandId || "printer_service"}';
-        }
-
-        brands.forEach(b => {
-            const opt = document.createElement('option');
-            opt.value = b.id;
-            opt.textContent = b.name;
-            if (b.id === savedBrand) opt.selected = true;
-            select.appendChild(opt);
-        });
-
-        localStorage.setItem('as_tracker_active_brand', select.value);
-
-        select.addEventListener('change', (e) => {
-            localStorage.setItem('as_tracker_active_brand', e.target.value);
-            console.log('[AS WhatsApp Tracker] Marca activa cambiada a:', e.target.value);
-            showToast(e.target.value);
-        });
-
-        function showToast(brandId) {
-            const toast = document.createElement('div');
-            toast.textContent = 'Registrando en: ' + (brands.find(function(b) { return b.id === brandId; })?.name || brandId);
-            toast.style.position = 'fixed';
-            toast.style.bottom = '70px';
-            toast.style.left = '20px';
-            toast.style.zIndex = '999999';
-            toast.style.backgroundColor = '#00a884';
-            toast.style.color = 'white';
-            toast.style.padding = '8px 16px';
-            toast.style.borderRadius = '16px';
-            toast.style.fontSize = '12px';
-            toast.style.fontWeight = 'bold';
-            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-            toast.style.transition = 'opacity 0.5s ease';
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 2000);
-        }
-
-        container.appendChild(label);
-        container.appendChild(select);
-        document.body.appendChild(container);
-    }
-
-    // Mantener el selector inyectado en el DOM (por si WhatsApp Web borra elementos del body al cargar)
-    setInterval(injectSelector, 2000);
+    const ACTIVE_BRAND = '${brandId || "printer_service"}';
 
     // Función para obtener el nombre del cliente del chat actual
     function getActiveChatName() {
@@ -388,13 +291,9 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             const sender = isOutbound ? 'Yo' : chatName;
             const direction = isInbound ? 'INBOUND' : 'OUTBOUND';
 
-            let selectedBrand = localStorage.getItem('as_tracker_active_brand');
-            if (!selectedBrand || selectedBrand === 'unknown' || selectedBrand === 'null') {
-                selectedBrand = '${brandId || "printer_service"}';
-            }
             const payload = {
                 id: msgId,
-                brandId: selectedBrand,
+                brandId: ACTIVE_BRAND,
                 chatId: chatName.toLowerCase().replace(/\s+/g, '_'),
                 sender: sender,
                 content: content,
