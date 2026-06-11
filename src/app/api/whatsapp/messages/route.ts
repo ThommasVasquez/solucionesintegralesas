@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
 
     // Retorna tanto 'data' como 'messages' para ser compatible con el dashboard y nuevos consumidores
     return NextResponse.json(
-      { success: true, messages: plainMessages, data: plainMessages },
+      { success: true, debug: { brandId, chatId, limit, count: plainMessages.length }, messages: plainMessages, data: plainMessages },
       { headers: corsHeaders }
     );
   } catch (error: any) {
