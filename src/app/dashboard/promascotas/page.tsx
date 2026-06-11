@@ -23,6 +23,7 @@ export default function ProMascotasPage() {
       driveUrl={DRIVE_URL}
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={false}
+      brandId="pro_mascotas"
     />
   );
 }

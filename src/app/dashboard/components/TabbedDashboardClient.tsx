@@ -37,6 +37,7 @@ interface TabbedDashboardClientProps {
   driveUrl: string;
   initialFiles: DriveFile[];
   hideExcelForSergio?: boolean;
+  brandId?: string;
 }
 
 export default function TabbedDashboardClient({
@@ -47,7 +48,8 @@ export default function TabbedDashboardClient({
   brandColor,
   driveUrl,
   initialFiles,
-  hideExcelForSergio = false
+  hideExcelForSergio = false,
+  brandId
 }: TabbedDashboardClientProps) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
@@ -292,7 +294,7 @@ export default function TabbedDashboardClient({
 
       {activeTab === 'whatsapp' && (
         <div className={styles.whatsappWrapper}>
-          <WhatsAppDashboard userName={user.name || "Usuario"} userEmail={user.email || ""} />
+          <WhatsAppDashboard userName={user.name || "Usuario"} userEmail={user.email || ""} brandId={brandId} />
         </div>
       )}
 

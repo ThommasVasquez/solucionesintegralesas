@@ -23,6 +23,7 @@ export default function PrinterServicePage() {
       driveUrl={DRIVE_URL}
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={true}
+      brandId="printer_service"
     />
   );
 }

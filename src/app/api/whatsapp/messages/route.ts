@@ -47,9 +47,14 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
   try {
-    await prisma.whatsAppMessage.deleteMany();
+    const { searchParams } = new URL(req.url);
+    const brandId = searchParams.get('brandId');
+
+    await prisma.whatsAppMessage.deleteMany({
+      where: brandId ? { brandId } : {},
+    });
     return NextResponse.json(
       { success: true },
       { status: 200, headers: corsHeaders }

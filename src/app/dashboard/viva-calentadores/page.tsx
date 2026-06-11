@@ -23,6 +23,7 @@ export default function VivaCalentadoresDashboardPage() {
       driveUrl={DRIVE_URL}
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={true}
+      brandId="viva_calentadores"
     />
   );
 }

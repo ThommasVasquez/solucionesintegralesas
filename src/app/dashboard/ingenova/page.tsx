@@ -24,6 +24,7 @@ export default function IngenovaPage() {
       driveUrl={DRIVE_URL}
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={true}
+      brandId="ingenova"
     />
   );
 }

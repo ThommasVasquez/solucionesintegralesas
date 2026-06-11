@@ -35,9 +35,10 @@ interface WhatsAppMessage {
 interface WhatsAppDashboardProps {
   userName: string;
   userEmail: string;
+  brandId?: string;
 }
 
-export default function WhatsAppDashboard({ userName, userEmail }: WhatsAppDashboardProps) {
+export default function WhatsAppDashboard({ userName, userEmail, brandId }: WhatsAppDashboardProps) {
   // Estado de mensajes
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
   const [isClient, setIsClient] = useState(false);
@@ -417,7 +418,8 @@ export default function WhatsAppDashboard({ userName, userEmail }: WhatsAppDashb
   // Función para obtener mensajes de la API
   const fetchMessagesFromAPI = async () => {
     try {
-      const res = await fetch('/api/whatsapp/messages');
+      const url = `/api/whatsapp/messages?limit=200${brandId ? `&brandId=${brandId}` : ''}`;
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         const apiMessages = data.messages || [];
@@ -454,13 +456,14 @@ export default function WhatsAppDashboard({ userName, userEmail }: WhatsAppDashb
     
     const interval = setInterval(fetchMessagesFromAPI, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [brandId]);
 
   // Función para vaciar los mensajes
   const handleClearData = async () => {
     if (confirm('¿Estás seguro de que deseas eliminar permanentemente todas las estadísticas en vivo de WhatsApp?')) {
       try {
-        const res = await fetch('/api/whatsapp/messages', { method: 'DELETE' });
+        const url = `/api/whatsapp/messages${brandId ? `?brandId=${brandId}` : ''}`;
+        const res = await fetch(url, { method: 'DELETE' });
         if (res.ok) {
           setMessages([]);
           setLastMessageTime(null);
