@@ -71,10 +71,10 @@ export async function DELETE(req: NextRequest) {
       { success: true },
       { status: 200, headers: corsHeaders }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en DELETE /api/whatsapp/messages:', error);
     return NextResponse.json(
-      { success: false, error: 'Error vaciando mensajes' },
+      { success: false, error: 'Error vaciando mensajes', details: error?.message || String(error), stack: error?.stack },
       { status: 500, headers: corsHeaders }
     );
   }
