@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { neon } from '@neondatabase/serverless';
 
 export const runtime = 'edge';
 
@@ -64,9 +65,19 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const brandId = searchParams.get('brandId');
 
-    await prisma.whatsAppMessage.deleteMany({
-      where: brandId ? { brandId } : {},
-    });
+    if (!process.env.DATABASE_URL) {
+      throw new Error('DATABASE_URL is not defined');
+    }
+
+    // Usar el cliente HTTP directo de Neon para evitar que la query de borrado (deleteMany)
+    // crasheé el runtime WASM del motor de Prisma en Edge (Cloudflare Pages)
+    const sql = neon(process.env.DATABASE_URL);
+    if (brandId) {
+      await sql`DELETE FROM whatsapp_messages WHERE "brandId" = ${brandId}`;
+    } else {
+      await sql`DELETE FROM whatsapp_messages`;
+    }
+
     return NextResponse.json(
       { success: true },
       { status: 200, headers: corsHeaders }
