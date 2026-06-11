@@ -71,9 +71,10 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   const tampermonkeyScript = `// ==UserScript==
 // @name         WhatsApp Web Real-Time Tracker for Soluciones AS
 // @namespace    http://tampermonkey.net/
-// @version      1.8
+// @version      1.9
 // @description  Envía mensajes entrantes y salientes de WhatsApp Web en tiempo real a la API local
 // @match        https://web.whatsapp.com/*
+// @connect      *
 // @grant        GM_xmlhttpRequest
 // @run-at       document-start
 // ==/UserScript==
