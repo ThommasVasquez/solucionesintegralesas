@@ -36,6 +36,11 @@ interface ExcelWorkbookState {
   sheetsData: Record<string, any[][]>;
 }
 
+export interface AdminSheet {
+  name: string;
+  url: string;
+}
+
 interface TabbedDashboardClientProps {
   user?: {
     name?: string | null;
@@ -49,6 +54,7 @@ interface TabbedDashboardClientProps {
   initialFiles: DriveFile[];
   hideExcelForSergio?: boolean;
   brandId?: string;
+  adminSheets?: AdminSheet[];
 }
 
 export default function TabbedDashboardClient({
@@ -60,7 +66,8 @@ export default function TabbedDashboardClient({
   driveUrl,
   initialFiles,
   hideExcelForSergio = false,
-  brandId
+  brandId,
+  adminSheets
 }: TabbedDashboardClientProps) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
@@ -90,6 +97,43 @@ export default function TabbedDashboardClient({
 
   // Ocultar planilla si es Sergio y la bandera está encendida.
   const shouldHideExcel = isSergio && hideExcelForSergio;
+
+  const defaultAdminSheets = [
+    { name: "archivo1", url: "https://docs.google.com/spreadsheets/d/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo/edit?usp=sharing" },
+    { name: "archivo2", url: "https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing" },
+    { name: "archivo3", url: "https://docs.google.com/spreadsheets/d/1joniM23XA3LxWo6ernD-w5bOppVsGFN38iCmhATC6Fs/edit?usp=sharing" },
+    { name: "archivo4", url: "https://docs.google.com/spreadsheets/d/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk/edit?usp=sharing" },
+  ];
+
+  const [sheetsList, setSheetsList] = useState<AdminSheet[]>(adminSheets || defaultAdminSheets);
+  const [isLoadingSheets, setIsLoadingSheets] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [configSheets, setConfigSheets] = useState<AdminSheet[]>([]);
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
+
+  // Fetch configured sheets from DB on mount/brandId change
+  useEffect(() => {
+    const fetchAdminSheets = async () => {
+      if (!brandId) return;
+      setIsLoadingSheets(true);
+      try {
+        const res = await fetch(`/api/admin-sheets?brandId=${brandId}`);
+        const data = await res.json();
+        if (data.success && data.sheets && data.sheets.length > 0) {
+          setSheetsList(data.sheets);
+        }
+      } catch (e) {
+        console.error("Error fetching admin sheets:", e);
+      } finally {
+        setIsLoadingSheets(false);
+      }
+    };
+
+    if (!adminSheets) {
+      fetchAdminSheets();
+    }
+  }, [brandId, adminSheets]);
+
 
   const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive'>('whatsapp');
 
@@ -585,10 +629,33 @@ export default function TabbedDashboardClient({
                 </button>
                 {isAdminOpen && (
                   <div className={styles.dropdownMenu}>
-                    <button onClick={() => handleAdminSelect('archivo1', 'https://docs.google.com/spreadsheets/d/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo/edit?usp=sharing')}>archivo1</button>
-                    <button onClick={() => handleAdminSelect('archivo2', 'https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing')}>archivo2</button>
-                    <button onClick={() => handleAdminSelect('archivo3', 'https://docs.google.com/spreadsheets/d/1joniM23XA3LxWo6ernD-w5bOppVsGFN38iCmhATC6Fs/edit?usp=sharing')}>archivo3</button>
-                    <button onClick={() => handleAdminSelect('archivo4', 'https://docs.google.com/spreadsheets/d/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk/edit?usp=sharing')}>archivo4</button>
+                    {sheetsList.map((sheet, index) => (
+                      <button 
+                        key={index} 
+                        onClick={() => handleAdminSelect(sheet.name, sheet.url)}
+                      >
+                        {sheet.name}
+                      </button>
+                    ))}
+                    {isUserAdmin && (
+                      <>
+                        <div className={styles.dropdownDivider} />
+                        <button 
+                          className={styles.dropdownConfigBtn}
+                          onClick={() => {
+                            const list = [...sheetsList];
+                            while (list.length < 4) {
+                              list.push({ name: `archivo${list.length + 1}`, url: '' });
+                            }
+                            setConfigSheets(list.slice(0, 4));
+                            setIsConfigModalOpen(true);
+                            setIsAdminOpen(false);
+                          }}
+                        >
+                          ⚙️ Configurar Archivos
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -915,6 +982,108 @@ export default function TabbedDashboardClient({
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* Modal de Configuración de Archivos Administrativos */}
+      {isConfigModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <div className={styles.modalHeader}>
+              <h2>⚙️ Configurar Archivos Administrativos</h2>
+              <button 
+                onClick={() => setIsConfigModalOpen(false)} 
+                className={styles.modalCloseBtn}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.modalAlert}>
+                <strong>⚠️ Información Importante:</strong> Para que las planillas sean editables directamente desde el panel, asegúrate de compartir el archivo en Google Drive y que los enlaces terminen en <code>/edit</code> o <code>/edit?usp=sharing</code>.
+              </div>
+
+              {configSheets.map((sheet, index) => (
+                <div key={index} className={styles.sheetConfigRow}>
+                  <div className={styles.sheetConfigRowTitle}>
+                    <span>📄 Archivo #{index + 1}</span>
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <input 
+                      type="text" 
+                      placeholder="Nombre del archivo (ej. Control Diario)" 
+                      value={sheet.name}
+                      onChange={(e) => {
+                        const newSheets = [...configSheets];
+                        newSheets[index] = { ...newSheets[index], name: e.target.value };
+                        setConfigSheets(newSheets);
+                      }}
+                      className={styles.inputField}
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="https://docs.google.com/spreadsheets/d/.../edit" 
+                      value={sheet.url}
+                      onChange={(e) => {
+                        const newSheets = [...configSheets];
+                        newSheets[index] = { ...newSheets[index], url: e.target.value };
+                        setConfigSheets(newSheets);
+                      }}
+                      className={styles.inputField}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button 
+                onClick={() => setIsConfigModalOpen(false)} 
+                className={styles.cancelBtn}
+                disabled={isSavingConfig}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!brandId) return;
+                  setIsSavingConfig(true);
+                  try {
+                    const res = await fetch('/api/admin-sheets', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ brandId, sheets: configSheets })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setSheetsList(configSheets.filter(s => s.name && s.url));
+                      setIsConfigModalOpen(false);
+                      logAction({
+                        userEmail: user.email,
+                        userName: user.name,
+                        action: 'UPDATE_ADMIN_SHEETS',
+                        resource: title,
+                        details: { message: `Actualizó los enlaces de los archivos administrativos en el panel ${title}` }
+                      });
+                    } else {
+                      alert("Error al guardar: " + data.error);
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    alert("Error de red al guardar la configuración.");
+                  } finally {
+                    setIsSavingConfig(false);
+                  }
+                }}
+                className={styles.saveBtn}
+                style={{ backgroundColor: brandColor }}
+                disabled={isSavingConfig}
+              >
+                {isSavingConfig ? 'Guardando...' : 'Guardar Cambios'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>

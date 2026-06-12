@@ -125,3 +125,17 @@ model StoredFile {
   @@index([brandId])
 }
 
+model AdminSheetConfig {
+  id        String   @id @default(cuid())
+  brandId   String   // 'viva_calentadores', 'pro_mascotas', 'ingenova', 'printer_service'
+  name      String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_sheet_configs")
+  @@index([brandId])
+}
+
+
