@@ -71,6 +71,17 @@ export default function TabbedDashboardClient({
     ? "https://docs.google.com/spreadsheets/d/1d0yCW0dVJjlhk4X4rQVVs_G62K8QEhEIgZQZHzltaqI/edit?usp=sharing"
     : passedSheetUrl;
 
+  const allowedAdmins = [
+    "sebastian@ingenova.com.co",
+    "jessyca@ingenova.com.co",
+    "adrian@ingenova.com.co",
+    "thommyenergy@superuser.com"
+  ];
+  const isUserAdmin = !!user?.email && (
+    allowedAdmins.includes(user.email.toLowerCase()) || 
+    (sessionUser as any)?.role === 'BOSS'
+  );
+
   const getEmbedUrl = (url: string) => {
     // Retornamos la URL original para permitir la edición en Google Sheets
     return url;
@@ -563,23 +574,25 @@ export default function TabbedDashboardClient({
       {!shouldHideExcel && (
         <div className={styles.tabContainer}>
           <div className={styles.tabBar}>
-            <div className={styles.dropdownContainer} ref={adminDropdownRef}>
-              <button 
-                className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl !== sheetUrl ? styles.tabBtnActive : ''}`}
-                style={activeTab === 'excel' && currentSheetUrl !== sheetUrl ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-                onClick={() => setIsAdminOpen(!isAdminOpen)}
-              >
-                💼 Administrativo ▾
-              </button>
-              {isAdminOpen && (
-                <div className={styles.dropdownMenu}>
-                  <button onClick={() => handleAdminSelect('archivo1', 'https://docs.google.com/spreadsheets/d/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo/edit?usp=sharing')}>archivo1</button>
-                  <button onClick={() => handleAdminSelect('archivo2', 'https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing')}>archivo2</button>
-                  <button onClick={() => handleAdminSelect('archivo3', 'https://docs.google.com/spreadsheets/d/1joniM23XA3LxWo6ernD-w5bOppVsGFN38iCmhATC6Fs/edit?usp=sharing')}>archivo3</button>
-                  <button onClick={() => handleAdminSelect('archivo4', 'https://docs.google.com/spreadsheets/d/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk/edit?usp=sharing')}>archivo4</button>
-                </div>
-              )}
-            </div>
+            {isUserAdmin && (
+              <div className={styles.dropdownContainer} ref={adminDropdownRef}>
+                <button 
+                  className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl !== sheetUrl ? styles.tabBtnActive : ''}`}
+                  style={activeTab === 'excel' && currentSheetUrl !== sheetUrl ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
+                  onClick={() => setIsAdminOpen(!isAdminOpen)}
+                >
+                  💼 Administrativo ▾
+                </button>
+                {isAdminOpen && (
+                  <div className={styles.dropdownMenu}>
+                    <button onClick={() => handleAdminSelect('archivo1', 'https://docs.google.com/spreadsheets/d/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo/edit?usp=sharing')}>archivo1</button>
+                    <button onClick={() => handleAdminSelect('archivo2', 'https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing')}>archivo2</button>
+                    <button onClick={() => handleAdminSelect('archivo3', 'https://docs.google.com/spreadsheets/d/1joniM23XA3LxWo6ernD-w5bOppVsGFN38iCmhATC6Fs/edit?usp=sharing')}>archivo3</button>
+                    <button onClick={() => handleAdminSelect('archivo4', 'https://docs.google.com/spreadsheets/d/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk/edit?usp=sharing')}>archivo4</button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <button 
               className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl === sheetUrl ? styles.tabBtnActive : ''}`}
