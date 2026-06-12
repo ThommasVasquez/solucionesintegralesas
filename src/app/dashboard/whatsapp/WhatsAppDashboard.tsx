@@ -30,7 +30,9 @@ interface WhatsAppMessage {
   content: string;
   timestamp: string; // ISO String
   direction: 'INBOUND' | 'OUTBOUND';
+  brandId?: string;
 }
+
 
 interface WhatsAppDashboardProps {
   userName: string;
@@ -494,6 +496,21 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
     const customers = ['Juan Pérez', 'María Gómez', 'Carlos Ruiz', 'Clínica Sabana', 'Estación Chía', 'Diana Torres'];
     const agent = 'Yo'; // El agente por defecto en tiempo real es 'Yo'
 
+    // Textos de demo dinámicos por marca
+    let clientText = 'Hola, buenas tardes, solicito mantenimiento de zonas húmedas.';
+    let agentText = 'Hola! Claro que sí, con gusto te agendamos con Ingenova. ¿Sería preventivo o correctivo?';
+
+    if (brandId === 'viva_calentadores') {
+      clientText = 'Hola, buenas tardes, solicito revisión técnica para mi calentador de agua.';
+      agentText = 'Hola! Claro que sí, con gusto te agendamos con Viva Calentadores. ¿El calentador es a gas o eléctrico?';
+    } else if (brandId === 'pro_mascotas') {
+      clientText = 'Hola, buenas tardes, solicito una cita de profilaxis dental para mi perrito.';
+      agentText = 'Hola! Claro que sí, con gusto te agendamos con ProMascotas. ¿Qué edad tiene tu perrito?';
+    } else if (brandId === 'printer_service') {
+      clientText = 'Hola, buenas tardes, solicito servicio de mantenimiento para una multifuncional Kyocera.';
+      agentText = 'Hola! Claro que sí, con gusto te agendamos con Printer Service. ¿Presenta algún código de error en la pantalla?';
+    }
+
     for (let d = 30; d >= 0; d--) {
       const currentDate = new Date(now);
       currentDate.setDate(now.getDate() - d);
@@ -512,12 +529,13 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
 
         const customerMsgTime1 = new Date(chatStartTime);
         demoMessages.push({
-          id: `demo-${d}-${c}-in-1-${Date.now()}`,
+          id: `demo-${d}-${c}-in-1-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
           chatId,
           sender: customer,
-          content: 'Hola, buenas tardes, solicito mantenimiento de zonas húmedas.',
+          content: clientText,
           timestamp: customerMsgTime1.toISOString(),
           direction: 'INBOUND',
+          brandId: brandId,
         });
 
         const agentResponseTime = new Date(customerMsgTime1);
@@ -525,15 +543,17 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         agentResponseTime.setMinutes(customerMsgTime1.getMinutes() + responseDelay);
         
         demoMessages.push({
-          id: `demo-${d}-${c}-out-1-${Date.now()}`,
+          id: `demo-${d}-${c}-out-1-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
           chatId,
           sender: agent,
-          content: `Hola! Claro que sí, con gusto te agendamos con Ingenova. ¿Sería preventivo o correctivo?`,
+          content: agentText,
           timestamp: agentResponseTime.toISOString(),
           direction: 'OUTBOUND',
+          brandId: brandId,
         });
       }
     }
+
 
     // Subir cada uno a la API
     try {
