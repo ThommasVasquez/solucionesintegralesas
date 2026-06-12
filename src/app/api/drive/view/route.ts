@@ -66,8 +66,11 @@ export async function GET(req: NextRequest) {
     }
     const byteArray = new Uint8Array(byteNumbers);
 
+    const blob = new Blob([byteArray], { type: mimeType });
+
     // Return the file binary content with Content-Disposition: inline
-    return new NextResponse(byteArray, {
+    return new Response(blob, {
+      status: 200,
       headers: {
         'Content-Type': mimeType,
         'Content-Disposition': `inline; filename="${encodeURIComponent(file.name)}"`,

@@ -72,10 +72,7 @@ export default function TabbedDashboardClient({
     : passedSheetUrl;
 
   const getEmbedUrl = (url: string) => {
-    if (url.includes('docs.google.com/spreadsheets')) {
-      // Reemplaza /edit por /htmlembed para evitar restricciones de X-Frame-Options
-      return url.replace(/\/edit(\?.*)?$/, '/htmlembed?widget=true&headers=false');
-    }
+    // Retornamos la URL original para permitir la edición en Google Sheets
     return url;
   };
   const sheetUrl = getEmbedUrl(rawSheetUrl);
@@ -107,6 +104,7 @@ export default function TabbedDashboardClient({
   const handleTabChange = (tab: 'excel' | 'whatsapp' | 'drive') => {
     setActiveTab(tab);
     setExcelWorkbook(null);
+    setViewingFile(null);
     logAction({
       userEmail: user.email,
       userName: user.name,
@@ -125,6 +123,7 @@ export default function TabbedDashboardClient({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadingFileName, setUploadingFileName] = useState('');
   const [excelWorkbook, setExcelWorkbook] = useState<ExcelWorkbookState | null>(null);
+  const [viewingFile, setViewingFile] = useState<DriveFile | null>(null);
 
   // Categorías de carpetas
   const categories = ['Todos', ...Array.from(new Set(files.map(f => f.category)))];
@@ -393,6 +392,7 @@ export default function TabbedDashboardClient({
             activeSheet: workbook.SheetNames[0],
             sheetsData: sheets
           });
+          setViewingFile(file);
 
           logAction({
             userEmail: user.email,
@@ -413,9 +413,9 @@ export default function TabbedDashboardClient({
       return;
     }
 
-    // For PDFs and images, open them directly in a new tab via the dedicated view API route
+    // For PDFs and images, display them inline using setViewingFile
     if (file.type === 'pdf' || file.type === 'img') {
-      window.open(`/api/drive/view?id=${file.id}`, '_blank');
+      setViewingFile(file);
       
       logAction({
         userEmail: user.email,
@@ -570,28 +570,30 @@ export default function TabbedDashboardClient({
 
       {activeTab === 'drive' && (
         <div className={styles.driveWrapper}>
-          {excelWorkbook ? (
-            <div className={styles.excelInlineViewer}>
+          {viewingFile ? (
+            <div className={styles.fileInlineViewer}>
               <div className={styles.excelInlineHeader}>
                 <div className={styles.excelInlineLeft}>
                   <button 
-                    onClick={() => setExcelWorkbook(null)} 
+                    onClick={() => {
+                      setViewingFile(null);
+                      setExcelWorkbook(null);
+                    }} 
                     className={styles.excelInlineBackBtn}
                   >
                     ← Volver a Archivos
                   </button>
                   <span className={styles.excelInlineDivider}>|</span>
                   <div className={styles.excelInlineTitle}>
-                    <FileSpreadsheet className={styles.excelIcon} size={20} />
-                    <h3>{excelWorkbook.fileName}</h3>
+                    {viewingFile.type === 'xls' && <FileSpreadsheet className={styles.iconXls} size={20} />}
+                    {viewingFile.type === 'pdf' && <FileText className={styles.iconPdf} size={20} />}
+                    {viewingFile.type === 'img' && <FileImage className={styles.iconImg} size={20} />}
+                    <h3>{viewingFile.name}</h3>
                   </div>
                 </div>
                 
                 <button 
-                  onClick={() => {
-                    const file = files.find(f => f.name === excelWorkbook.fileName);
-                    if (file) handleDownloadFile(file);
-                  }}
+                  onClick={() => handleDownloadFile(viewingFile)}
                   className={styles.excelInlineDownloadBtn}
                   style={{ backgroundColor: brandColor }}
                 >
@@ -599,64 +601,88 @@ export default function TabbedDashboardClient({
                 </button>
               </div>
 
-              {/* Grid Table */}
-              <div className={styles.excelTableContainer}>
-                <table className={styles.excelTable}>
-                  <thead>
-                    <tr>
-                      <th className={styles.excelCornerHeader}></th>
-                      {Array.from({ length: (excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).reduce((max, row) => Math.max(max, row.length), 0) }).map((_, colIdx) => {
-                        const getColumnLetter = (index: number): string => {
-                          let letter = '';
-                          let temp = index;
-                          while (temp >= 0) {
-                            letter = String.fromCharCode((temp % 26) + 65) + letter;
-                            temp = Math.floor(temp / 26) - 1;
-                          }
-                          return letter;
-                        };
-                        return (
-                          <th key={colIdx} className={styles.excelColHeader}>
-                            {getColumnLetter(colIdx)}
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).map((row, rowIdx) => (
-                      <tr key={rowIdx}>
-                        <td className={styles.excelRowHeader}>{rowIdx + 1}</td>
-                        {Array.from({ length: (excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).reduce((max, row) => Math.max(max, row.length), 0) }).map((_, colIdx) => {
-                          const cell = row[colIdx];
-                          return (
-                            <td key={colIdx} className={styles.excelCell}>
-                              {cell !== null && cell !== undefined ? String(cell) : ''}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {viewingFile.type === 'xls' && excelWorkbook && (
+                <>
+                  {/* Grid Table */}
+                  <div className={styles.excelTableContainer}>
+                    <table className={styles.excelTable}>
+                      <thead>
+                        <tr>
+                          <th className={styles.excelCornerHeader}></th>
+                          {Array.from({ length: (excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).reduce((max, row) => Math.max(max, row.length), 0) }).map((_, colIdx) => {
+                            const getColumnLetter = (index: number): string => {
+                              let letter = '';
+                              let temp = index;
+                              while (temp >= 0) {
+                                letter = String.fromCharCode((temp % 26) + 65) + letter;
+                                temp = Math.floor(temp / 26) - 1;
+                              }
+                              return letter;
+                            };
+                            return (
+                              <th key={colIdx} className={styles.excelColHeader}>
+                                {getColumnLetter(colIdx)}
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).map((row, rowIdx) => (
+                          <tr key={rowIdx}>
+                            <td className={styles.excelRowHeader}>{rowIdx + 1}</td>
+                            {Array.from({ length: (excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).reduce((max, row) => Math.max(max, row.length), 0) }).map((_, colIdx) => {
+                              const cell = row[colIdx];
+                              return (
+                                <td key={colIdx} className={styles.excelCell}>
+                                  {cell !== null && cell !== undefined ? String(cell) : ''}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-              {/* Sheet Tabs at the bottom */}
-              {excelWorkbook.sheetNames.length > 1 && (
-                <div className={styles.excelSheetTabsBottom}>
-                  {excelWorkbook.sheetNames.map((name) => (
-                    <button
-                      key={name}
-                      className={`${styles.excelSheetTab} ${excelWorkbook.activeSheet === name ? styles.excelSheetTabActive : ''}`}
-                      style={excelWorkbook.activeSheet === name ? { borderTop: `3px solid ${brandColor}`, color: brandColor } : {}}
-                      onClick={() => setExcelWorkbook({
-                        ...excelWorkbook,
-                        activeSheet: name
-                      })}
-                    >
-                      {name}
-                    </button>
-                  ))}
+                  {/* Sheet Tabs at the bottom */}
+                  {excelWorkbook.sheetNames.length > 1 && (
+                    <div className={styles.excelSheetTabsBottom}>
+                      {excelWorkbook.sheetNames.map((name) => (
+                        <button
+                          key={name}
+                          className={`${styles.excelSheetTab} ${excelWorkbook.activeSheet === name ? styles.excelSheetTabActive : ''}`}
+                          style={excelWorkbook.activeSheet === name ? { borderTop: `3px solid ${brandColor}`, color: brandColor } : {}}
+                          onClick={() => setExcelWorkbook({
+                            ...excelWorkbook,
+                            activeSheet: name
+                          })}
+                        >
+                          {name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {viewingFile.type === 'pdf' && (
+                <div className={styles.pdfViewerContainer}>
+                  <iframe 
+                    src={`/api/drive/view?id=${viewingFile.id}`} 
+                    className={styles.pdfIframe}
+                    title={viewingFile.name}
+                  />
+                </div>
+              )}
+
+              {viewingFile.type === 'img' && (
+                <div className={styles.imageViewerContainer}>
+                  <img 
+                    src={`/api/drive/view?id=${viewingFile.id}`} 
+                    className={styles.imageViewerImg} 
+                    alt={viewingFile.name}
+                  />
                 </div>
               )}
             </div>
