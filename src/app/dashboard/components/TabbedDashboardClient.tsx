@@ -413,36 +413,18 @@ export default function TabbedDashboardClient({
       return;
     }
 
-    try {
-      const res = await fetch(`/api/drive/download?id=${file.id}`);
-      const data = await res.json();
-      if (data.success && data.content) {
-        const mimeType = getMimeType(data.name || file.name);
-        
-        const byteCharacters = atob(data.content);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: mimeType });
-        
-        const url = window.URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        
-        logAction({
-          userEmail: user.email,
-          userName: user.name,
-          action: 'VIEW_FILE_ONLINE',
-          resource: title,
-          details: { fileName: file.name, message: `Visualizó en línea el archivo ${file.name} en el panel ${title}` }
-        });
-      } else {
-        alert("Error al abrir el archivo de la base de datos.");
-      }
-    } catch (err) {
-      console.error("Error viewing file:", err);
-      alert("Error de conexión al abrir el archivo.");
+    // For PDFs and images, open them directly in a new tab via the dedicated view API route
+    if (file.type === 'pdf' || file.type === 'img') {
+      window.open(`/api/drive/view?id=${file.id}`, '_blank');
+      
+      logAction({
+        userEmail: user.email,
+        userName: user.name,
+        action: 'VIEW_FILE_ONLINE',
+        resource: title,
+        details: { fileName: file.name, message: `Visualizó en línea el archivo ${file.name} en el panel ${title}` }
+      });
+      return;
     }
   };
 
