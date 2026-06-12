@@ -34,28 +34,40 @@ export async function GET(req: NextRequest) {
     // Ejecutar consultas SQL directas vía HTTP para un rendimiento óptimo y libre de timeouts de WASM en Edge
     if (brandId && chatId) {
       messages = await sql`
-        SELECT * FROM whatsapp_messages 
+        SELECT id, "brandId", "chatId", sender, content, direction, 
+               timestamp::timestamptz as timestamp, 
+               "createdAt"::timestamptz as "createdAt"
+        FROM whatsapp_messages 
         WHERE "brandId" = ${brandId} AND "chatId" = ${chatId} 
         ORDER BY timestamp DESC 
         LIMIT ${limit}
       `;
     } else if (brandId) {
       messages = await sql`
-        SELECT * FROM whatsapp_messages 
+        SELECT id, "brandId", "chatId", sender, content, direction, 
+               timestamp::timestamptz as timestamp, 
+               "createdAt"::timestamptz as "createdAt"
+        FROM whatsapp_messages 
         WHERE "brandId" = ${brandId} 
         ORDER BY timestamp DESC 
         LIMIT ${limit}
       `;
     } else if (chatId) {
       messages = await sql`
-        SELECT * FROM whatsapp_messages 
+        SELECT id, "brandId", "chatId", sender, content, direction, 
+               timestamp::timestamptz as timestamp, 
+               "createdAt"::timestamptz as "createdAt"
+        FROM whatsapp_messages 
         WHERE "chatId" = ${chatId} 
         ORDER BY timestamp DESC 
         LIMIT ${limit}
       `;
     } else {
       messages = await sql`
-        SELECT * FROM whatsapp_messages 
+        SELECT id, "brandId", "chatId", sender, content, direction, 
+               timestamp::timestamptz as timestamp, 
+               "createdAt"::timestamptz as "createdAt"
+        FROM whatsapp_messages 
         ORDER BY timestamp DESC 
         LIMIT ${limit}
       `;
