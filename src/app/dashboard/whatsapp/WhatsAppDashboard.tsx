@@ -44,6 +44,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   const [isClient, setIsClient] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'active' | 'disconnected'>('disconnected');
   const [lastMessageTime, setLastMessageTime] = useState<Date | null>(null);
+  const [activeAuditSlot, setActiveAuditSlot] = useState<'slot1' | 'slot2' | 'slot3' | 'slot4'>('slot1');
   const [origin, setOrigin] = useState('http://localhost:3001');
 
   useEffect(() => {
@@ -503,7 +504,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         const customer = customers[Math.floor(Math.random() * customers.length)];
         const chatId = customer.toLowerCase().replace(/\s+/g, '_');
         
-        const startHour = Math.floor(Math.random() * 12) + 9; // 9:00 a 21:00
+        const startHour = Math.floor(Math.random() * 24); // 0 a 23
         const startMinute = Math.floor(Math.random() * 60);
         
         const chatStartTime = new Date(currentDate);
@@ -597,18 +598,35 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   }, [messages, period, customStartDate, customEndDate, isClient]);
 
   // Estadísticas calculadas
+  // Helper to format timestamps for client lists
+  const formatMsgDate = (timestamp: string) => {
+    const dateObj = new Date(timestamp);
+    const today = new Date();
+    const isToday = dateObj.getDate() === today.getDate() &&
+                    dateObj.getMonth() === today.getMonth() &&
+                    dateObj.getFullYear() === today.getFullYear();
+    const timeStr = dateObj.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: true });
+    if (isToday) {
+      return timeStr;
+    } else {
+      const dateStr = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
+      return `${dateStr} ${timeStr}`;
+    }
+  };
+
+  // Estadísticas calculadas
   const stats = useMemo(() => {
     if (filteredMessages.length === 0) {
       return {
         totalReceived: 0,
         totalAnswered: 0,
-        responseRate: 0,
         uniqueClientsCount: 0,
-        avgResponseTime: null as number | null,
-        groupedByDay: [] as { dayLabel: string; inbound: number; outbound: number }[],
-        groupedByHour: Array(24).fill(0) as number[],
-        topCustomers: [] as { name: string; count: number }[],
-        avgResponseTimeByDay: [] as { dayLabel: string; avgTime: number | null }[],
+        slots: {
+          slot1: { id: 'slot1' as const, label: 'Tiempo Muerto Mañana', range: '12:00 AM - 8:00 AM', active: false, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
+          slot2: { id: 'slot2' as const, label: 'Agente Diurno', range: '8:00 AM - 2:00 PM', active: true, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
+          slot3: { id: 'slot3' as const, label: 'Agente de la Tarde', range: '2:00 PM - 8:00 PM', active: true, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
+          slot4: { id: 'slot4' as const, label: 'Tiempo Muerto Noche', range: '8:00 PM - 11:59 PM', active: false, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] }
+        }
       };
     }
 
@@ -620,130 +638,109 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
       else outboundCount++;
     });
 
-    const dayGroups: Record<string, { inbound: number; outbound: number }> = {};
-    const dayResponseTimes: Record<string, number[]> = {};
+    const slot1Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
+    const slot2Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
+    const slot3Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
+    const slot4Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
 
     filteredMessages.forEach(m => {
-      const dateObj = new Date(m.timestamp);
-      const dayLabel = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
-      
-      if (!dayGroups[dayLabel]) {
-        dayGroups[dayLabel] = { inbound: 0, outbound: 0 };
-      }
-      
-      if (m.direction === 'INBOUND') {
-        dayGroups[dayLabel].inbound++;
-      } else {
-        dayGroups[dayLabel].outbound++;
-      }
-    });
-
-    const chats: Record<string, WhatsAppMessage[]> = {};
-    filteredMessages.forEach(m => {
-      if (!chats[m.chatId]) chats[m.chatId] = [];
-      chats[m.chatId].push(m);
-    });
-
-    const responseTimes: number[] = [];
-    let totalCustomerBlocks = 0;
-    let answeredCustomerBlocks = 0;
-
-    Object.entries(chats).forEach(([chatId, chatMsgs]) => {
-      const sorted = [...chatMsgs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-      
-      let firstInboundMs: number | null = null;
-      let dayLabelForInbound = '';
-
-      sorted.forEach(m => {
-        if (m.direction === 'INBOUND') {
-          if (firstInboundMs === null) {
-            firstInboundMs = new Date(m.timestamp).getTime();
-            const dateObj = new Date(m.timestamp);
-            dayLabelForInbound = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}`;
-            totalCustomerBlocks++;
+      // Solo contamos clientes que escriben (mensajes entrantes)
+      if (m.direction === 'INBOUND' && m.sender !== 'Yo') {
+        const dateObj = new Date(m.timestamp);
+        const hour = dateObj.getHours();
+        const timestampMs = dateObj.getTime();
+        const formattedTime = formatMsgDate(m.timestamp);
+        
+        if (hour >= 0 && hour < 8) {
+          if (!slot1Chats[m.chatId]) {
+            slot1Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
           }
-        } else {
-          if (firstInboundMs !== null) {
-            const outMs = new Date(m.timestamp).getTime();
-            const diffMin = Math.max(0, (outMs - firstInboundMs) / 60000);
-            
-            if (diffMin < 2880) {
-              responseTimes.push(diffMin);
-              answeredCustomerBlocks++;
-              
-              if (!dayResponseTimes[dayLabelForInbound]) {
-                dayResponseTimes[dayLabelForInbound] = [];
-              }
-              dayResponseTimes[dayLabelForInbound].push(diffMin);
-            }
-            
-            firstInboundMs = null;
+          slot1Chats[m.chatId].msgCount++;
+          if (timestampMs > slot1Chats[m.chatId].timestampMs) {
+            slot1Chats[m.chatId].lastTime = formattedTime;
+            slot1Chats[m.chatId].timestampMs = timestampMs;
+          }
+        } else if (hour >= 8 && hour < 14) {
+          if (!slot2Chats[m.chatId]) {
+            slot2Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
+          }
+          slot2Chats[m.chatId].msgCount++;
+          if (timestampMs > slot2Chats[m.chatId].timestampMs) {
+            slot2Chats[m.chatId].lastTime = formattedTime;
+            slot2Chats[m.chatId].timestampMs = timestampMs;
+          }
+        } else if (hour >= 14 && hour < 20) {
+          if (!slot3Chats[m.chatId]) {
+            slot3Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
+          }
+          slot3Chats[m.chatId].msgCount++;
+          if (timestampMs > slot3Chats[m.chatId].timestampMs) {
+            slot3Chats[m.chatId].lastTime = formattedTime;
+            slot3Chats[m.chatId].timestampMs = timestampMs;
+          }
+        } else if (hour >= 20 && hour < 24) {
+          if (!slot4Chats[m.chatId]) {
+            slot4Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
+          }
+          slot4Chats[m.chatId].msgCount++;
+          if (timestampMs > slot4Chats[m.chatId].timestampMs) {
+            slot4Chats[m.chatId].lastTime = formattedTime;
+            slot4Chats[m.chatId].timestampMs = timestampMs;
           }
         }
-      });
-    });
-
-    const avgResponseTime = responseTimes.length > 0 
-      ? responseTimes.reduce((sum, t) => sum + t, 0) / responseTimes.length 
-      : null;
-
-    const responseRate = totalCustomerBlocks > 0 
-      ? Math.round((answeredCustomerBlocks / totalCustomerBlocks) * 100) 
-      : 0;
-
-    const sortedDays = Object.keys(dayGroups).sort((a, b) => {
-      const [dayA, monthA] = a.split('/').map(Number);
-      const [dayB, monthB] = b.split('/').map(Number);
-      return (monthA * 32 + dayA) - (monthB * 32 + dayB);
-    });
-
-    const groupedByDay = sortedDays.map(day => ({
-      dayLabel: day,
-      inbound: dayGroups[day].inbound,
-      outbound: dayGroups[day].outbound,
-    }));
-
-    const avgResponseTimeByDay = sortedDays.map(day => {
-      const times = dayResponseTimes[day] || [];
-      const avg = times.length > 0 ? (times.reduce((s, t) => s + t, 0) / times.length) : null;
-      return {
-        dayLabel: day,
-        avgTime: avg
-      };
-    });
-
-    const groupedByHour = Array(24).fill(0);
-    filteredMessages.forEach(m => {
-      if (m.direction === 'INBOUND') {
-        const hour = new Date(m.timestamp).getHours();
-        groupedByHour[hour]++;
       }
     });
 
-    const customerCounts: Record<string, number> = {};
-    filteredMessages.forEach(m => {
-      if (m.direction === 'INBOUND' && m.sender !== 'Yo') {
-        customerCounts[m.sender] = (customerCounts[m.sender] || 0) + 1;
-      }
-    });
+    const sortChats = (chatsMap: Record<string, any>) => {
+      return Object.values(chatsMap)
+        .sort((a: any, b: any) => b.timestampMs - a.timestampMs)
+        .map(({ timestampMs, ...rest }) => rest);
+    };
 
-    const topCustomers = Object.entries(customerCounts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    const uniqueClientsCount = new Set(filteredMessages.map(m => m.chatId)).size;
+    const uniqueClientsCount = new Set(
+      filteredMessages
+        .filter(m => m.direction === 'INBOUND' && m.sender !== 'Yo')
+        .map(m => m.chatId)
+    ).size;
 
     return {
       totalReceived: inboundCount,
       totalAnswered: outboundCount,
-      responseRate,
       uniqueClientsCount,
-      avgResponseTime,
-      groupedByDay,
-      groupedByHour,
-      topCustomers,
-      avgResponseTimeByDay,
+      slots: {
+        slot1: {
+          id: 'slot1' as const,
+          label: 'Tiempo Muerto Mañana',
+          range: '12:00 AM - 8:00 AM',
+          active: false,
+          count: Object.keys(slot1Chats).length,
+          chats: sortChats(slot1Chats)
+        },
+        slot2: {
+          id: 'slot2' as const,
+          label: 'Agente Diurno',
+          range: '8:00 AM - 2:00 PM',
+          active: true,
+          count: Object.keys(slot2Chats).length,
+          chats: sortChats(slot2Chats)
+        },
+        slot3: {
+          id: 'slot3' as const,
+          label: 'Agente de la Tarde',
+          range: '2:00 PM - 8:00 PM',
+          active: true,
+          count: Object.keys(slot3Chats).length,
+          chats: sortChats(slot3Chats)
+        },
+        slot4: {
+          id: 'slot4' as const,
+          label: 'Tiempo Muerto Noche',
+          range: '8:00 PM - 11:59 PM',
+          active: false,
+          count: Object.keys(slot4Chats).length,
+          chats: sortChats(slot4Chats)
+        }
+      }
     };
   }, [filteredMessages]);
 
@@ -761,249 +758,105 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   };
 
   // SVGs para gráficos
-  const renderVolumeChart = () => {
-    const data = stats.groupedByDay;
-    if (data.length === 0) {
-      return (
-        <div className={styles.emptyChart}>
-          <BarChart2 size={40} strokeWidth={1} style={{ opacity: 0.5 }} />
-          <p>No hay datos disponibles para este periodo.</p>
-        </div>
-      );
-    }
+  const renderSlotsChart = () => {
+    const totalClients = stats.slots.slot1.count + stats.slots.slot2.count + stats.slots.slot3.count + stats.slots.slot4.count;
+    const getPercent = (count: number) => {
+      if (totalClients === 0) return 0;
+      return Math.round((count / totalClients) * 100);
+    };
 
-    const width = 500;
-    const height = 240;
-    const paddingLeft = 40;
-    const paddingRight = 10;
-    const paddingTop = 20;
-    const paddingBottom = 30;
-
-    const maxVal = Math.max(...data.map(d => Math.max(d.inbound, d.outbound)), 5);
-    const yMax = Math.ceil(maxVal * 1.15);
-
-    const chartWidth = width - paddingLeft - paddingRight;
-    const chartHeight = height - paddingTop - paddingBottom;
-    const barWidth = Math.max(4, Math.floor(chartWidth / data.length) - 8);
-    const stepX = chartWidth / data.length;
+    const slotsList = [stats.slots.slot1, stats.slots.slot2, stats.slots.slot3, stats.slots.slot4];
 
     return (
-      <svg viewBox={`0 0 ${width} ${height}`} className={styles.svgChart}>
-        {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-          const y = paddingTop + chartHeight * (1 - ratio);
-          const val = Math.round(yMax * ratio);
-          return (
-            <g key={idx}>
-              <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} className={styles.chartGridLine} />
-              <text x={paddingLeft - 8} y={y + 3} textAnchor="end" className={styles.chartText}>{val}</text>
-            </g>
-          );
-        })}
-
-        <line x1={paddingLeft} y1={height - paddingBottom} x2={width - paddingRight} y2={height - paddingBottom} className={styles.chartAxis} />
-
-        {data.map((d, idx) => {
-          const x = paddingLeft + (idx * stepX) + (stepX - barWidth) / 2;
-          const inboundHeight = (d.inbound / yMax) * chartHeight;
-          const outboundHeight = (d.outbound / yMax) * chartHeight;
-
-          const yIn = height - paddingBottom - inboundHeight;
-          const yOut = height - paddingBottom - outboundHeight;
-
-          const singleBarWidth = barWidth / 2 - 2;
-
-          return (
-            <g key={idx}>
-              <rect 
-                x={x} 
-                y={yIn} 
-                width={singleBarWidth} 
-                height={inboundHeight} 
-                rx={2} 
-                className={styles.chartBarInbound}
-                onMouseEnter={(e) => setTooltip({
-                  show: true,
-                  x: e.clientX,
-                  y: e.clientY - 40,
-                  text: `${d.dayLabel}: ${d.inbound} entrantes`
-                })}
-                onMouseLeave={() => setTooltip(p => ({ ...p, show: false }))}
-              />
-              <rect 
-                x={x + singleBarWidth + 2} 
-                y={yOut} 
-                width={singleBarWidth} 
-                height={outboundHeight} 
-                rx={2} 
-                className={styles.chartBarOutbound}
-                onMouseEnter={(e) => setTooltip({
-                  show: true,
-                  x: e.clientX,
-                  y: e.clientY - 40,
-                  text: `${d.dayLabel}: ${d.outbound} contestados`
-                })}
-                onMouseLeave={() => setTooltip(p => ({ ...p, show: false }))}
-              />
-              
-              {(data.length <= 15 || idx % Math.ceil(data.length / 10) === 0) && (
-                <text x={x + barWidth / 2} y={height - paddingBottom + 16} textAnchor="middle" className={styles.chartText} style={{ fontSize: '9px' }}>
-                  {d.dayLabel}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
+      <div className={styles.chartCard} style={{ gridColumn: '1 / -1' }}>
+        <h3 style={{ marginBottom: '4px' }}>
+          <BarChart2 size={18} style={{ color: '#25d366', marginRight: '8px', verticalAlign: 'middle' }} />
+          Distribución de Clientes por Franjas Horarias
+        </h3>
+        <p className={styles.chartSubtext}>
+          Proporción de clientes únicos que enviaron mensajes en cada franja horaria. Total acumulado de contactos: <strong>{totalClients}</strong>.
+        </p>
+        <div className={styles.slotsChartContainer}>
+          {slotsList.map((slot) => {
+            const percent = getPercent(slot.count);
+            const barColor = slot.id === 'slot1' ? '#64748b' : slot.id === 'slot2' ? '#3b82f6' : slot.id === 'slot3' ? '#f59e0b' : '#475569';
+            
+            return (
+              <div key={slot.id} className={styles.slotChartRow}>
+                <div className={styles.slotChartInfo}>
+                  <span className={styles.slotChartLabel}>{slot.label}</span>
+                  <span className={styles.slotChartRange}>{slot.range}</span>
+                </div>
+                
+                <div className={styles.slotChartBarBg}>
+                  <div 
+                    className={styles.slotChartBarFill} 
+                    style={{ 
+                      width: `${percent}%`, 
+                      backgroundColor: barColor 
+                    }} 
+                  />
+                </div>
+                
+                <div className={styles.slotChartValue}>
+                  <span className={styles.slotChartCount}>{slot.count} {slot.count === 1 ? 'cliente' : 'clientes'}</span>
+                  <span className={styles.slotChartPercent}>{percent}%</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     );
   };
 
-  const renderResponseTimeChart = () => {
-    const data = stats.avgResponseTimeByDay.filter(
-      (d): d is { dayLabel: string; avgTime: number } => d.avgTime !== null
-    );
-    if (data.length === 0) {
-      return (
-        <div className={styles.emptyChart}>
-          <Clock size={40} strokeWidth={1} style={{ opacity: 0.5 }} />
-          <p>No hay tiempos de respuesta registrados.</p>
+  const renderSlotsAudit = () => {
+    const selectedSlot = stats.slots[activeAuditSlot];
+    
+    return (
+      <div className={styles.auditCard} style={{ marginTop: '20px', gridColumn: '1 / -1' }}>
+        <div className={styles.auditHeader}>
+          <div className={styles.auditTitle}>
+            <User size={18} style={{ color: activeAuditSlot === 'slot1' ? '#64748b' : activeAuditSlot === 'slot2' ? '#3b82f6' : activeAuditSlot === 'slot3' ? '#f59e0b' : '#475569', marginRight: '8px' }} />
+            <h3>Auditoría de Chats: {selectedSlot.label} ({selectedSlot.range})</h3>
+          </div>
+          <span className={`${styles.auditBadge} ${selectedSlot.active ? styles.badgeActive : styles.badgeDead}`}>
+            {selectedSlot.active ? '🟢 Agente Activo en Turno' : '🔴 Tiempo Muerto (Sin Agente)'}
+          </span>
         </div>
-      );
-    }
-
-    const width = 500;
-    const height = 240;
-    const paddingLeft = 45;
-    const paddingRight = 15;
-    const paddingTop = 20;
-    const paddingBottom = 30;
-
-    const maxVal = Math.max(...data.map(d => d.avgTime), 10);
-    const yMax = Math.ceil(maxVal * 1.15);
-
-    const chartWidth = width - paddingLeft - paddingRight;
-    const chartHeight = height - paddingTop - paddingBottom;
-    const stepX = data.length > 1 ? chartWidth / (data.length - 1) : chartWidth;
-
-    const points = data.map((d, idx) => {
-      const x = paddingLeft + idx * stepX;
-      const y = height - paddingBottom - (d.avgTime / yMax) * chartHeight;
-      return `${x},${y}`;
-    }).join(' ');
-
-    return (
-      <svg viewBox={`0 0 ${width} ${height}`} className={styles.svgChart}>
-        {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-          const y = paddingTop + chartHeight * (1 - ratio);
-          const val = Math.round(yMax * ratio);
-          return (
-            <g key={idx}>
-              <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} className={styles.chartGridLine} />
-              <text x={paddingLeft - 8} y={y + 3} textAnchor="end" className={styles.chartText}>{val}m</text>
-            </g>
-          );
-        })}
-
-        <line x1={paddingLeft} y1={height - paddingBottom} x2={width - paddingRight} y2={height - paddingBottom} className={styles.chartAxis} />
-
-        {data.length > 1 && (
-          <polyline points={points} className={styles.chartLine} />
-        )}
-
-        {data.map((d, idx) => {
-          const x = paddingLeft + idx * stepX;
-          const y = height - paddingBottom - (d.avgTime / yMax) * chartHeight;
-
-          return (
-            <g key={idx}>
-              <circle 
-                cx={x} 
-                cy={y} 
-                r={4} 
-                className={styles.chartDot}
-                onMouseEnter={(e) => setTooltip({
-                  show: true,
-                  x: e.clientX,
-                  y: e.clientY - 40,
-                  text: `${d.dayLabel}: promedio de ${formatResponseTime(d.avgTime)}`
-                })}
-                onMouseLeave={() => setTooltip(p => ({ ...p, show: false }))}
-              />
-              
-              {(data.length <= 12 || idx % Math.ceil(data.length / 8) === 0) && (
-                <text x={x} y={height - paddingBottom + 16} textAnchor="middle" className={styles.chartText} style={{ fontSize: '9px' }}>
-                  {d.dayLabel}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    );
-  };
-
-  const renderHourlyChart = () => {
-    const data = stats.groupedByHour;
-    const maxVal = Math.max(...data, 1);
-    const yMax = Math.ceil(maxVal * 1.1);
-
-    const width = 500;
-    const height = 180;
-    const paddingLeft = 30;
-    const paddingRight = 10;
-    const paddingTop = 15;
-    const paddingBottom = 25;
-
-    const chartWidth = width - paddingLeft - paddingRight;
-    const chartHeight = height - paddingTop - paddingBottom;
-    const stepX = chartWidth / 24;
-    const barWidth = Math.max(2, stepX - 4);
-
-    return (
-      <svg viewBox={`0 0 ${width} ${height}`} className={styles.svgChart}>
-        {[0, 0.5, 1].map((ratio, idx) => {
-          const y = paddingTop + chartHeight * (1 - ratio);
-          const val = Math.round(yMax * ratio);
-          return (
-            <g key={idx}>
-              <line x1={paddingLeft} y1={y} x2={width - paddingRight} y2={y} className={styles.chartGridLine} />
-              <text x={paddingLeft - 8} y={y + 3} textAnchor="end" className={styles.chartText}>{val}</text>
-            </g>
-          );
-        })}
-
-        {data.map((count, hour) => {
-          const x = paddingLeft + hour * stepX + (stepX - barWidth) / 2;
-          const barHeight = (count / yMax) * chartHeight;
-          const y = height - paddingBottom - barHeight;
-
-          return (
-            <g key={hour}>
-              <rect 
-                x={x} 
-                y={y} 
-                width={barWidth} 
-                height={barHeight} 
-                rx={1} 
-                fill="#25d366" 
-                opacity={count > 0 ? 0.8 : 0.2}
-                onMouseEnter={(e) => setTooltip({
-                  show: true,
-                  x: e.clientX,
-                  y: e.clientY - 40,
-                  text: `${hour.toString().padStart(2, '0')}:00 hs: ${count} mensajes`
-                })}
-                onMouseLeave={() => setTooltip(p => ({ ...p, show: false }))}
-              />
-              
-              {hour % 4 === 0 && (
-                <text x={x + barWidth / 2} y={height - paddingBottom + 14} textAnchor="middle" className={styles.chartText}>
-                  {`${hour.toString().padStart(2, '0')}:00`}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
+        
+        <div className={styles.auditTableContainer}>
+          {selectedSlot.chats.length === 0 ? (
+            <div className={styles.noAuditData}>
+              No se registraron mensajes entrantes de clientes en esta franja horaria durante el periodo seleccionado.
+            </div>
+          ) : (
+            <table className={styles.auditTable}>
+              <thead>
+                <tr>
+                  <th>Cliente (Nombre / Número)</th>
+                  <th>ID del Chat</th>
+                  <th>Mensajes Recibidos</th>
+                  <th>Último Mensaje del Cliente</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedSlot.chats.map((chat) => (
+                  <tr key={chat.chatId}>
+                    <td className={styles.auditClientName}>
+                      <User size={14} className={styles.clientIcon} />
+                      {chat.sender}
+                    </td>
+                    <td className={styles.auditChatId}>{chat.chatId}</td>
+                    <td className={styles.auditMsgCount}>{chat.msgCount} {chat.msgCount === 1 ? 'mensaje' : 'mensajes'}</td>
+                    <td className={styles.auditTime}>{chat.lastTime}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     );
   };
 
@@ -1169,83 +1022,63 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         )}
       </div>
 
-      {/* Tarjetas KPI de Resumen */}
+      {/* Tarjetas KPI de Franjas Horarias */}
       <div className={styles.kpiGrid}>
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ backgroundColor: '#25d36615', color: '#25d366' }}>
-            <MessageSquare />
-          </div>
-          <div className={styles.kpiInfo}>
-            <span className={styles.kpiLabel}>Tráfico Recibido</span>
-            <span className={styles.kpiValue}>{stats.totalReceived} msg</span>
-          </div>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ backgroundColor: '#1a5d9115', color: '#1a5d91' }}>
-            <MessageSquare />
-          </div>
-          <div className={styles.kpiInfo}>
-            <span className={styles.kpiLabel}>Tráfico Enviado</span>
-            <span className={styles.kpiValue}>{stats.totalAnswered} msg</span>
-          </div>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ backgroundColor: '#ff9f4315', color: '#ff9f43' }}>
-            <User />
-          </div>
-          <div className={styles.kpiInfo}>
-            <span className={styles.kpiLabel}>Clientes Únicos</span>
-            <span className={styles.kpiValue}>{stats.uniqueClientsCount}</span>
-          </div>
-        </div>
-
-        <div className={styles.kpiCard}>
-          <div className={styles.kpiIcon} style={{ backgroundColor: '#f1c40f15', color: '#f1c40f' }}>
-            <Clock />
-          </div>
-          <div className={styles.kpiInfo}>
-            <span className={styles.kpiLabel}>Tiempo de Respuesta</span>
-            <span className={styles.kpiValue}>{formatResponseTime(stats.avgResponseTime)}</span>
-          </div>
-        </div>
+        {(Object.values(stats.slots) as any[]).map((slot) => {
+          const isSelected = activeAuditSlot === slot.id;
+          const activeColor = slot.id === 'slot1' ? '#64748b' : slot.id === 'slot2' ? '#3b82f6' : slot.id === 'slot3' ? '#f59e0b' : '#475569';
+          
+          return (
+            <div 
+              key={slot.id} 
+              className={`${styles.kpiCard} ${styles.kpiCardClickable} ${isSelected ? styles.kpiCardActive : ''}`}
+              style={{
+                '--kpi-active-color': activeColor,
+                '--kpi-active-color-alpha': activeColor + '15',
+                borderColor: isSelected ? activeColor : undefined
+              } as any}
+              onClick={() => setActiveAuditSlot(slot.id)}
+            >
+              <div 
+                className={styles.kpiIcon} 
+                style={{ 
+                  backgroundColor: slot.active ? 'rgba(37, 211, 102, 0.1)' : 'rgba(148, 163, 184, 0.1)', 
+                  color: slot.active ? '#25d366' : '#64748b' 
+                }}
+              >
+                <Clock />
+              </div>
+              <div className={styles.kpiInfo} style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span className={styles.kpiLabel} style={{ fontSize: '0.75rem' }}>{slot.label}</span>
+                  <span 
+                    style={{ 
+                      fontSize: '9px', 
+                      padding: '2px 6px', 
+                      borderRadius: '4px', 
+                      backgroundColor: slot.active ? 'rgba(37, 211, 102, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+                      color: slot.active ? '#25d366' : '#64748b',
+                      fontWeight: 600
+                    }}
+                  >
+                    {slot.active ? 'Turno' : 'Cerrado'}
+                  </span>
+                </div>
+                <span className={styles.kpiValue} style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                  {slot.count}
+                  <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>chats</span>
+                </span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{slot.range}</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Gráficos */}
+      {/* Gráficos de Turnos y Tabla de Auditoría */}
       <div className={styles.chartsGrid}>
-        <div className={styles.chartCard}>
-          <h3>
-            <BarChart2 size={18} style={{ color: '#25d366' }} />
-            Mensajes por Día (Entrantes vs Contestados)
-          </h3>
-          <div className={styles.chartContainer}>
-            {renderVolumeChart()}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '10px', fontSize: '0.8rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '12px', height: '12px', backgroundColor: '#25d366', display: 'inline-block', borderRadius: '2px' }} />
-              Clientes (Entrantes)
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '12px', height: '12px', backgroundColor: '#1a5d91', display: 'inline-block', borderRadius: '2px' }} />
-              Tú (Contestados)
-            </span>
-          </div>
-        </div>
-
-        <div className={styles.chartCard}>
-          <h3>
-            <Clock size={18} style={{ color: '#ff9f43' }} />
-            Velocidad de Respuesta Promedio
-          </h3>
-          <div className={styles.chartContainer}>
-            {renderResponseTimeChart()}
-          </div>
-          <span className={styles.helpText} style={{ textAlign: 'center', marginTop: '10px' }}>
-            Promedio de minutos transcurridos por día antes de dar respuesta al cliente.
-          </span>
-        </div>
+        {renderSlotsChart()}
+        {renderSlotsAudit()}
       </div>
 
       {/* Estado vacío cuando no hay mensajes */}

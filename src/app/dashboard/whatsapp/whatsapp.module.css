@@ -630,3 +630,209 @@
     justify-content: center;
   }
 }
+
+/* ==========================================
+   TURNOS / FRANZAS HORARIAS DE WHATSAPP
+   ========================================== */
+.slotsChartContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.slotChartRow {
+  display: grid;
+  grid-template-columns: 220px 1fr 140px;
+  align-items: center;
+  gap: 16px;
+}
+
+.slotChartInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.slotChartLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.slotChartRange {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.slotChartBarBg {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.slotChartBarFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.slotChartValue {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.slotChartCount {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.slotChartPercent {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* AUDIT CARD AND TABLE STYLES */
+.auditCard {
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+}
+
+.auditHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.auditTitle {
+  display: flex;
+  align-items: center;
+}
+
+.auditTitle h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.auditBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.badgeActive {
+  background-color: rgba(37, 211, 102, 0.1);
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.2);
+}
+
+.badgeDead {
+  background-color: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.auditTableContainer {
+  overflow-x: auto;
+}
+
+.auditTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.auditTable th {
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.auditTable td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.auditTable tbody tr:hover {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.auditClientName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.clientIcon {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.auditChatId {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.auditMsgCount {
+  font-weight: 500;
+}
+
+.auditTime {
+  color: var(--text-muted);
+}
+
+.noAuditData {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.kpiCardClickable {
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.kpiCardActive {
+  box-shadow: 0 0 0 2px var(--kpi-active-color), 0 4px 12px var(--kpi-active-color-alpha);
+  border-color: var(--kpi-active-color) !important;
+}
+
+.kpiCardActive:hover {
+  transform: translateY(-2px);
+}
+
+.chartSubtext {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 640px) {
+  .slotChartRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
