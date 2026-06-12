@@ -424,7 +424,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   // Función para obtener mensajes de la API
   const fetchMessagesFromAPI = async () => {
     try {
-      const url = `/api/whatsapp/messages?limit=200${brandId ? `&brandId=${brandId}` : ''}`;
+      const url = `/api/whatsapp/messages?limit=5000${brandId ? `&brandId=${brandId}` : ''}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -644,10 +644,10 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         totalAnswered: 0,
         uniqueClientsCount: 0,
         slots: {
-          slot1: { id: 'slot1' as const, label: 'Tiempo Muerto Mañana', range: '12:00 AM - 8:00 AM', active: false, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
-          slot2: { id: 'slot2' as const, label: 'Agente Diurno', range: '8:00 AM - 2:00 PM', active: true, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
-          slot3: { id: 'slot3' as const, label: 'Agente de la Tarde', range: '2:00 PM - 8:00 PM', active: true, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
-          slot4: { id: 'slot4' as const, label: 'Tiempo Muerto Noche', range: '8:00 PM - 11:59 PM', active: false, count: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] }
+          slot1: { id: 'slot1' as const, label: 'Tiempo Muerto Mañana', range: '12:00 AM - 8:00 AM', active: false, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
+          slot2: { id: 'slot2' as const, label: 'Agente Diurno', range: '8:00 AM - 2:00 PM', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
+          slot3: { id: 'slot3' as const, label: 'Agente de la Tarde', range: '2:00 PM - 8:00 PM', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
+          slot4: { id: 'slot4' as const, label: 'Tiempo Muerto Noche', range: '8:00 PM - 11:59 PM', active: false, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] }
         }
       };
     }
@@ -736,6 +736,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '12:00 AM - 8:00 AM',
           active: false,
           count: Object.keys(slot1Chats).length,
+          msgCount: Object.values(slot1Chats).reduce((sum, c) => sum + c.msgCount, 0),
           chats: sortChats(slot1Chats)
         },
         slot2: {
@@ -744,6 +745,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '8:00 AM - 2:00 PM',
           active: true,
           count: Object.keys(slot2Chats).length,
+          msgCount: Object.values(slot2Chats).reduce((sum, c) => sum + c.msgCount, 0),
           chats: sortChats(slot2Chats)
         },
         slot3: {
@@ -752,6 +754,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '2:00 PM - 8:00 PM',
           active: true,
           count: Object.keys(slot3Chats).length,
+          msgCount: Object.values(slot3Chats).reduce((sum, c) => sum + c.msgCount, 0),
           chats: sortChats(slot3Chats)
         },
         slot4: {
@@ -760,6 +763,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '8:00 PM - 11:59 PM',
           active: false,
           count: Object.keys(slot4Chats).length,
+          msgCount: Object.values(slot4Chats).reduce((sum, c) => sum + c.msgCount, 0),
           chats: sortChats(slot4Chats)
         }
       }
@@ -1090,9 +1094,12 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
                     {slot.active ? 'Turno' : 'Cerrado'}
                   </span>
                 </div>
-                <span className={styles.kpiValue} style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                <span className={styles.kpiValue} style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
                   {slot.count}
                   <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>chats</span>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '4px' }}>
+                    ({slot.msgCount} {slot.msgCount === 1 ? 'msj' : 'msjs'})
+                  </span>
                 </span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{slot.range}</span>
               </div>

@@ -16,7 +16,7 @@ export default function WhatsAppDashboard() {
   const [brandFilter, setBrandFilter] = useState('');
 
   async function fetchMessages() {
-    const url = `/api/whatsapp/messages?limit=100${brandFilter ? `&brandId=${brandFilter}` : ''}`;
+    const url = `/api/whatsapp/messages?limit=5000${brandFilter ? `&brandId=${brandFilter}` : ''}`;
     const res  = await fetch(url);
     const json = await res.json();
     if (json.success) setMessages(json.data);
