@@ -111,3 +111,17 @@ model WhatsAppMessage {
   @@map("whatsapp_messages")
 }
 
+model StoredFile {
+  id        String   @id @default(cuid())
+  brandId   String   // 'viva_calentadores', 'promascotas', 'ingenova', 'printer_service'
+  name      String
+  type      String   // 'pdf' | 'doc' | 'xls' | 'img'
+  size      String
+  category  String
+  content   String   // Contenido en Base64
+  createdAt DateTime @default(now())
+
+  @@map("stored_files")
+  @@index([brandId])
+}
+

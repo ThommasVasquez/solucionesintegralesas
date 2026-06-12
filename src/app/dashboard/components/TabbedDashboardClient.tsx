@@ -13,11 +13,14 @@ import {
   Upload, 
   Download, 
   ExternalLink, 
-  FolderOpen 
+  FolderOpen,
+  Trash2,
+  Loader2
 } from 'lucide-react';
 import styles from "./TabbedDashboardClient.module.css";
 
 export interface DriveFile {
+  id?: string;
   name: string;
   type: 'pdf' | 'doc' | 'xls' | 'img';
   size: string;
@@ -96,22 +99,301 @@ export default function TabbedDashboardClient({
   };
 
   // Estados del Explorador de Archivos (Drive)
-  const [files, setFiles] = useState<DriveFile[]>(initialFiles);
+  const [files, setFiles] = useState<DriveFile[]>([]);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [modalType, setModalType] = useState<'file' | 'folder' | 'create_folder'>('file');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingFileName, setUploadingFileName] = useState('');
 
   // Categorías de carpetas
   const categories = ['Todos', ...Array.from(new Set(files.map(f => f.category)))];
 
+  // Cargar archivos desde base de datos
+  const loadFiles = async () => {
+    if (!brandId) return;
+    setIsLoadingFiles(true);
+    try {
+      const res = await fetch(`/api/drive/files?brandId=${brandId}`);
+      const data = await res.json();
+      if (data.success && data.files) {
+        setFiles(data.files);
+      }
+    } catch (e) {
+      console.error("Error loading files:", e);
+    } finally {
+      setIsLoadingFiles(false);
+    }
+  };
 
+  useEffect(() => {
+    if (activeTab === 'drive') {
+      loadFiles();
+    }
+  }, [activeTab, brandId]);
 
-  // Filtrado de archivos
+  // Helper para deducir tipo de archivo por extensión
+  const getFileType = (fileName: string): 'pdf' | 'doc' | 'xls' | 'img' => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return 'pdf';
+    if (['doc', 'docx'].includes(ext || '')) return 'doc';
+    if (['xls', 'xlsx', 'csv'].includes(ext || '')) return 'xls';
+    return 'img';
+  };
+
+  // Crear Carpeta guardando un archivo dummy en base de datos
+  const handleCreateFolder = async () => {
+    const folderName = prompt("Ingrese el nombre de la nueva carpeta:");
+    if (folderName && folderName.trim()) {
+      const trimmed = folderName.trim();
+      if (categories.includes(trimmed)) {
+        alert("Ya existe una carpeta con ese nombre.");
+        return;
+      }
+      
+      setIsUploading(true);
+      setUploadingFileName(`Creando carpeta "${trimmed}"`);
+      setUploadProgress(50);
+      
+      try {
+        const res = await fetch('/api/drive/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brandId,
+            name: `.folder`,
+            type: 'pdf',
+            size: '0 KB',
+            category: trimmed,
+            content: 'Rk9MREVS' // base64 para 'FOLDER'
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setUploadProgress(100);
+          await loadFiles();
+          setSelectedCategory(trimmed);
+          logAction({
+            userEmail: user.email,
+            userName: user.name,
+            action: 'CREATE_FOLDER',
+            resource: title,
+            details: { folderName: trimmed, message: `Creó la carpeta "${trimmed}" en el panel ${title}` }
+          });
+        } else {
+          alert("Error al crear la carpeta en la base de datos.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al crear carpeta.");
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+    }
+  };
+
+  // Subir Archivo Real a Base de Datos
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      if (file.size > 4 * 1024 * 1024) {
+        alert("El archivo supera el límite de 4 MB para almacenamiento directo en la base de datos.");
+        return;
+      }
+
+      setIsUploading(true);
+      setUploadProgress(10);
+      setUploadingFileName(file.name);
+      
+      try {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          setUploadProgress(40);
+          const base64Url = reader.result as string;
+          const base64Content = base64Url.split(',')[1];
+          
+          setUploadProgress(70);
+          const res = await fetch('/api/drive/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              brandId,
+              name: file.name,
+              type: getFileType(file.name),
+              size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+              category: selectedCategory === 'Todos' ? 'General' : selectedCategory,
+              content: base64Content
+            })
+          });
+          
+          const data = await res.json();
+          if (data.success) {
+            setUploadProgress(100);
+            setTimeout(async () => {
+              await loadFiles();
+              setIsUploading(false);
+              logAction({
+                userEmail: user.email,
+                userName: user.name,
+                action: 'UPLOAD_FILE',
+                resource: title,
+                details: { fileName: file.name, size: file.size, message: `Subió el archivo ${file.name} en el panel ${title}` }
+              });
+            }, 300);
+          } else {
+            alert("Error al guardar el archivo: " + (data.error || "Desconocido"));
+            setIsUploading(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        console.error(err);
+        alert("Error al cargar el archivo.");
+        setIsUploading(false);
+      }
+    }
+  };
+
+  // Subir Carpeta Real a Base de Datos
+  const handleFolderChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const folderFiles = Array.from(e.target.files);
+      
+      const validFiles = folderFiles.filter(f => f.size <= 4 * 1024 * 1024);
+      if (validFiles.length === 0) {
+        alert("No hay archivos válidos menores a 4 MB para subir.");
+        return;
+      }
+
+      const firstFile = validFiles[0];
+      const folderName = firstFile.webkitRelativePath.split('/')[0] || 'Carpeta Subida';
+      
+      setIsUploading(true);
+      setUploadingFileName(`Carpeta "${folderName}" (${validFiles.length} archivos)`);
+      
+      let uploadedCount = 0;
+      
+      for (const file of validFiles) {
+        try {
+          const base64Content = await new Promise<string>((resolve, reject) => {
+             const reader = new FileReader();
+             reader.onload = () => resolve((reader.result as string).split(',')[1]);
+             reader.onerror = reject;
+             reader.readAsDataURL(file);
+          });
+          
+          await fetch('/api/drive/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              brandId,
+              name: file.name,
+              type: getFileType(file.name),
+              size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+              category: folderName,
+              content: base64Content
+            })
+          });
+          
+          uploadedCount++;
+          setUploadProgress(Math.round((uploadedCount / validFiles.length) * 100));
+        } catch (err) {
+          console.error(`Error uploading ${file.name}:`, err);
+        }
+      }
+      
+      setTimeout(async () => {
+        await loadFiles();
+        setIsUploading(false);
+        logAction({
+          userEmail: user.email,
+          userName: user.name,
+          action: 'UPLOAD_FOLDER',
+          resource: title,
+          details: { folderName, fileCount: uploadedCount, message: `Subió la carpeta "${folderName}" con ${uploadedCount} archivos en el panel ${title}` }
+        });
+      }, 300);
+    }
+  };
+
+  // Descargar Archivo Real desde Base de Datos
+  const handleDownloadFile = async (file: DriveFile) => {
+    if (!file.id) return;
+    try {
+      const res = await fetch(`/api/drive/download?id=${file.id}`);
+      const data = await res.json();
+      if (data.success && data.content) {
+        const byteCharacters = atob(data.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+        
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = data.name || file.name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        logAction({
+          userEmail: user.email,
+          userName: user.name,
+          action: 'DOWNLOAD_FILE',
+          resource: title,
+          details: { fileName: file.name, message: `Descargó el archivo ${file.name} en el panel ${title}` }
+        });
+      } else {
+        alert("Error al descargar el archivo de la base de datos.");
+      }
+    } catch (err) {
+      console.error("Error downloading file:", err);
+      alert("Error de conexión al descargar el archivo.");
+    }
+  };
+
+  // Eliminar Archivo Real de la Base de Datos
+  const handleDeleteFile = async (file: DriveFile) => {
+    if (!file.id) return;
+    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente el archivo "${file.name}"?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/drive/delete?id=${file.id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        await loadFiles();
+        logAction({
+          userEmail: user.email,
+          userName: user.name,
+          action: 'DELETE_FILE',
+          resource: title,
+          details: { fileName: file.name, message: `Eliminó el archivo ${file.name} en el panel ${title}` }
+        });
+      } else {
+        alert("Error al eliminar el archivo.");
+      }
+    } catch (err) {
+      console.error("Error deleting file:", err);
+      alert("Error de conexión al eliminar el archivo.");
+    }
+  };
+
+  // Filtrado de archivos (ocultando archivos de control de carpetas vacías ".folder")
   const filteredFiles = files.filter(file => {
+    const isNotDummyFolder = file.name !== '.folder';
     const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'Todos' || file.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return isNotDummyFolder && matchesSearch && matchesCategory;
   });
 
   const renderFileIcon = (type: 'pdf' | 'doc' | 'xls' | 'img') => {
@@ -131,7 +413,7 @@ export default function TabbedDashboardClient({
     <main className={`${styles.main} ${activeTab !== 'excel' ? styles.scrollable : styles.hiddenScroll} ${shouldHideExcel ? styles.isSergioActive : ''}`}>
       <Navbar />
       
-      {/* Selector de pestañas, oculto si se debe ocultar el Excel */}
+      {/* Selector de pestañas */}
       {!shouldHideExcel && (
         <div className={styles.tabContainer}>
           <div className={styles.tabBar}>
@@ -181,28 +463,9 @@ export default function TabbedDashboardClient({
         <div className={styles.driveWrapper}>
           <div className={styles.driveHeader}>
             <div className={styles.driveTitle}>
-              <h2>📁 Explorador de Documentos</h2>
-              <p>Acceso a la documentación digital, actas y soportes de la línea de negocio en la nube.</p>
+              <h2>📁 Almacenamiento Seguro Propio</h2>
+              <p>Sube y gestiona documentos y actas directamente en el espacio digital propio de la empresa.</p>
             </div>
-            <a 
-              href={driveUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={styles.externalDriveBtn}
-              style={{ backgroundColor: brandColor }}
-              onClick={() => {
-                logAction({
-                  userEmail: user.email,
-                  userName: user.name,
-                  action: 'OPEN_DRIVE',
-                  resource: title,
-                  details: { message: `Abrió la carpeta externa de Google Drive en el panel ${title}` }
-                });
-              }}
-            >
-              <ExternalLink size={18} />
-              Abrir en Google Drive ↗
-            </a>
           </div>
 
           <div className={styles.explorerContainer}>
@@ -220,10 +483,8 @@ export default function TabbedDashboardClient({
               
               <div className={styles.uploadZone}>
                 <button 
-                  onClick={() => {
-                    setModalType('create_folder');
-                    setShowUploadModal(true);
-                  }}
+                  onClick={handleCreateFolder}
+                  disabled={isUploading}
                   className={styles.uploadBtn}
                   style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}
                 >
@@ -231,31 +492,49 @@ export default function TabbedDashboardClient({
                   Crear Carpeta
                 </button>
 
-                <button 
-                  onClick={() => {
-                    setModalType('folder');
-                    setShowUploadModal(true);
-                  }}
-                  className={styles.uploadBtn}
-                  style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}
-                >
+                <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}>
                   <FolderOpen size={18} />
                   Subir Carpeta
-                </button>
+                  <input 
+                    type="file" 
+                    // @ts-ignore
+                    webkitdirectory="true"
+                    directory="true"
+                    multiple
+                    onChange={handleFolderChange}
+                    className={styles.hiddenInput} 
+                    disabled={isUploading}
+                  />
+                </label>
 
-                <button 
-                  onClick={() => {
-                    setModalType('file');
-                    setShowUploadModal(true);
-                  }}
-                  className={styles.uploadBtn}
-                  style={{ borderColor: brandColor, color: brandColor }}
-                >
+                <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor }}>
                   <Upload size={18} />
                   Subir Archivo
-                </button>
+                  <input 
+                    type="file" 
+                    onChange={handleFileChange}
+                    className={styles.hiddenInput} 
+                    disabled={isUploading}
+                  />
+                </label>
               </div>
             </div>
+
+            {/* Upload progress */}
+            {isUploading && (
+              <div className={styles.uploadProgressBarContainer}>
+                <div className={styles.uploadProgressInfo}>
+                  <span className={styles.progressFileName}>Procesando: {uploadingFileName}</span>
+                  <span className={styles.progressPercent}>{uploadProgress}%</span>
+                </div>
+                <div className={styles.progressBarBg}>
+                  <div 
+                    className={styles.progressBarFill} 
+                    style={{ width: `${uploadProgress}%`, backgroundColor: brandColor }}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Folder Tabs (Categories) */}
             <div className={styles.folderRow}>
@@ -273,97 +552,57 @@ export default function TabbedDashboardClient({
             </div>
 
             {/* Files List */}
-            <div className={styles.filesGrid}>
-              {filteredFiles.length === 0 ? (
-                <div className={styles.noFiles}>
-                  <p>No se encontraron archivos en esta carpeta.</p>
-                </div>
-              ) : (
-                filteredFiles.map((file, idx) => (
-                  <div key={idx} className={styles.fileCard}>
-                    <div className={styles.fileIconWrapper}>
-                      {renderFileIcon(file.type)}
-                    </div>
-                    <div className={styles.fileDetails}>
-                      <h3>{file.name}</h3>
-                      <div className={styles.fileMeta}>
-                        <span className={styles.fileCategory} style={{ color: brandColor, backgroundColor: brandColor + '10' }}>
-                          {file.category}
-                        </span>
-                        <span className={styles.fileSize}>{file.size}</span>
-                        <span className={styles.fileDate}>{file.date}</span>
+            {isLoadingFiles ? (
+              <div className={styles.noFiles} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                <Loader2 className={styles.spinner} size={32} />
+                <p>Cargando archivos del almacenamiento seguro...</p>
+              </div>
+            ) : (
+              <div className={styles.filesGrid}>
+                {filteredFiles.length === 0 ? (
+                  <div className={styles.noFiles}>
+                    <p>No se encontraron archivos en esta carpeta.</p>
+                  </div>
+                ) : (
+                  filteredFiles.map((file, idx) => (
+                    <div key={idx} className={styles.fileCard}>
+                      <div className={styles.fileIconWrapper}>
+                        {renderFileIcon(file.type)}
+                      </div>
+                      <div className={styles.fileDetails}>
+                        <h3>{file.name}</h3>
+                        <div className={styles.fileMeta}>
+                          <span className={styles.fileCategory} style={{ color: brandColor, backgroundColor: brandColor + '10' }}>
+                            {file.category}
+                          </span>
+                          <span className={styles.fileSize}>{file.size}</span>
+                          <span className={styles.fileDate}>{file.date}</span>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.fileActions}>
+                        <button 
+                          onClick={() => handleDownloadFile(file)}
+                          className={styles.downloadBtn}
+                          title="Descargar archivo"
+                          style={{ marginRight: '6px' }}
+                        >
+                          <Download size={18} />
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleDeleteFile(file)}
+                          className={styles.deleteBtn}
+                          title="Eliminar archivo"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </div>
-                    <button 
-                      onClick={() => {
-                        alert(`Los archivos reales están almacenados de forma segura en Google Drive. Te redirigiremos a la carpeta para que puedas ver y descargar el archivo "${file.name}".`);
-                        window.open(driveUrl, '_blank');
-                        logAction({
-                          userEmail: user.email,
-                          userName: user.name,
-                          action: 'DOWNLOAD_FILE',
-                          resource: title,
-                          details: { fileName: file.name, message: `Redirigió al usuario a Google Drive para descargar ${file.name} en el panel ${title}` }
-                        });
-                      }}
-                      className={styles.downloadBtn}
-                      title="Descargar archivo de Google Drive"
-                    >
-                      <Download size={18} />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showUploadModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <div className={styles.modalHeader}>
-              <h3>
-                {modalType === 'file' && '📤 Subir Archivo'}
-                {modalType === 'folder' && '📂 Subir Carpeta'}
-                {modalType === 'create_folder' && '➕ Crear Carpeta'}
-              </h3>
-              <button onClick={() => setShowUploadModal(false)} className={styles.closeModalBtn}>×</button>
-            </div>
-            <div className={styles.modalBody}>
-              <p>
-                Para garantizar la seguridad de la información, el almacenamiento ilimitado y la privacidad de tu empresa, los archivos reales se gestionan directamente en el espacio seguro de <strong>Google Drive</strong>.
-              </p>
-              <div className={styles.modalInstructions}>
-                <h4>Instrucciones:</h4>
-                <ol>
-                  <li>Haz clic en el botón <strong>"Abrir Google Drive"</strong> a continuación.</li>
-                  <li>Se abrirá la carpeta oficial de tu empresa en una nueva pestaña.</li>
-                  <li>
-                    {modalType === 'create_folder' 
-                      ? 'Haz clic en "Nuevo" > "Nueva carpeta" dentro de Google Drive.'
-                      : 'Arrastra y suelta tus archivos o carpetas directamente en la ventana de Google Drive, o haz clic en "Nuevo" > "Subir archivo / carpeta".'}
-                  </li>
-                </ol>
+                  ))
+                )}
               </div>
-              <button 
-                onClick={() => {
-                  window.open(driveUrl, '_blank');
-                  setShowUploadModal(false);
-                  logAction({
-                    userEmail: user.email,
-                    userName: user.name,
-                    action: modalType === 'file' ? 'UPLOAD_FILE_REDIRECT' : modalType === 'folder' ? 'UPLOAD_FOLDER_REDIRECT' : 'CREATE_FOLDER_REDIRECT',
-                    resource: title,
-                    details: { message: `Redirigió al usuario a Google Drive para ${modalType} en el panel ${title}` }
-                  });
-                }}
-                className={styles.modalSubmitBtn}
-                style={{ backgroundColor: brandColor }}
-              >
-                Abrir Google Drive ↗
-              </button>
-            </div>
+            )}
           </div>
         </div>
       )}
