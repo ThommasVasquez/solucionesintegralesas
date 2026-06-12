@@ -185,6 +185,7 @@ export default function TabbedDashboardClient({
     setActiveTab(tab);
     setExcelWorkbook(null);
     setViewingFile(null);
+    setSelectedFileIds([]);
     setIsAdminOpen(false);
     if (tab !== 'excel') {
       setCurrentSheetUrl(sheetUrl);
@@ -221,6 +222,8 @@ export default function TabbedDashboardClient({
   const [uploadingFileName, setUploadingFileName] = useState('');
   const [excelWorkbook, setExcelWorkbook] = useState<ExcelWorkbookState | null>(null);
   const [viewingFile, setViewingFile] = useState<DriveFile | null>(null);
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
 
   // Categorías de carpetas
   const categories = ['Todos', ...Array.from(new Set(files.map(f => f.category)))];
@@ -234,6 +237,7 @@ export default function TabbedDashboardClient({
       const data = await res.json();
       if (data.success && data.files) {
         setFiles(data.files);
+        setSelectedFileIds([]);
       }
     } catch (e) {
       console.error("Error loading files:", e);
@@ -609,6 +613,83 @@ export default function TabbedDashboardClient({
     return isNotDummyFolder && matchesSearch && matchesCategory;
   });
 
+  const allFilteredSelected = filteredFiles.length > 0 && filteredFiles.every(f => f.id && selectedFileIds.includes(f.id));
+  const someFilteredSelected = filteredFiles.some(f => f.id && selectedFileIds.includes(f.id)) && !allFilteredSelected;
+
+  const toggleFileSelection = (fileId: string) => {
+    setSelectedFileIds(prev => {
+      if (prev.includes(fileId)) {
+        return prev.filter(id => id !== fileId);
+      } else {
+        return [...prev, fileId];
+      }
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allFilteredSelected) {
+      const filteredIds = filteredFiles.map(f => f.id).filter(Boolean) as string[];
+      setSelectedFileIds(prev => prev.filter(id => !filteredIds.includes(id)));
+    } else {
+      const filteredIds = filteredFiles.map(f => f.id).filter(Boolean) as string[];
+      setSelectedFileIds(prev => {
+        const unique = new Set([...prev, ...filteredIds]);
+        return Array.from(unique);
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedFileIds.length === 0) return;
+    
+    const count = selectedFileIds.length;
+    const confirmMessage = count === 1 
+      ? `¿Estás seguro de que deseas eliminar permanentemente el archivo seleccionado?`
+      : `¿Estás seguro de que deseas eliminar permanentemente los ${count} archivos seleccionados?`;
+      
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    setIsDeletingBulk(true);
+    try {
+      const filesToDelete = files.filter(f => f.id && selectedFileIds.includes(f.id));
+      const fileNames = filesToDelete.map(f => f.name).join(', ');
+
+      const deletePromises = selectedFileIds.map(id =>
+        fetch(`/api/drive/delete?id=${id}`, { method: 'DELETE' }).then(res => res.json())
+      );
+      
+      const results = await Promise.all(deletePromises);
+      const failures = results.filter(r => !r.success);
+      
+      if (failures.length > 0) {
+        alert(`Se eliminaron algunos archivos, pero ocurrió un error con ${failures.length} de ellos.`);
+      }
+      
+      await loadFiles();
+      setSelectedFileIds([]);
+      
+      logAction({
+        userEmail: user.email,
+        userName: user.name,
+        action: 'BULK_DELETE_FILES',
+        resource: title,
+        details: { 
+          count, 
+          fileNames,
+          message: `Eliminó de forma masiva ${count} archivos (${fileNames}) en el panel ${title}` 
+        }
+      });
+      
+    } catch (err) {
+      console.error("Error in bulk delete:", err);
+      alert("Ocurrió un error de conexión al eliminar los archivos.");
+    } finally {
+      setIsDeletingBulk(false);
+    }
+  };
+
   const renderFileIcon = (type: 'pdf' | 'doc' | 'xls' | 'img') => {
     switch (type) {
       case 'pdf':
@@ -921,7 +1002,10 @@ export default function TabbedDashboardClient({
                       key={category}
                       className={`${styles.folderBtn} ${selectedCategory === category ? styles.folderBtnActive : ''}`}
                       style={selectedCategory === category ? { borderColor: brandColor, color: brandColor, backgroundColor: brandColor + '10' } : {}}
-                      onClick={() => setSelectedCategory(category)}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setSelectedFileIds([]);
+                      }}
                     >
                       <FolderOpen size={16} />
                       {category}
@@ -936,61 +1020,128 @@ export default function TabbedDashboardClient({
                     <p>Cargando archivos del almacenamiento seguro...</p>
                   </div>
                 ) : (
-                  <div className={styles.filesGrid}>
-                    {filteredFiles.length === 0 ? (
-                      <div className={styles.noFiles}>
-                        <p>No se encontraron archivos en esta carpeta.</p>
+                  <>
+                    {/* Select All and Bulk Actions Bar */}
+                    {filteredFiles.length > 0 && (
+                      <div className={styles.bulkBar}>
+                        <label className={styles.selectAllLabel}>
+                          <input
+                            type="checkbox"
+                            checked={allFilteredSelected}
+                            ref={(el) => {
+                              if (el) {
+                                el.indeterminate = someFilteredSelected;
+                              }
+                            }}
+                            onChange={toggleSelectAll}
+                            className={styles.checkboxInput}
+                            style={{ accentColor: brandColor }}
+                          />
+                          <span>Seleccionar todo ({filteredFiles.length})</span>
+                        </label>
+
+                        {selectedFileIds.length > 0 && (
+                          <div className={styles.bulkActions}>
+                            <span className={styles.bulkInfo}>
+                              {selectedFileIds.length} {selectedFileIds.length === 1 ? 'elemento seleccionado' : 'elementos seleccionados'}
+                            </span>
+                            <button
+                              onClick={handleBulkDelete}
+                              className={styles.bulkDeleteBtn}
+                              disabled={isDeletingBulk}
+                            >
+                              {isDeletingBulk ? (
+                                <>
+                                  <Loader2 className={`${styles.spinner} mr-1`} size={16} />
+                                  <span>Eliminando...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Trash2 size={16} style={{ marginRight: '6px' }} />
+                                  <span>Eliminar Seleccionados</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      filteredFiles.map((file, idx) => (
-                        <div key={idx} className={styles.fileCard}>
-                          <div className={styles.fileIconWrapper}>
-                            {renderFileIcon(file.type)}
-                          </div>
-                          <div className={styles.fileDetails}>
-                            <h3>{file.name}</h3>
-                            <div className={styles.fileMeta}>
-                              <span className={styles.fileCategory} style={{ color: brandColor, backgroundColor: brandColor + '10' }}>
-                                {file.category}
-                              </span>
-                              <span className={styles.fileSize}>{file.size}</span>
-                              <span className={styles.fileDate}>{file.date}</span>
+                    )}
+
+                    <div className={styles.filesGrid}>
+                      {filteredFiles.length === 0 ? (
+                        <div className={styles.noFiles}>
+                          <p>No se encontraron archivos en esta carpeta.</p>
+                        </div>
+                      ) : (
+                        filteredFiles.map((file, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`${styles.fileCard} ${file.id && selectedFileIds.includes(file.id) ? styles.fileCardSelected : ''}`}
+                            style={file.id && selectedFileIds.includes(file.id) ? { borderColor: brandColor, backgroundColor: brandColor + '0A' } : {}}
+                            onClick={() => file.id && toggleFileSelection(file.id)}
+                          >
+                            <div className={styles.checkboxContainer} onClick={(e) => e.stopPropagation()}>
+                              <input
+                                type="checkbox"
+                                checked={!!file.id && selectedFileIds.includes(file.id)}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  if (file.id) toggleFileSelection(file.id);
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className={styles.checkboxInput}
+                                style={{ accentColor: brandColor }}
+                              />
                             </div>
-                          </div>
-                          
-                          <div className={styles.fileActions}>
-                            {(file.type === 'pdf' || file.type === 'img' || file.type === 'xls') && (
+
+                            <div className={styles.fileIconWrapper}>
+                              {renderFileIcon(file.type)}
+                            </div>
+                            <div className={styles.fileDetails}>
+                              <h3>{file.name}</h3>
+                              <div className={styles.fileMeta}>
+                                <span className={styles.fileCategory} style={{ color: brandColor, backgroundColor: brandColor + '10' }}>
+                                  {file.category}
+                                </span>
+                                <span className={styles.fileSize}>{file.size}</span>
+                                <span className={styles.fileDate}>{file.date}</span>
+                              </div>
+                            </div>
+                            
+                            <div className={styles.fileActions} onClick={(e) => e.stopPropagation()}>
+                              {(file.type === 'pdf' || file.type === 'img' || file.type === 'xls') && (
+                                <button 
+                                  onClick={() => handleViewFile(file)}
+                                  className={styles.viewBtn}
+                                  title="Ver en línea"
+                                  style={{ marginRight: '6px' }}
+                                >
+                                  <Eye size={18} />
+                                </button>
+                              )}
+                              
                               <button 
-                                onClick={() => handleViewFile(file)}
-                                className={styles.viewBtn}
-                                title="Ver en línea"
+                                onClick={() => handleDownloadFile(file)}
+                                className={styles.downloadBtn}
+                                title="Descargar archivo"
                                 style={{ marginRight: '6px' }}
                               >
-                                <Eye size={18} />
+                                <Download size={18} />
                               </button>
-                            )}
-                            
-                            <button 
-                              onClick={() => handleDownloadFile(file)}
-                              className={styles.downloadBtn}
-                              title="Descargar archivo"
-                              style={{ marginRight: '6px' }}
-                            >
-                              <Download size={18} />
-                            </button>
-                            
-                            <button 
-                              onClick={() => handleDeleteFile(file)}
-                              className={styles.deleteBtn}
-                              title="Eliminar archivo"
-                            >
-                              <Trash2 size={18} />
-                            </button>
+                              
+                              <button 
+                                onClick={() => handleDeleteFile(file)}
+                                className={styles.deleteBtn}
+                                title="Eliminar archivo"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+                        ))
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
             </>
