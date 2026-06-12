@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { neon } from '@neondatabase/serverless';
+import { auth } from '@/lib/auth';
+
 
 export const runtime = 'edge';
 
@@ -84,6 +86,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    if (session?.user?.email !== 'thommyenergy@superuser.com') {
+      return NextResponse.json(
+        { success: false, error: 'No autorizado. Solo el superusuario puede configurar los archivos.' },
+        { status: 403, headers: corsHeaders }
+      );
+    }
+
     const body = await req.json();
     const { brandId, sheets } = body;
 
@@ -93,6 +103,7 @@ export async function POST(req: NextRequest) {
         { status: 400, headers: corsHeaders }
       );
     }
+
 
     if (!process.env.DATABASE_URL) {
       throw new Error('DATABASE_URL is not defined');

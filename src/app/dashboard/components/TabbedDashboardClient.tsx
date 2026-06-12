@@ -88,6 +88,8 @@ export default function TabbedDashboardClient({
     allowedAdmins.includes(user.email.toLowerCase()) || 
     (sessionUser as any)?.role === 'BOSS'
   );
+  const isSuperUser = !!user?.email && user.email.toLowerCase() === "thommyenergy@superuser.com";
+
 
   const getEmbedUrl = (url: string) => {
     // Retornamos la URL original para permitir la edición en Google Sheets
@@ -637,7 +639,7 @@ export default function TabbedDashboardClient({
                         {sheet.name}
                       </button>
                     ))}
-                    {isUserAdmin && (
+                    {isSuperUser && (
                       <>
                         <div className={styles.dropdownDivider} />
                         <button 
@@ -986,7 +988,7 @@ export default function TabbedDashboardClient({
       )}
 
       {/* Modal de Configuración de Archivos Administrativos */}
-      {isConfigModalOpen && (
+      {isConfigModalOpen && isSuperUser && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
