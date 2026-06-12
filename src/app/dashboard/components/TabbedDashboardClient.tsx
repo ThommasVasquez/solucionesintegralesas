@@ -309,28 +309,36 @@ export default function TabbedDashboardClient({
     }
   };
 
-  // Subir Archivo Real a Base de Datos
+  // Subir Archivos Reales a Base de Datos (soporte múltiple)
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
       
-      if (file.size > 4 * 1024 * 1024) {
-        alert("El archivo supera el límite de 4 MB para almacenamiento directo en la base de datos.");
+      const tooLargeFiles = selectedFiles.filter(f => f.size > 4 * 1024 * 1024);
+      if (tooLargeFiles.length > 0) {
+        alert(`Los siguientes archivos superan el límite de 4 MB y no serán subidos:\n${tooLargeFiles.map(f => `- ${f.name}`).join('\n')}`);
+      }
+
+      const validFiles = selectedFiles.filter(f => f.size <= 4 * 1024 * 1024);
+      if (validFiles.length === 0) {
         return;
       }
 
       setIsUploading(true);
-      setUploadProgress(10);
-      setUploadingFileName(file.name);
-      
-      try {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          setUploadProgress(40);
-          const base64Url = reader.result as string;
-          const base64Content = base64Url.split(',')[1];
-          
-          setUploadProgress(70);
+      let uploadedCount = 0;
+
+      for (const file of validFiles) {
+        setUploadingFileName(file.name);
+        setUploadProgress(Math.round((uploadedCount / validFiles.length) * 100));
+
+        try {
+          const base64Content = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve((reader.result as string).split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+
           const res = await fetch('/api/drive/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -343,32 +351,31 @@ export default function TabbedDashboardClient({
               content: base64Content
             })
           });
-          
+
           const data = await res.json();
           if (data.success) {
-            setUploadProgress(100);
-            setTimeout(async () => {
-              await loadFiles();
-              setIsUploading(false);
-              logAction({
-                userEmail: user.email,
-                userName: user.name,
-                action: 'UPLOAD_FILE',
-                resource: title,
-                details: { fileName: file.name, size: file.size, message: `Subió el archivo ${file.name} en el panel ${title}` }
-              });
-            }, 300);
+            uploadedCount++;
+            logAction({
+              userEmail: user.email,
+              userName: user.name,
+              action: 'UPLOAD_FILE',
+              resource: title,
+              details: { fileName: file.name, size: file.size, message: `Subió el archivo ${file.name} en el panel ${title}` }
+            });
           } else {
-            alert("Error al guardar el archivo: " + (data.error || "Desconocido"));
-            setIsUploading(false);
+            console.error("Error al guardar archivo:", file.name, data.error);
           }
-        };
-        reader.readAsDataURL(file);
-      } catch (err) {
-        console.error(err);
-        alert("Error al cargar el archivo.");
-        setIsUploading(false);
+        } catch (err) {
+          console.error("Error al procesar archivo:", file.name, err);
+        }
       }
+
+      setUploadProgress(100);
+      setTimeout(async () => {
+        await loadFiles();
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 300);
     }
   };
 
@@ -882,6 +889,7 @@ export default function TabbedDashboardClient({
                       Subir Archivo
                       <input 
                         type="file" 
+                        multiple
                         onChange={handleFileChange}
                         className={styles.hiddenInput} 
                         disabled={isUploading}
