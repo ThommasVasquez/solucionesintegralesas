@@ -29,6 +29,13 @@ export interface DriveFile {
   category: string;
 }
 
+interface ExcelWorkbookState {
+  fileName: string;
+  sheetNames: string[];
+  activeSheet: string;
+  sheetsData: Record<string, any[][]>;
+}
+
 interface TabbedDashboardClientProps {
   user?: {
     name?: string | null;
@@ -99,6 +106,7 @@ export default function TabbedDashboardClient({
 
   const handleTabChange = (tab: 'excel' | 'whatsapp' | 'drive') => {
     setActiveTab(tab);
+    setExcelWorkbook(null);
     logAction({
       userEmail: user.email,
       userName: user.name,
@@ -116,6 +124,7 @@ export default function TabbedDashboardClient({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadingFileName, setUploadingFileName] = useState('');
+  const [excelWorkbook, setExcelWorkbook] = useState<ExcelWorkbookState | null>(null);
 
   // Categorías de carpetas
   const categories = ['Todos', ...Array.from(new Set(files.map(f => f.category)))];
@@ -342,13 +351,65 @@ export default function TabbedDashboardClient({
     return 'application/octet-stream';
   };
 
-  // Ver Archivo Real en Línea (Nativo del Navegador)
+  // Ver Archivo Real en Línea (Nativo del Navegador o Visor Integrado)
   const handleViewFile = async (file: DriveFile) => {
     if (!file.id) return;
     
-    if (file.type === 'doc' || file.type === 'xls') {
+    if (file.type === 'doc') {
       alert(`Este tipo de archivo (${file.type.toUpperCase()}) no se puede visualizar directamente en el navegador. Se descargará automáticamente.`);
       handleDownloadFile(file);
+      return;
+    }
+
+    if (file.type === 'xls') {
+      setIsLoadingFiles(true);
+      try {
+        const res = await fetch(`/api/drive/download?id=${file.id}`);
+        const data = await res.json();
+        if (data.success && data.content) {
+          // Load SheetJS dynamically from CDN
+          const XLSX = await new Promise<any>((resolve) => {
+            if ((window as any).XLSX) {
+              resolve((window as any).XLSX);
+              return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+            script.onload = () => resolve((window as any).XLSX);
+            document.body.appendChild(script);
+          });
+
+          const workbook = XLSX.read(data.content, { type: 'base64' });
+          const sheets: Record<string, any[][]> = {};
+          workbook.SheetNames.forEach((sheetName: string) => {
+            const worksheet = workbook.Sheets[sheetName];
+            const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][];
+            sheets[sheetName] = rawData;
+          });
+
+          setExcelWorkbook({
+            fileName: file.name,
+            sheetNames: workbook.SheetNames,
+            activeSheet: workbook.SheetNames[0],
+            sheetsData: sheets
+          });
+
+          logAction({
+            userEmail: user.email,
+            userName: user.name,
+            action: 'VIEW_EXCEL_ONLINE',
+            resource: title,
+            details: { fileName: file.name, message: `Visualizó en línea la hoja de cálculo ${file.name} en el panel ${title}` }
+          });
+        } else {
+          alert("Error al abrir el archivo de la base de datos.");
+        }
+      } catch (err) {
+        console.error("Error viewing Excel:", err);
+        alert("Error de conexión al cargar la vista de Excel.");
+      } finally {
+        setIsLoadingFiles(false);
+      }
       return;
     }
 
@@ -527,160 +588,254 @@ export default function TabbedDashboardClient({
 
       {activeTab === 'drive' && (
         <div className={styles.driveWrapper}>
-          <div className={styles.driveHeader}>
-            <div className={styles.driveTitle}>
-              <h2>📁 Almacenamiento Seguro Propio</h2>
-              <p>Sube y gestiona documentos y actas directamente en el espacio digital propio de la empresa.</p>
-            </div>
-          </div>
-
-          <div className={styles.explorerContainer}>
-            {/* Search and Upload Bar */}
-            <div className={styles.actionRow}>
-              <div className={styles.searchBar}>
-                <Search size={18} className={styles.searchIcon} />
-                <input 
-                  type="text" 
-                  placeholder="Buscar archivos por nombre..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              
-              <div className={styles.uploadZone}>
+          {excelWorkbook ? (
+            <div className={styles.excelInlineViewer}>
+              <div className={styles.excelInlineHeader}>
+                <div className={styles.excelInlineLeft}>
+                  <button 
+                    onClick={() => setExcelWorkbook(null)} 
+                    className={styles.excelInlineBackBtn}
+                  >
+                    ← Volver a Archivos
+                  </button>
+                  <span className={styles.excelInlineDivider}>|</span>
+                  <div className={styles.excelInlineTitle}>
+                    <FileSpreadsheet className={styles.excelIcon} size={20} />
+                    <h3>{excelWorkbook.fileName}</h3>
+                  </div>
+                </div>
+                
                 <button 
-                  onClick={handleCreateFolder}
-                  disabled={isUploading}
-                  className={styles.uploadBtn}
-                  style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}
+                  onClick={() => {
+                    const file = files.find(f => f.name === excelWorkbook.fileName);
+                    if (file) handleDownloadFile(file);
+                  }}
+                  className={styles.excelInlineDownloadBtn}
+                  style={{ backgroundColor: brandColor }}
                 >
-                  <FolderOpen size={18} />
-                  Crear Carpeta
+                  <Download size={16} /> Descargar
                 </button>
-
-                <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}>
-                  <FolderOpen size={18} />
-                  Subir Carpeta
-                  <input 
-                    type="file" 
-                    // @ts-ignore
-                    webkitdirectory="true"
-                    directory="true"
-                    multiple
-                    onChange={handleFolderChange}
-                    className={styles.hiddenInput} 
-                    disabled={isUploading}
-                  />
-                </label>
-
-                <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor }}>
-                  <Upload size={18} />
-                  Subir Archivo
-                  <input 
-                    type="file" 
-                    onChange={handleFileChange}
-                    className={styles.hiddenInput} 
-                    disabled={isUploading}
-                  />
-                </label>
               </div>
-            </div>
 
-            {/* Upload progress */}
-            {isUploading && (
-              <div className={styles.uploadProgressBarContainer}>
-                <div className={styles.uploadProgressInfo}>
-                  <span className={styles.progressFileName}>Procesando: {uploadingFileName}</span>
-                  <span className={styles.progressPercent}>{uploadProgress}%</span>
+              {/* Grid Table */}
+              <div className={styles.excelTableContainer}>
+                <table className={styles.excelTable}>
+                  <thead>
+                    <tr>
+                      <th className={styles.excelCornerHeader}></th>
+                      {Array.from({ length: (excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).reduce((max, row) => Math.max(max, row.length), 0) }).map((_, colIdx) => {
+                        const getColumnLetter = (index: number): string => {
+                          let letter = '';
+                          let temp = index;
+                          while (temp >= 0) {
+                            letter = String.fromCharCode((temp % 26) + 65) + letter;
+                            temp = Math.floor(temp / 26) - 1;
+                          }
+                          return letter;
+                        };
+                        return (
+                          <th key={colIdx} className={styles.excelColHeader}>
+                            {getColumnLetter(colIdx)}
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).map((row, rowIdx) => (
+                      <tr key={rowIdx}>
+                        <td className={styles.excelRowHeader}>{rowIdx + 1}</td>
+                        {Array.from({ length: (excelWorkbook.sheetsData[excelWorkbook.activeSheet] || []).reduce((max, row) => Math.max(max, row.length), 0) }).map((_, colIdx) => {
+                          const cell = row[colIdx];
+                          return (
+                            <td key={colIdx} className={styles.excelCell}>
+                              {cell !== null && cell !== undefined ? String(cell) : ''}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Sheet Tabs at the bottom */}
+              {excelWorkbook.sheetNames.length > 1 && (
+                <div className={styles.excelSheetTabsBottom}>
+                  {excelWorkbook.sheetNames.map((name) => (
+                    <button
+                      key={name}
+                      className={`${styles.excelSheetTab} ${excelWorkbook.activeSheet === name ? styles.excelSheetTabActive : ''}`}
+                      style={excelWorkbook.activeSheet === name ? { borderTop: `3px solid ${brandColor}`, color: brandColor } : {}}
+                      onClick={() => setExcelWorkbook({
+                        ...excelWorkbook,
+                        activeSheet: name
+                      })}
+                    >
+                      {name}
+                    </button>
+                  ))}
                 </div>
-                <div className={styles.progressBarBg}>
-                  <div 
-                    className={styles.progressBarFill} 
-                    style={{ width: `${uploadProgress}%`, backgroundColor: brandColor }}
-                  />
+              )}
+            </div>
+          ) : (
+            <>
+              <div className={styles.driveHeader}>
+                <div className={styles.driveTitle}>
+                  <h2>📁 Almacenamiento Seguro Propio</h2>
+                  <p>Sube y gestiona documentos y actas directamente en el espacio digital propio de la empresa.</p>
                 </div>
               </div>
-            )}
 
-            {/* Folder Tabs (Categories) */}
-            <div className={styles.folderRow}>
-              {categories.map(category => (
-                <button
-                  key={category}
-                  className={`${styles.folderBtn} ${selectedCategory === category ? styles.folderBtnActive : ''}`}
-                  style={selectedCategory === category ? { borderColor: brandColor, color: brandColor, backgroundColor: brandColor + '10' } : {}}
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  <FolderOpen size={16} />
-                  {category}
-                </button>
-              ))}
-            </div>
+              <div className={styles.explorerContainer}>
+                {/* Search and Upload Bar */}
+                <div className={styles.actionRow}>
+                  <div className={styles.searchBar}>
+                    <Search size={18} className={styles.searchIcon} />
+                    <input 
+                      type="text" 
+                      placeholder="Buscar archivos por nombre..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className={styles.uploadZone}>
+                    <button 
+                      onClick={handleCreateFolder}
+                      disabled={isUploading}
+                      className={styles.uploadBtn}
+                      style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}
+                    >
+                      <FolderOpen size={18} />
+                      Crear Carpeta
+                    </button>
 
-            {/* Files List */}
-            {isLoadingFiles ? (
-              <div className={styles.noFiles} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
-                <Loader2 className={styles.spinner} size={32} />
-                <p>Cargando archivos del almacenamiento seguro...</p>
-              </div>
-            ) : (
-              <div className={styles.filesGrid}>
-                {filteredFiles.length === 0 ? (
-                  <div className={styles.noFiles}>
-                    <p>No se encontraron archivos en esta carpeta.</p>
+                    <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor, marginRight: '10px' }}>
+                      <FolderOpen size={18} />
+                      Subir Carpeta
+                      <input 
+                        type="file" 
+                        // @ts-ignore
+                        webkitdirectory="true"
+                        directory="true"
+                        multiple
+                        onChange={handleFolderChange}
+                        className={styles.hiddenInput} 
+                        disabled={isUploading}
+                      />
+                    </label>
+
+                    <label className={styles.uploadBtn} style={{ borderColor: brandColor, color: brandColor }}>
+                      <Upload size={18} />
+                      Subir Archivo
+                      <input 
+                        type="file" 
+                        onChange={handleFileChange}
+                        className={styles.hiddenInput} 
+                        disabled={isUploading}
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Upload progress */}
+                {isUploading && (
+                  <div className={styles.uploadProgressBarContainer}>
+                    <div className={styles.uploadProgressInfo}>
+                      <span className={styles.progressFileName}>Procesando: {uploadingFileName}</span>
+                      <span className={styles.progressPercent}>{uploadProgress}%</span>
+                    </div>
+                    <div className={styles.progressBarBg}>
+                      <div 
+                        className={styles.progressBarFill} 
+                        style={{ width: `${uploadProgress}%`, backgroundColor: brandColor }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Folder Tabs (Categories) */}
+                <div className={styles.folderRow}>
+                  {categories.map(category => (
+                    <button
+                      key={category}
+                      className={`${styles.folderBtn} ${selectedCategory === category ? styles.folderBtnActive : ''}`}
+                      style={selectedCategory === category ? { borderColor: brandColor, color: brandColor, backgroundColor: brandColor + '10' } : {}}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      <FolderOpen size={16} />
+                      {category}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Files List */}
+                {isLoadingFiles ? (
+                  <div className={styles.noFiles} style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+                    <Loader2 className={styles.spinner} size={32} />
+                    <p>Cargando archivos del almacenamiento seguro...</p>
                   </div>
                 ) : (
-                  filteredFiles.map((file, idx) => (
-                    <div key={idx} className={styles.fileCard}>
-                      <div className={styles.fileIconWrapper}>
-                        {renderFileIcon(file.type)}
+                  <div className={styles.filesGrid}>
+                    {filteredFiles.length === 0 ? (
+                      <div className={styles.noFiles}>
+                        <p>No se encontraron archivos en esta carpeta.</p>
                       </div>
-                      <div className={styles.fileDetails}>
-                        <h3>{file.name}</h3>
-                        <div className={styles.fileMeta}>
-                          <span className={styles.fileCategory} style={{ color: brandColor, backgroundColor: brandColor + '10' }}>
-                            {file.category}
-                          </span>
-                          <span className={styles.fileSize}>{file.size}</span>
-                          <span className={styles.fileDate}>{file.date}</span>
+                    ) : (
+                      filteredFiles.map((file, idx) => (
+                        <div key={idx} className={styles.fileCard}>
+                          <div className={styles.fileIconWrapper}>
+                            {renderFileIcon(file.type)}
+                          </div>
+                          <div className={styles.fileDetails}>
+                            <h3>{file.name}</h3>
+                            <div className={styles.fileMeta}>
+                              <span className={styles.fileCategory} style={{ color: brandColor, backgroundColor: brandColor + '10' }}>
+                                {file.category}
+                              </span>
+                              <span className={styles.fileSize}>{file.size}</span>
+                              <span className={styles.fileDate}>{file.date}</span>
+                            </div>
+                          </div>
+                          
+                          <div className={styles.fileActions}>
+                            {(file.type === 'pdf' || file.type === 'img' || file.type === 'xls') && (
+                              <button 
+                                onClick={() => handleViewFile(file)}
+                                className={styles.viewBtn}
+                                title="Ver en línea"
+                                style={{ marginRight: '6px' }}
+                              >
+                                <Eye size={18} />
+                              </button>
+                            )}
+                            
+                            <button 
+                              onClick={() => handleDownloadFile(file)}
+                              className={styles.downloadBtn}
+                              title="Descargar archivo"
+                              style={{ marginRight: '6px' }}
+                            >
+                              <Download size={18} />
+                            </button>
+                            
+                            <button 
+                              onClick={() => handleDeleteFile(file)}
+                              className={styles.deleteBtn}
+                              title="Eliminar archivo"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className={styles.fileActions}>
-                        {(file.type === 'pdf' || file.type === 'img') && (
-                          <button 
-                            onClick={() => handleViewFile(file)}
-                            className={styles.viewBtn}
-                            title="Ver en línea"
-                            style={{ marginRight: '6px' }}
-                          >
-                            <Eye size={18} />
-                          </button>
-                        )}
-                        
-                        <button 
-                          onClick={() => handleDownloadFile(file)}
-                          className={styles.downloadBtn}
-                          title="Descargar archivo"
-                          style={{ marginRight: '6px' }}
-                        >
-                          <Download size={18} />
-                        </button>
-                        
-                        <button 
-                          onClick={() => handleDeleteFile(file)}
-                          className={styles.deleteBtn}
-                          title="Eliminar archivo"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  ))
+                      ))
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       )}
     </main>

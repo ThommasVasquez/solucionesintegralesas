@@ -509,3 +509,223 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* ==========================================
+   EXCEL INLINE SPREADSHEET VIEWER STYLES
+   ========================================== */
+.excelInlineViewer {
+  background: #ffffff; /* Light background for maximum spreadsheet legibility, just like Google Sheets */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 70vh; /* Fixed height so it scrolls within, similar to an iframe */
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  color: #1e293b; /* Dark text for light mode spreadsheet */
+  margin-top: 10px;
+}
+
+.excelInlineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #0f172a; /* Keep header dark to match dashboard shell */
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.excelInlineLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.excelInlineBackBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.excelInlineBackBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.excelInlineDivider {
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 1.2rem;
+}
+
+.excelInlineTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.excelInlineTitle h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  color: #f8fafc;
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.excelIcon {
+  color: #10b981;
+}
+
+.excelInlineDownloadBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.excelInlineDownloadBtn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* Table container scrollable */
+.excelTableContainer {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: #f8fafc;
+}
+
+/* Spreadsheet Grid styling */
+.excelTable {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  width: max-content; /* Critical: prevent table from squeezing columns */
+  min-width: 100%;
+  background: #ffffff;
+}
+
+/* Corner cell (empty junction between cols and rows) */
+.excelCornerHeader {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  background: #e2e8f0;
+  border-right: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  width: 40px;
+  min-width: 40px;
+  height: 28px;
+}
+
+/* Column letters header */
+.excelColHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+  text-align: center;
+  border-right: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  min-width: 80px;
+  max-width: 250px;
+  height: 28px;
+  user-select: none;
+}
+
+/* Row numbers header */
+.excelRowHeader {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 500;
+  text-align: center;
+  border-right: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  width: 40px;
+  min-width: 40px;
+  user-select: none;
+  height: 25px;
+}
+
+/* Highlight corner / header intersection */
+.excelRowHeader:hover, .excelColHeader:hover {
+  background: #e2e8f0;
+}
+
+/* Grid cell */
+.excelCell {
+  border-right: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  white-space: nowrap;
+  color: #334155;
+  min-width: 80px;
+  max-width: 300px;
+  vertical-align: middle;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Sheet selection tabs at the bottom */
+.excelSheetTabsBottom {
+  display: flex;
+  background: #f1f5f9;
+  border-top: 1px solid #cbd5e1;
+  padding: 0 12px;
+  gap: 4px;
+  height: 40px;
+  align-items: flex-end;
+}
+
+.excelSheetTab {
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  color: #475569;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.excelSheetTab:hover {
+  background: #cbd5e1;
+  color: #1e293b;
+}
+
+.excelSheetTabActive {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+}
