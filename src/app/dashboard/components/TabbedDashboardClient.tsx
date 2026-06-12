@@ -60,9 +60,18 @@ export default function TabbedDashboardClient({
 
   const user = passedUser?.email ? passedUser : { name: sessionUser?.name, email: sessionUser?.email };
   const isSergio = passedIsSergio !== undefined ? passedIsSergio : (sessionUser?.email === "sergio@ingenova.com.co");
-  const sheetUrl = (isSergio && title === "Gestión de Visitas ProMascotas")
+  const rawSheetUrl = (isSergio && title === "Gestión de Visitas ProMascotas")
     ? "https://docs.google.com/spreadsheets/d/1d0yCW0dVJjlhk4X4rQVVs_G62K8QEhEIgZQZHzltaqI/edit?usp=sharing"
     : passedSheetUrl;
+
+  const getEmbedUrl = (url: string) => {
+    if (url.includes('docs.google.com/spreadsheets')) {
+      // Reemplaza /edit por /htmlembed para evitar restricciones de X-Frame-Options
+      return url.replace(/\/edit(\?.*)?$/, '/htmlembed?widget=true&headers=false');
+    }
+    return url;
+  };
+  const sheetUrl = getEmbedUrl(rawSheetUrl);
 
   // Ocultar planilla si es Sergio y la bandera está encendida.
   const shouldHideExcel = isSergio && hideExcelForSergio;
