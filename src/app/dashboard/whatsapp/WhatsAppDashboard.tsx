@@ -48,7 +48,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   const [isClient, setIsClient] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'active' | 'disconnected'>('disconnected');
   const [lastMessageTime, setLastMessageTime] = useState<Date | null>(null);
-  const [activeAuditSlot, setActiveAuditSlot] = useState<'slot1' | 'slot2' | 'slot3' | 'slot4'>('slot1');
+  const [activeAuditSlot, setActiveAuditSlot] = useState<'all' | 'slot1' | 'slot2' | 'slot3' | 'slot4'>('all');
   const [origin, setOrigin] = useState('http://localhost:3001');
 
   useEffect(() => {
@@ -615,7 +615,9 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
 
     return messages.filter(msg => {
       const msgMs = new Date(msg.timestamp).getTime();
-      return msgMs >= startMs && msgMs <= endMs;
+      const matchesStart = msgMs >= startMs;
+      const matchesEnd = (period === 'yesterday' || period === 'custom') ? msgMs <= endMs : true;
+      return matchesStart && matchesEnd;
     });
   }, [messages, period, customStartDate, customEndDate, isClient]);
 
@@ -644,6 +646,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         totalAnswered: 0,
         uniqueClientsCount: 0,
         slots: {
+          all: { id: 'all' as const, label: 'Todos los Turnos', range: 'Resumen Completo', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
           slot1: { id: 'slot1' as const, label: 'Tiempo Muerto Mañana', range: '12:00 AM - 8:00 AM', active: false, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
           slot2: { id: 'slot2' as const, label: 'Agente Diurno', range: '8:00 AM - 2:00 PM', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
           slot3: { id: 'slot3' as const, label: 'Agente de la Tarde', range: '2:00 PM - 8:00 PM', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
@@ -730,6 +733,34 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
       totalAnswered: outboundCount,
       uniqueClientsCount,
       slots: {
+        all: {
+          id: 'all' as const,
+          label: 'Todos los Turnos',
+          range: 'Resumen Completo',
+          active: true,
+          count: uniqueClientsCount,
+          msgCount: inboundCount,
+          chats: [
+            ...Object.values(slot1Chats),
+            ...Object.values(slot2Chats),
+            ...Object.values(slot3Chats),
+            ...Object.values(slot4Chats)
+          ].reduce((acc, chat) => {
+            const existing = acc.find(c => c.chatId === chat.chatId);
+            if (existing) {
+              existing.msgCount += chat.msgCount;
+              if (chat.timestampMs > existing.timestampMs) {
+                existing.lastTime = chat.lastTime;
+                existing.timestampMs = chat.timestampMs;
+              }
+            } else {
+              acc.push({ ...chat });
+            }
+            return acc;
+          }, [] as any[])
+          .sort((a, b) => b.timestampMs - a.timestampMs)
+          .map(({ timestampMs, ...rest }) => rest)
+        },
         slot1: {
           id: 'slot1' as const,
           label: 'Tiempo Muerto Mañana',
@@ -843,11 +874,11 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
       <div className={styles.auditCard} style={{ marginTop: '20px', gridColumn: '1 / -1' }}>
         <div className={styles.auditHeader}>
           <div className={styles.auditTitle}>
-            <User size={18} style={{ color: activeAuditSlot === 'slot1' ? '#64748b' : activeAuditSlot === 'slot2' ? '#3b82f6' : activeAuditSlot === 'slot3' ? '#f59e0b' : '#475569', marginRight: '8px' }} />
+            <User size={18} style={{ color: activeAuditSlot === 'all' ? '#25d366' : activeAuditSlot === 'slot1' ? '#64748b' : activeAuditSlot === 'slot2' ? '#3b82f6' : activeAuditSlot === 'slot3' ? '#f59e0b' : '#475569', marginRight: '8px' }} />
             <h3>Auditoría de Chats: {selectedSlot.label} ({selectedSlot.range})</h3>
           </div>
-          <span className={`${styles.auditBadge} ${selectedSlot.active ? styles.badgeActive : styles.badgeDead}`}>
-            {selectedSlot.active ? '🟢 Agente Activo en Turno' : '🔴 Tiempo Muerto (Sin Agente)'}
+          <span className={`${styles.auditBadge} ${selectedSlot.id === 'all' ? styles.badgeActive : selectedSlot.active ? styles.badgeActive : styles.badgeDead}`}>
+            {selectedSlot.id === 'all' ? '📊 Resumen General del Periodo' : selectedSlot.active ? '🟢 Agente Activo en Turno' : '🔴 Tiempo Muerto (Sin Agente)'}
           </span>
         </div>
         
@@ -1056,7 +1087,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
       <div className={styles.kpiGrid}>
         {(Object.values(stats.slots) as any[]).map((slot) => {
           const isSelected = activeAuditSlot === slot.id;
-          const activeColor = slot.id === 'slot1' ? '#64748b' : slot.id === 'slot2' ? '#3b82f6' : slot.id === 'slot3' ? '#f59e0b' : '#475569';
+          const activeColor = slot.id === 'all' ? '#25d366' : slot.id === 'slot1' ? '#64748b' : slot.id === 'slot2' ? '#3b82f6' : slot.id === 'slot3' ? '#f59e0b' : '#475569';
           
           return (
             <div 
@@ -1072,11 +1103,11 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
               <div 
                 className={styles.kpiIcon} 
                 style={{ 
-                  backgroundColor: slot.active ? 'rgba(37, 211, 102, 0.1)' : 'rgba(148, 163, 184, 0.1)', 
-                  color: slot.active ? '#25d366' : '#64748b' 
+                  backgroundColor: slot.id === 'all' ? 'rgba(37, 211, 102, 0.1)' : slot.active ? 'rgba(37, 211, 102, 0.1)' : 'rgba(148, 163, 184, 0.1)', 
+                  color: slot.id === 'all' ? '#25d366' : slot.active ? '#25d366' : '#64748b' 
                 }}
               >
-                <Clock />
+                {slot.id === 'all' ? <MessageSquare /> : <Clock />}
               </div>
               <div className={styles.kpiInfo} style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1086,12 +1117,12 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
                       fontSize: '9px', 
                       padding: '2px 6px', 
                       borderRadius: '4px', 
-                      backgroundColor: slot.active ? 'rgba(37, 211, 102, 0.1)' : 'rgba(100, 116, 139, 0.1)',
-                      color: slot.active ? '#25d366' : '#64748b',
+                      backgroundColor: slot.id === 'all' ? 'rgba(37, 211, 102, 0.1)' : slot.active ? 'rgba(37, 211, 102, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+                      color: slot.id === 'all' ? '#25d366' : slot.active ? '#25d366' : '#64748b',
                       fontWeight: 600
                     }}
                   >
-                    {slot.active ? 'Turno' : 'Cerrado'}
+                    {slot.id === 'all' ? 'General' : slot.active ? 'Turno' : 'Cerrado'}
                   </span>
                 </div>
                 <span className={styles.kpiValue} style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
