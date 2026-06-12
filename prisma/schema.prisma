@@ -131,6 +131,7 @@ model AdminSheetConfig {
   name      String
   url       String
   order     Int      @default(0)
+  isCustom  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

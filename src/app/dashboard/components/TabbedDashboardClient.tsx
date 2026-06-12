@@ -108,6 +108,7 @@ export default function TabbedDashboardClient({
   ];
 
   const [sheetsList, setSheetsList] = useState<AdminSheet[]>(adminSheets || defaultAdminSheets);
+  const [isCustomConfig, setIsCustomConfig] = useState(false);
   const [isLoadingSheets, setIsLoadingSheets] = useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [configSheets, setConfigSheets] = useState<AdminSheet[]>([]);
@@ -123,6 +124,7 @@ export default function TabbedDashboardClient({
         const data = await res.json();
         if (data.success && data.sheets && data.sheets.length > 0) {
           setSheetsList(data.sheets);
+          setIsCustomConfig(!!data.isCustom);
         }
       } catch (e) {
         console.error("Error fetching admin sheets:", e);
@@ -135,6 +137,7 @@ export default function TabbedDashboardClient({
       fetchAdminSheets();
     }
   }, [brandId, adminSheets]);
+
 
 
   const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive'>('whatsapp');
@@ -639,7 +642,7 @@ export default function TabbedDashboardClient({
                         {sheet.name}
                       </button>
                     ))}
-                    {isSuperUser && (
+                    {(isSuperUser || (isUserAdmin && !isCustomConfig)) && (
                       <>
                         <div className={styles.dropdownDivider} />
                         <button 
@@ -988,7 +991,7 @@ export default function TabbedDashboardClient({
       )}
 
       {/* Modal de Configuración de Archivos Administrativos */}
-      {isConfigModalOpen && isSuperUser && (
+      {isConfigModalOpen && (isSuperUser || (isUserAdmin && !isCustomConfig)) && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
@@ -1060,6 +1063,7 @@ export default function TabbedDashboardClient({
                     const data = await res.json();
                     if (data.success) {
                       setSheetsList(configSheets.filter(s => s.name && s.url));
+                      setIsCustomConfig(true);
                       setIsConfigModalOpen(false);
                       logAction({
                         userEmail: user.email,

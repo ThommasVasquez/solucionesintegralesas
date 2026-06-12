@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
 
     // Buscar configuraciones de hojas administrativas para esta marca
     let sheets = await sql`
-      SELECT name, url, "order"
+      SELECT name, url, "order", "isCustom"
       FROM admin_sheet_configs
       WHERE "brandId" = ${brandId}
       ORDER BY "order" ASC
@@ -57,22 +57,24 @@ export async function GET(req: NextRequest) {
         const sheet = DEFAULT_SHEETS[i];
         const id = `config-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
         await sql`
-          INSERT INTO admin_sheet_configs (id, "brandId", name, url, "order", "createdAt", "updatedAt")
-          VALUES (${id}, ${brandId}, ${sheet.name}, ${sheet.url}, ${i}, ${new Date()}, ${new Date()})
+          INSERT INTO admin_sheet_configs (id, "brandId", name, url, "order", "isCustom", "createdAt", "updatedAt")
+          VALUES (${id}, ${brandId}, ${sheet.name}, ${sheet.url}, ${i}, false, ${new Date()}, ${new Date()})
         `;
       }
 
       // Volver a consultar
       sheets = await sql`
-        SELECT name, url, "order"
+        SELECT name, url, "order", "isCustom"
         FROM admin_sheet_configs
         WHERE "brandId" = ${brandId}
         ORDER BY "order" ASC
       `;
     }
 
+    const isCustom = sheets.some((s: any) => s.isCustom === true);
+
     return NextResponse.json(
-      { success: true, sheets },
+      { success: true, sheets, isCustom },
       { headers: corsHeaders }
     );
   } catch (error: any) {
@@ -87,12 +89,22 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = await auth();
-    if (session?.user?.email !== 'thommyenergy@superuser.com') {
+    const userEmail = session?.user?.email;
+    const allowedAdmins = [
+      "sebastian@ingenova.com.co",
+      "jessyca@ingenova.com.co",
+      "adrian@ingenova.com.co",
+      "thommyenergy@superuser.com"
+    ];
+
+    if (!userEmail || !allowedAdmins.includes(userEmail.toLowerCase())) {
       return NextResponse.json(
-        { success: false, error: 'No autorizado. Solo el superusuario puede configurar los archivos.' },
+        { success: false, error: 'No autorizado.' },
         { status: 403, headers: corsHeaders }
       );
     }
+
+    const isSuper = userEmail.toLowerCase() === 'thommyenergy@superuser.com';
 
     const body = await req.json();
     const { brandId, sheets } = body;
@@ -104,12 +116,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
     if (!process.env.DATABASE_URL) {
       throw new Error('DATABASE_URL is not defined');
     }
 
     const sql = neon(process.env.DATABASE_URL);
+
+    // Si no es superusuario, verificar si la configuración ya ha sido modificada (es custom)
+    if (!isSuper) {
+      const currentConfigs = await sql`
+        SELECT "isCustom"
+        FROM admin_sheet_configs
+        WHERE "brandId" = ${brandId}
+      `;
+      const hasCustom = currentConfigs.some((c: any) => c.isCustom === true);
+      if (hasCustom) {
+        return NextResponse.json(
+          { success: false, error: 'No autorizado. La configuración ya fue guardada previamente y solo el superusuario puede volver a modificarla.' },
+          { status: 403, headers: corsHeaders }
+        );
+      }
+    }
 
     // Eliminar las configuraciones anteriores para esta marca
     await sql`
@@ -117,7 +144,7 @@ export async function POST(req: NextRequest) {
       WHERE "brandId" = ${brandId}
     `;
 
-    // Insertar las nuevas configuraciones
+    // Insertar las nuevas configuraciones como personalizadas (isCustom: true)
     for (let i = 0; i < sheets.length; i++) {
       const sheet = sheets[i];
       // Ignorar si no tiene nombre o url
@@ -125,8 +152,8 @@ export async function POST(req: NextRequest) {
 
       const id = `config-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
       await sql`
-        INSERT INTO admin_sheet_configs (id, "brandId", name, url, "order", "createdAt", "updatedAt")
-        VALUES (${id}, ${brandId}, ${sheet.name}, ${sheet.url}, ${i}, ${new Date()}, ${new Date()})
+        INSERT INTO admin_sheet_configs (id, "brandId", name, url, "order", "isCustom", "createdAt", "updatedAt")
+        VALUES (${id}, ${brandId}, ${sheet.name}, ${sheet.url}, ${i}, true, ${new Date()}, ${new Date()})
       `;
     }
 
