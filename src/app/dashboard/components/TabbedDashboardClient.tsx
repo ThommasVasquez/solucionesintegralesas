@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Navbar from "@/components/Navbar";
 import WhatsAppDashboard from "../whatsapp/WhatsAppDashboard";
@@ -101,16 +101,53 @@ export default function TabbedDashboardClient({
     }
   }, [user, title]);
 
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [currentSheetUrl, setCurrentSheetUrl] = useState(sheetUrl);
+  const adminDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCurrentSheetUrl(sheetUrl);
+  }, [sheetUrl]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (adminDropdownRef.current && !adminDropdownRef.current.contains(event.target as Node)) {
+        setIsAdminOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleTabChange = (tab: 'excel' | 'whatsapp' | 'drive') => {
     setActiveTab(tab);
     setExcelWorkbook(null);
     setViewingFile(null);
+    setIsAdminOpen(false);
+    if (tab !== 'excel') {
+      setCurrentSheetUrl(sheetUrl);
+    }
     logAction({
       userEmail: user.email,
       userName: user.name,
       action: 'SWITCH_TAB',
       resource: title,
       details: { tab, message: `Cambió a la pestaña "${tab === 'excel' ? 'Planilla Excel' : tab === 'whatsapp' ? 'Reportes WhatsApp' : 'Carpeta Drive'}" en el panel ${title}` }
+    });
+  };
+
+  const handleAdminSelect = (name: string, url: string) => {
+    setCurrentSheetUrl(url);
+    setIsAdminOpen(false);
+    setActiveTab('excel');
+    logAction({
+      userEmail: user.email,
+      userName: user.name,
+      action: 'SWITCH_TAB',
+      resource: title,
+      details: { tab: `excel-${name}`, message: `Visualizó el archivo administrativo "${name}" en el panel ${title}` }
     });
   };
 
@@ -526,10 +563,31 @@ export default function TabbedDashboardClient({
       {!shouldHideExcel && (
         <div className={styles.tabContainer}>
           <div className={styles.tabBar}>
+            <div className={styles.dropdownContainer} ref={adminDropdownRef}>
+              <button 
+                className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl !== sheetUrl ? styles.tabBtnActive : ''}`}
+                style={activeTab === 'excel' && currentSheetUrl !== sheetUrl ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
+                onClick={() => setIsAdminOpen(!isAdminOpen)}
+              >
+                💼 Administrativo ▾
+              </button>
+              {isAdminOpen && (
+                <div className={styles.dropdownMenu}>
+                  <button onClick={() => handleAdminSelect('archivo1', 'https://docs.google.com/spreadsheets/d/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo/edit?usp=sharing')}>archivo1</button>
+                  <button onClick={() => handleAdminSelect('archivo2', 'https://docs.google.com/spreadsheets/d/1hLseTl6VfGFoVG8rIND5vDiwbX36xNiaOeMYDxVTl54/edit?usp=sharing')}>archivo2</button>
+                  <button onClick={() => handleAdminSelect('archivo3', 'https://docs.google.com/spreadsheets/d/1joniM23XA3LxWo6ernD-w5bOppVsGFN38iCmhATC6Fs/edit?usp=sharing')}>archivo3</button>
+                  <button onClick={() => handleAdminSelect('archivo4', 'https://docs.google.com/spreadsheets/d/1dRd9YiMJpycg28KdZVvtDtNaSKb0YA6UZdibk1CQzLk/edit?usp=sharing')}>archivo4</button>
+                </div>
+              )}
+            </div>
+
             <button 
-              className={`${styles.tabBtn} ${activeTab === 'excel' ? styles.tabBtnActive : ''}`}
-              style={activeTab === 'excel' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-              onClick={() => handleTabChange('excel')}
+              className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl === sheetUrl ? styles.tabBtnActive : ''}`}
+              style={activeTab === 'excel' && currentSheetUrl === sheetUrl ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
+              onClick={() => {
+                setCurrentSheetUrl(sheetUrl);
+                handleTabChange('excel');
+              }}
             >
               📄 Planilla Excel
             </button>
@@ -554,7 +612,7 @@ export default function TabbedDashboardClient({
       {activeTab === 'excel' && !shouldHideExcel && (
         <div className={styles.iframeWrapper}>
           <iframe 
-            src={sheetUrl}
+            src={currentSheetUrl}
             className={styles.iframe}
             title={title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

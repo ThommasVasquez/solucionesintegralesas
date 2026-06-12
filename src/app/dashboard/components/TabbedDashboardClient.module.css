@@ -785,3 +785,44 @@
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
+
+/* ==========================================
+   ADMINISTRATIVO DROPDOWN STYLES
+   ========================================== */
+.dropdownContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background-color: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 6px 0;
+  min-width: 160px;
+  z-index: 10;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.dropdownMenu button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  text-align: left;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dropdownMenu button:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #f8fafc;
+}
