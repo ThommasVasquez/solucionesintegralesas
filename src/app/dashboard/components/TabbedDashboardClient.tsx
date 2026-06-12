@@ -15,7 +15,8 @@ import {
   ExternalLink, 
   FolderOpen,
   Trash2,
-  Loader2
+  Loader2,
+  Eye
 } from 'lucide-react';
 import styles from "./TabbedDashboardClient.module.css";
 
@@ -319,6 +320,62 @@ export default function TabbedDashboardClient({
     }
   };
 
+  const getMimeType = (fileName: string): string => {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return 'application/pdf';
+    if (ext === 'png') return 'image/png';
+    if (['jpg', 'jpeg'].includes(ext || '')) return 'image/jpeg';
+    if (ext === 'gif') return 'image/gif';
+    if (ext === 'svg') return 'image/svg+xml';
+    if (ext === 'webp') return 'image/webp';
+    if (['xls', 'xlsx'].includes(ext || '')) return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    if (['doc', 'docx'].includes(ext || '')) return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    return 'application/octet-stream';
+  };
+
+  // Ver Archivo Real en Línea (Nativo del Navegador)
+  const handleViewFile = async (file: DriveFile) => {
+    if (!file.id) return;
+    
+    if (file.type === 'doc' || file.type === 'xls') {
+      alert(`Este tipo de archivo (${file.type.toUpperCase()}) no se puede visualizar directamente en el navegador. Se descargará automáticamente.`);
+      handleDownloadFile(file);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/drive/download?id=${file.id}`);
+      const data = await res.json();
+      if (data.success && data.content) {
+        const mimeType = getMimeType(data.name || file.name);
+        
+        const byteCharacters = atob(data.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+        
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        logAction({
+          userEmail: user.email,
+          userName: user.name,
+          action: 'VIEW_FILE_ONLINE',
+          resource: title,
+          details: { fileName: file.name, message: `Visualizó en línea el archivo ${file.name} en el panel ${title}` }
+        });
+      } else {
+        alert("Error al abrir el archivo de la base de datos.");
+      }
+    } catch (err) {
+      console.error("Error viewing file:", err);
+      alert("Error de conexión al abrir el archivo.");
+    }
+  };
+
   // Descargar Archivo Real desde Base de Datos
   const handleDownloadFile = async (file: DriveFile) => {
     if (!file.id) return;
@@ -581,6 +638,17 @@ export default function TabbedDashboardClient({
                       </div>
                       
                       <div className={styles.fileActions}>
+                        {(file.type === 'pdf' || file.type === 'img') && (
+                          <button 
+                            onClick={() => handleViewFile(file)}
+                            className={styles.viewBtn}
+                            title="Ver en línea"
+                            style={{ marginRight: '6px' }}
+                          >
+                            <Eye size={18} />
+                          </button>
+                        )}
+                        
                         <button 
                           onClick={() => handleDownloadFile(file)}
                           className={styles.downloadBtn}

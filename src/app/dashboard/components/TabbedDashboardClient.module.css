@@ -482,6 +482,24 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+.viewBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewBtn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .spinner {
   animation: spin 1s linear infinite;
   color: #94a3b8;
