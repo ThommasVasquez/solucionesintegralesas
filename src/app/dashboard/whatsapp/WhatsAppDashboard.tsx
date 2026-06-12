@@ -41,6 +41,8 @@ interface WhatsAppDashboardProps {
 }
 
 export default function WhatsAppDashboard({ userName, userEmail, brandId }: WhatsAppDashboardProps) {
+  const isSuperUser = userEmail.toLowerCase() === 'thommyenergy@superuser.com';
+
   // Estado de mensajes
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
   const [isClient, setIsClient] = useState(false);
@@ -934,33 +936,37 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             {connectionStatus === 'active' ? '🟢 Activo en vivo' : connectionStatus === 'connected' ? '🔵 Esperando chats...' : '🔴 Desconectado'}
           </div>
 
-          <button 
-            onClick={() => setShowScriptModal(!showScriptModal)} 
-            className={styles.btnSuccess}
-          >
-            <Terminal size={16} />
-            Conectar WhatsApp Web
-          </button>
+          {isSuperUser && (
+            <>
+              <button 
+                onClick={() => setShowScriptModal(!showScriptModal)} 
+                className={styles.btnSuccess}
+              >
+                <Terminal size={16} />
+                Conectar WhatsApp Web
+              </button>
 
-          <button 
-            onClick={handleGenerateDemoData} 
-            className={styles.btnSecundario}
-          >
-            <Database size={16} />
-            Generar Demo
-          </button>
-          
-          {messages.length > 0 && (
-            <button onClick={handleClearData} className={styles.btnDanger}>
-              <Trash2 size={16} />
-              Limpiar
-            </button>
+              <button 
+                onClick={handleGenerateDemoData} 
+                className={styles.btnSecundario}
+              >
+                <Database size={16} />
+                Generar Demo
+              </button>
+              
+              {messages.length > 0 && (
+                <button onClick={handleClearData} className={styles.btnDanger}>
+                  <Trash2 size={16} />
+                  Limpiar
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
 
       {/* Modal/Sección del script de Tampermonkey */}
-      {showScriptModal && (
+      {showScriptModal && isSuperUser && (
         <div 
           style={{ 
             backgroundColor: 'rgba(0,0,0,0.03)', 
