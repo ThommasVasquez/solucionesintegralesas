@@ -63,8 +63,12 @@ export default function DashboardPage() {
             {!isSergio && (
               <>
                 <div className={styles.card}>
-                  <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.INGENOVA + '20' }}>
-                    <span style={{ color: BRAND_COLORS.INGENOVA }}>🏊‍♂️</span>
+                  <div className={styles.iconWrapper} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '2px' }}>
+                    <img 
+                      src="/ingenova-logo.jpg" 
+                      alt="Ingenova Logo" 
+                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                    />
                   </div>
                   <h3>Ingenova</h3>
                   <p>Gestión de hojas de control para mantenimiento de piscinas.</p>
@@ -106,8 +110,12 @@ export default function DashboardPage() {
             </div>
 
             <div className={styles.card}>
-              <div className={styles.iconWrapper} style={{ backgroundColor: BRAND_COLORS.PROMASCOTAS + '20' }}>
-                <span style={{ color: BRAND_COLORS.PROMASCOTAS }}>🐾</span>
+              <div className={styles.iconWrapper} style={{ backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', padding: '2px' }}>
+                <img 
+                  src="/promascotas-logo.png" 
+                  alt="ProMascotas Logo" 
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
               </div>
               <h3>ProMascotas</h3>
               <p>Control de visitas y profilaxis a domicilio.</p>
