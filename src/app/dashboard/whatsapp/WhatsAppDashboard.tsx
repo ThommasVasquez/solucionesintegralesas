@@ -41,7 +41,13 @@ interface WhatsAppDashboardProps {
 }
 
 export default function WhatsAppDashboard({ userName, userEmail, brandId }: WhatsAppDashboardProps) {
-  const isSuperUser = userEmail.toLowerCase() === 'thommyenergy@superuser.com';
+  const allowedAdminEmails = [
+    "sebastian@ingenova.com.co",
+    "jessyca@ingenova.com.co",
+    "adrian@ingenova.com.co",
+    "thommyenergy@superuser.com"
+  ];
+  const isSuperUser = allowedAdminEmails.includes(userEmail.toLowerCase());
 
   // Estado de mensajes
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
@@ -76,7 +82,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
   const tampermonkeyScript = `// ==UserScript==
 // @name         WhatsApp Web Real-Time Tracker for Soluciones AS
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.5
 // @description  Envía mensajes entrantes y salientes de WhatsApp Web en tiempo real a la API local
 // @match        https://web.whatsapp.com/*
 // @connect      *
@@ -98,6 +104,9 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
     const API_URL = '${origin}/api/whatsapp/message';
     const sentMessageIds = new Set();
     window.asTrackerSentIds = sentMessageIds;
+    if (!window.asTrackerSentUnread) {
+        window.asTrackerSentUnread = new Set();
+    }
     let currentChatName = null;
 
     const ACTIVE_BRAND = '${brandId || "printer_service"}';
@@ -120,6 +129,98 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             if (text && text.trim() !== '' && !text.includes('Comunidades') && !text.includes('Chats')) return text.trim();
         }
         return null;
+    }
+
+    // Función para parsear la fecha y hora de la celda de chat de WhatsApp Web
+    function parseWhatsAppDate(dateStr) {
+        try {
+            if (!dateStr) return new Date().toISOString();
+            const now = new Date();
+            const str = dateStr.trim().toLowerCase();
+
+            // 1. Formato de hora hoy (ej. "10:24", "10:24 a. m.", "10:24 pm", "10:24 p.m.")
+            const timeMatch = str.match(/^(\\d{1,2})[.:](\\d{2})\\s*([ap]\\.?\\s*m\\.?)?$/i);
+            if (timeMatch) {
+                let hours = parseInt(timeMatch[1], 10);
+                const minutes = parseInt(timeMatch[2], 10);
+                const ampm = timeMatch[3];
+                if (ampm) {
+                    const ampmLower = ampm.replace(/\\s/g, '').replace(/\\./g, '');
+                    if (ampmLower.includes('p') && hours < 12) {
+                        hours += 12;
+                    } else if (ampmLower.includes('a') && hours === 12) {
+                        hours = 0;
+                    }
+                }
+                const parsedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+                if (!isNaN(parsedDate.getTime())) {
+                    return parsedDate.toISOString();
+                }
+            }
+
+            // 2. Ayer / Yesterday
+            if (str === 'ayer' || str === 'yesterday') {
+                const yesterday = new Date();
+                yesterday.setDate(now.getDate() - 1);
+                yesterday.setHours(12, 0, 0, 0); // Hora por defecto a mitad del día
+                return yesterday.toISOString();
+            }
+
+            // 3. Días de la semana
+            const daysEn = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const daysEs = ['domingo', 'lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado'];
+            
+            let dayIndex = daysEn.indexOf(str);
+            if (dayIndex === -1) {
+                const esIndex = daysEs.indexOf(str);
+                if (esIndex !== -1) {
+                    if (esIndex === 0) dayIndex = 0;
+                    else if (esIndex === 1) dayIndex = 1;
+                    else if (esIndex === 2) dayIndex = 2;
+                    else if (esIndex === 3 || esIndex === 4) dayIndex = 3;
+                    else if (esIndex === 5) dayIndex = 4;
+                    else if (esIndex === 6) dayIndex = 5;
+                    else if (esIndex === 7 || esIndex === 8) dayIndex = 6;
+                }
+            }
+
+            if (dayIndex !== -1) {
+                const resultDate = new Date();
+                const currentDay = now.getDay();
+                let diff = currentDay - dayIndex;
+                if (diff <= 0) {
+                    diff += 7;
+                }
+                resultDate.setDate(now.getDate() - diff);
+                resultDate.setHours(12, 0, 0, 0);
+                return resultDate.toISOString();
+            }
+
+            // 4. Formatos de fecha DD/MM/AAAA, DD.MM.AA, etc.
+            const dateMatch = str.match(/^(\\d{1,2})[\\/\\.\\-](\\d{1,2})[\\/\\.\\-](\\d{2,4})$/);
+            if (dateMatch) {
+                const val1 = parseInt(dateMatch[1], 10);
+                const val2 = parseInt(dateMatch[2], 10);
+                let year = parseInt(dateMatch[3], 10);
+                if (year < 100) year += 2000;
+
+                let day, month;
+                if (val2 > 12) {
+                    day = val2;
+                    month = val1 - 1;
+                } else {
+                    day = val1;
+                    month = val2 - 1;
+                }
+                const parsedDate = new Date(year, month, day, 12, 0, 0);
+                if (!isNaN(parsedDate.getTime())) {
+                    return parsedDate.toISOString();
+                }
+            }
+        } catch (e) {
+            console.error('[AS Tracker] Error parsing date:', e);
+        }
+        return new Date().toISOString();
     }
 
     // Función para obtener el timestamp real del mensaje desde el DOM de WhatsApp
@@ -207,6 +308,99 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         return new Date().toISOString();
     }
 
+    // Escanear periódicamente la lista de chats en el sidebar para capturar chats entrantes en segundo plano
+    function scanSidebarChats() {
+        try {
+            const chatCells = document.querySelectorAll('div[data-testid="cell-frame-container"], div[role="listitem"], [data-testid="chat-cell"], [class*="chat-cell"]');
+            if (!chatCells || chatCells.length === 0) return;
+
+            chatCells.forEach(cell => {
+                // Obtener el nombre del contacto
+                const titleEl = cell.querySelector('span[title]') || 
+                                cell.querySelector('[data-testid="chat-title"] span') || 
+                                cell.querySelector('div[dir="auto"]');
+                if (!titleEl) return;
+                
+                const chatName = (titleEl.getAttribute('title') || titleEl.textContent || '').trim();
+                if (!chatName || chatName === 'Yo' || chatName === 'Tú' || chatName.includes('grupo') || chatName.includes('Group') || chatName.includes('WhatsApp')) return;
+
+                // 1. Encontrar el texto de fecha/hora en la celda
+                let timeText = '';
+                const divsAndSpans = cell.querySelectorAll('div, span');
+                const daysOfWeek = ['lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado', 'domingo',
+                                    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                
+                for (let el of divsAndSpans) {
+                    const txt = el.textContent ? el.textContent.trim() : '';
+                    if (txt.match(/^\\d{1,2}[.:]\\d{2}\\s*(?:[ap]\\.?\\s*m\\.?)?$/i) || 
+                        txt.toLowerCase() === 'ayer' || 
+                        txt.toLowerCase() === 'yesterday' ||
+                        daysOfWeek.includes(txt.toLowerCase()) ||
+                        txt.match(/^\\d{1,2}[\\/\\.\\-]\\d{1,2}[\\/\\.\\-]\\d{2,4}$/)) {
+                        timeText = txt;
+                        break;
+                    }
+                }
+
+                if (!timeText) return; // Si no hay indicación de tiempo válida, saltar
+
+                // 2. Detectar si el último mensaje tiene insignia de no leído
+                const unreadEl = cell.querySelector('[data-testid="unread-count"], span[aria-label*="unread"], span[aria-label*="leído"], span[class*="badge"], div[class*="unread"]');
+                const hasUnreadBadge = !!unreadEl || !!cell.querySelector('span[class*="badge"]') || !!cell.querySelector('div[class*="badge"]') || !!cell.querySelector('[class*="unread"]');
+
+                // 3. Determinar la dirección del último mensaje (si tiene checkmark, es OUTBOUND)
+                const hasCheckmark = cell.querySelector('[data-testid="msg-status-check"], [data-testid="msg-status-doublecheck"], [data-icon*="check"], [class*="status-check"]');
+                
+                // Si tiene badge de no leído, definitivamente el cliente nos escribió y no hemos leído
+                const direction = hasUnreadBadge ? 'INBOUND' : (hasCheckmark ? 'OUTBOUND' : 'INBOUND');
+
+                const chatId = chatName.toLowerCase().replace(/\\s+/g, '_');
+                const cleanTimeText = timeText.toLowerCase().replace(/[^a-z0-9]/g, '');
+                
+                // ID único determinista para el estado del chat en este momento exacto
+                const msgId = \`sb_\${chatId}_\${direction}_\${cleanTimeText}\`;
+
+                if (!sentMessageIds.has(msgId)) {
+                    const parsedTimestamp = parseWhatsAppDate(timeText);
+                    const payload = {
+                        id: msgId,
+                        brandId: ACTIVE_BRAND,
+                        chatId: chatId,
+                        sender: chatName,
+                        content: hasUnreadBadge 
+                            ? \`[Contacto entrante en sidebar - sin leer]\` 
+                            : \`[Contacto detectado en sidebar - último: \${timeText}]\`,
+                        timestamp: parsedTimestamp,
+                        direction: direction
+                    };
+
+                    GM_xmlhttpRequest({
+                        method: 'POST',
+                        url: API_URL,
+                        headers: { 'Content-Type': 'application/json' },
+                        data: JSON.stringify(payload),
+                        onload: function(response) {
+                            try {
+                                const data = JSON.parse(response.responseText);
+                                if (data.success) {
+                                    sentMessageIds.add(msgId);
+                                    console.log(\`[AS Tracker] Sidebar chat registrado: \${chatName} (\${direction}) a las \${timeText}\`);
+                                }
+                            } catch(e) {
+                                console.error('[AS Tracker] Error parseando respuesta:', e);
+                            }
+                        },
+                        onerror: function(err) {
+                            console.error('[AS Tracker] Error en GM_xmlhttpRequest:', err);
+                        }
+                    });
+                }
+            });
+        } catch (e) {
+            console.error('[AS Tracker] Error escaneando sidebar:', e);
+        }
+    }
+
     // Procesar y enviar un mensaje
     function processMessage(el) {
         try {
@@ -224,12 +418,12 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
 
             // Verificar que tiene contenido real o multimedia
             const hasContent = !!(el.querySelector('[class*="copyable-text"]') || 
-                                  el.querySelector('[class*="selectable-text"]') || 
-                                  el.querySelector('img') || 
-                                  el.querySelector('video') || 
-                                  el.querySelector('[data-icon]') || 
-                                  el.querySelector('[data-testid="msg-copyable-text"]') ||
-                                  el.querySelector('[data-testid="msg-container"]'));
+                                   el.querySelector('[class*="selectable-text"]') || 
+                                   el.querySelector('img') || 
+                                   el.querySelector('video') || 
+                                   el.querySelector('[data-icon]') || 
+                                   el.querySelector('[data-testid="msg-copyable-text"]') ||
+                                   el.querySelector('[data-testid="msg-container"]'));
             if (!hasContent) return;
 
             if (sentMessageIds.has(msgId)) return;
@@ -299,7 +493,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             const payload = {
                 id: msgId,
                 brandId: ACTIVE_BRAND,
-                chatId: chatName.toLowerCase().replace(/\s+/g, '_'),
+                chatId: chatName.toLowerCase().replace(/\\s+/g, '_'),
                 sender: sender,
                 content: content,
                 timestamp: getMessageTimestamp(el),
@@ -386,6 +580,9 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
         const observer = new MutationObserver(callback);
         observer.observe(targetNode, config);
         console.log('[AS WhatsApp Tracker] MutationObserver activo. Escuchando chats...');
+        
+        // Iniciar escaneo periódico de chats en el sidebar cada 2 segundos
+        setInterval(scanSidebarChats, 2000);
         
         // Primera ejecución al cargar
         checkChatSwitch();
@@ -640,17 +837,27 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
 
   // Estadísticas calculadas
   const stats = useMemo(() => {
+    interface SlotChat {
+      sender: string;
+      lastTime: string;
+      inboundCount: number;
+      outboundCount: number;
+      msgCount: number;
+      chatId: string;
+      timestampMs: number;
+    }
+
     if (filteredMessages.length === 0) {
       return {
         totalReceived: 0,
         totalAnswered: 0,
         uniqueClientsCount: 0,
         slots: {
-          all: { id: 'all' as const, label: 'Todos los Turnos', range: 'Resumen Completo', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
-          slot1: { id: 'slot1' as const, label: 'Tiempo Muerto Mañana', range: '12:00 AM - 8:00 AM', active: false, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
-          slot2: { id: 'slot2' as const, label: 'Agente Diurno', range: '8:00 AM - 2:00 PM', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
-          slot3: { id: 'slot3' as const, label: 'Agente de la Tarde', range: '2:00 PM - 8:00 PM', active: true, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] },
-          slot4: { id: 'slot4' as const, label: 'Tiempo Muerto Noche', range: '8:00 PM - 11:59 PM', active: false, count: 0, msgCount: 0, chats: [] as { sender: string; lastTime: string; msgCount: number; chatId: string }[] }
+          all: { id: 'all' as const, label: 'Todos los Turnos', range: 'Resumen Completo', active: true, count: 0, msgCount: 0, chats: [] as SlotChat[] },
+          slot1: { id: 'slot1' as const, label: 'Tiempo Muerto Mañana', range: '12:00 AM - 8:00 AM', active: false, count: 0, msgCount: 0, chats: [] as SlotChat[] },
+          slot2: { id: 'slot2' as const, label: 'Agente Diurno', range: '8:00 AM - 2:00 PM', active: true, count: 0, msgCount: 0, chats: [] as SlotChat[] },
+          slot3: { id: 'slot3' as const, label: 'Agente de la Tarde', range: '2:00 PM - 8:00 PM', active: true, count: 0, msgCount: 0, chats: [] as SlotChat[] },
+          slot4: { id: 'slot4' as const, label: 'Tiempo Muerto Noche', range: '8:00 PM - 11:59 PM', active: false, count: 0, msgCount: 0, chats: [] as SlotChat[] }
         }
       };
     }
@@ -663,68 +870,65 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
       else outboundCount++;
     });
 
-    const slot1Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
-    const slot2Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
-    const slot3Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
-    const slot4Chats: Record<string, { sender: string; lastTime: string; msgCount: number; timestampMs: number; chatId: string }> = {};
+    const slot1Chats: Record<string, SlotChat> = {};
+    const slot2Chats: Record<string, SlotChat> = {};
+    const slot3Chats: Record<string, SlotChat> = {};
+    const slot4Chats: Record<string, SlotChat> = {};
 
     filteredMessages.forEach(m => {
-      // Solo contamos clientes que escriben (mensajes entrantes)
-      if (m.direction === 'INBOUND' && m.sender !== 'Yo') {
+      // Contamos cualquier chat con actividad del cliente (en base de datos el sender es 'Cliente')
+      if (m.sender !== 'Yo') {
         const dateObj = new Date(m.timestamp);
         const hour = dateObj.getHours();
         const timestampMs = dateObj.getTime();
         const formattedTime = formatMsgDate(m.timestamp);
         
+        let targetSlot: Record<string, SlotChat>;
         if (hour >= 0 && hour < 8) {
-          if (!slot1Chats[m.chatId]) {
-            slot1Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
-          }
-          slot1Chats[m.chatId].msgCount++;
-          if (timestampMs > slot1Chats[m.chatId].timestampMs) {
-            slot1Chats[m.chatId].lastTime = formattedTime;
-            slot1Chats[m.chatId].timestampMs = timestampMs;
-          }
+          targetSlot = slot1Chats;
         } else if (hour >= 8 && hour < 14) {
-          if (!slot2Chats[m.chatId]) {
-            slot2Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
-          }
-          slot2Chats[m.chatId].msgCount++;
-          if (timestampMs > slot2Chats[m.chatId].timestampMs) {
-            slot2Chats[m.chatId].lastTime = formattedTime;
-            slot2Chats[m.chatId].timestampMs = timestampMs;
-          }
+          targetSlot = slot2Chats;
         } else if (hour >= 14 && hour < 20) {
-          if (!slot3Chats[m.chatId]) {
-            slot3Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
-          }
-          slot3Chats[m.chatId].msgCount++;
-          if (timestampMs > slot3Chats[m.chatId].timestampMs) {
-            slot3Chats[m.chatId].lastTime = formattedTime;
-            slot3Chats[m.chatId].timestampMs = timestampMs;
-          }
-        } else if (hour >= 20 && hour < 24) {
-          if (!slot4Chats[m.chatId]) {
-            slot4Chats[m.chatId] = { sender: m.sender || m.chatId, lastTime: formattedTime, msgCount: 0, timestampMs, chatId: m.chatId };
-          }
-          slot4Chats[m.chatId].msgCount++;
-          if (timestampMs > slot4Chats[m.chatId].timestampMs) {
-            slot4Chats[m.chatId].lastTime = formattedTime;
-            slot4Chats[m.chatId].timestampMs = timestampMs;
-          }
+          targetSlot = slot3Chats;
+        } else {
+          targetSlot = slot4Chats;
+        }
+
+        if (!targetSlot[m.chatId]) {
+          targetSlot[m.chatId] = { 
+            sender: m.sender || m.chatId, 
+            lastTime: formattedTime, 
+            inboundCount: 0, 
+            outboundCount: 0, 
+            msgCount: 0, 
+            timestampMs, 
+            chatId: m.chatId 
+          };
+        }
+        
+        targetSlot[m.chatId].msgCount++;
+        if (m.direction === 'INBOUND') {
+          targetSlot[m.chatId].inboundCount++;
+        } else {
+          targetSlot[m.chatId].outboundCount++;
+        }
+
+        if (timestampMs > targetSlot[m.chatId].timestampMs) {
+          targetSlot[m.chatId].lastTime = formattedTime;
+          targetSlot[m.chatId].timestampMs = timestampMs;
         }
       }
     });
 
-    const sortChats = (chatsMap: Record<string, any>) => {
+    const sortChats = (chatsMap: Record<string, SlotChat>) => {
       return Object.values(chatsMap)
-        .sort((a: any, b: any) => b.timestampMs - a.timestampMs)
+        .sort((a, b) => b.timestampMs - a.timestampMs)
         .map(({ timestampMs, ...rest }) => rest);
     };
 
     const uniqueClientsCount = new Set(
       filteredMessages
-        .filter(m => m.direction === 'INBOUND' && m.sender !== 'Yo')
+        .filter(m => m.sender !== 'Yo')
         .map(m => m.chatId)
     ).size;
 
@@ -749,6 +953,8 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
             const existing = acc.find(c => c.chatId === chat.chatId);
             if (existing) {
               existing.msgCount += chat.msgCount;
+              existing.inboundCount += chat.inboundCount;
+              existing.outboundCount += chat.outboundCount;
               if (chat.timestampMs > existing.timestampMs) {
                 existing.lastTime = chat.lastTime;
                 existing.timestampMs = chat.timestampMs;
@@ -757,7 +963,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
               acc.push({ ...chat });
             }
             return acc;
-          }, [] as any[])
+          }, [] as SlotChat[])
           .sort((a, b) => b.timestampMs - a.timestampMs)
           .map(({ timestampMs, ...rest }) => rest)
         },
@@ -767,7 +973,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '12:00 AM - 8:00 AM',
           active: false,
           count: Object.keys(slot1Chats).length,
-          msgCount: Object.values(slot1Chats).reduce((sum, c) => sum + c.msgCount, 0),
+          msgCount: Object.values(slot1Chats).reduce((sum, c) => sum + c.inboundCount, 0),
           chats: sortChats(slot1Chats)
         },
         slot2: {
@@ -776,7 +982,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '8:00 AM - 2:00 PM',
           active: true,
           count: Object.keys(slot2Chats).length,
-          msgCount: Object.values(slot2Chats).reduce((sum, c) => sum + c.msgCount, 0),
+          msgCount: Object.values(slot2Chats).reduce((sum, c) => sum + c.inboundCount, 0),
           chats: sortChats(slot2Chats)
         },
         slot3: {
@@ -785,7 +991,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '2:00 PM - 8:00 PM',
           active: true,
           count: Object.keys(slot3Chats).length,
-          msgCount: Object.values(slot3Chats).reduce((sum, c) => sum + c.msgCount, 0),
+          msgCount: Object.values(slot3Chats).reduce((sum, c) => sum + c.inboundCount, 0),
           chats: sortChats(slot3Chats)
         },
         slot4: {
@@ -794,7 +1000,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           range: '8:00 PM - 11:59 PM',
           active: false,
           count: Object.keys(slot4Chats).length,
-          msgCount: Object.values(slot4Chats).reduce((sum, c) => sum + c.msgCount, 0),
+          msgCount: Object.values(slot4Chats).reduce((sum, c) => sum + c.inboundCount, 0),
           chats: sortChats(slot4Chats)
         }
       }
@@ -893,8 +1099,8 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
                 <tr>
                   <th>Cliente (Nombre / Número)</th>
                   <th>ID del Chat</th>
-                  <th>Mensajes Recibidos</th>
-                  <th>Último Mensaje del Cliente</th>
+                  <th>Mensajes</th>
+                  <th>Última Actividad</th>
                 </tr>
               </thead>
               <tbody>
@@ -905,7 +1111,9 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
                       {chat.sender}
                     </td>
                     <td className={styles.auditChatId}>{chat.chatId}</td>
-                    <td className={styles.auditMsgCount}>{chat.msgCount} {chat.msgCount === 1 ? 'mensaje' : 'mensajes'}</td>
+                    <td className={styles.auditMsgCount}>
+                      {chat.msgCount} ({chat.inboundCount} Recibidos / {chat.outboundCount} Enviados)
+                    </td>
                     <td className={styles.auditTime}>{chat.lastTime}</td>
                   </tr>
                 ))}
