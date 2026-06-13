@@ -41,13 +41,7 @@ interface WhatsAppDashboardProps {
 }
 
 export default function WhatsAppDashboard({ userName, userEmail, brandId }: WhatsAppDashboardProps) {
-  const allowedAdminEmails = [
-    "sebastian@ingenova.com.co",
-    "jessyca@ingenova.com.co",
-    "adrian@ingenova.com.co",
-    "thommyenergy@superuser.com"
-  ];
-  const isSuperUser = allowedAdminEmails.includes(userEmail.toLowerCase());
+  const isSuperUser = userEmail.toLowerCase() === 'thommyenergy@superuser.com';
 
   // Estado de mensajes
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
