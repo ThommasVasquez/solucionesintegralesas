@@ -55,8 +55,7 @@ const BRAND_INFO: Record<string, { name: string; logoUrl: string; emoji?: string
   },
   pro_mascotas: {
     name: "ProMascotas",
-    logoUrl: "/logo.png",
-    emoji: "🐾"
+    logoUrl: "/promascotas-logo.png",
   }
 };
 

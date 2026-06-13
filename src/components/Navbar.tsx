@@ -128,6 +128,14 @@ export default function Navbar() {
         style: { width: 'auto', height: '55px' }
       };
     }
+    if (pathname.includes('promascotas')) {
+      return {
+        full: '/promascotas-logo.png',
+        icon: '/promascotas-logo.png',
+        alt: 'ProMascotas Logo',
+        style: { width: 'auto', height: '55px', borderRadius: '8px' }
+      };
+    }
     return {
       full: '/logo.png',
       icon: '/icon.png',
