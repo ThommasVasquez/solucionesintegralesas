@@ -40,8 +40,35 @@ interface WhatsAppDashboardProps {
   brandId?: string;
 }
 
+const BRAND_INFO: Record<string, { name: string; logoUrl: string; emoji?: string }> = {
+  viva_calentadores: {
+    name: "Viva Calentadores",
+    logoUrl: "/viva-calentadores-logo.jpg",
+  },
+  ingenova: {
+    name: "Ingenova",
+    logoUrl: "/ingenova-logo.jpg",
+  },
+  printer_service: {
+    name: "PrinterService",
+    logoUrl: "/printerservice-logo.png",
+  },
+  pro_mascotas: {
+    name: "ProMascotas",
+    logoUrl: "/logo.png",
+    emoji: "🐾"
+  }
+};
+
+const FALLBACK_BRAND = {
+  name: "Soluciones AS",
+  logoUrl: "/logo.png",
+  emoji: "📲"
+};
+
 export default function WhatsAppDashboard({ userName, userEmail, brandId }: WhatsAppDashboardProps) {
   const isSuperUser = userEmail.toLowerCase() === 'thommyenergy@superuser.com';
+  const currentBrand = (brandId && BRAND_INFO[brandId]) || FALLBACK_BRAND;
 
   // Estado de mensajes
   const [messages, setMessages] = useState<WhatsAppMessage[]>([]);
@@ -1144,13 +1171,38 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
       {/* Cabecera del Panel */}
       <div className={styles.header}>
         <div className={styles.welcome}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <Link href="/dashboard" style={{ display: 'inline-flex', color: 'var(--text-muted)' }} prefetch={false}>
               <ArrowLeft size={20} />
             </Link>
-            <h1>WhatsApp en Tiempo Real</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {currentBrand.logoUrl && (
+                <img 
+                  src={currentBrand.logoUrl} 
+                  alt={`${currentBrand.name} Logo`} 
+                  style={{ 
+                    height: '48px', 
+                    width: 'auto', 
+                    borderRadius: '8px', 
+                    border: '1px solid var(--border-color)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                    objectFit: 'contain',
+                    backgroundColor: '#fff',
+                    padding: '2px'
+                  }} 
+                />
+              )}
+              <div>
+                <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.8rem', margin: 0 }}>
+                  {currentBrand.emoji && <span>{currentBrand.emoji}</span>}
+                  {currentBrand.name}
+                </h1>
+                <p style={{ margin: '2px 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  Reportes de WhatsApp en Tiempo Real
+                </p>
+              </div>
+            </div>
           </div>
-          <p>Métricas actualizadas automáticamente al chatear en WhatsApp Web.</p>
         </div>
         
         <div className={styles.headerActions}>
