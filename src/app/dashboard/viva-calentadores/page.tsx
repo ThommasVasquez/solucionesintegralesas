@@ -3,7 +3,7 @@
 import TabbedDashboardClient, { type DriveFile } from "../components/TabbedDashboardClient";
 import { BRAND_COLORS } from "@/app/page";
 
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/1gk5qpJybTL4tP1t462uuvVpOmGwVqOsQ/edit?usp=sharing&ouid=104979725954775501182&rtpof=true&sd=true";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/1hBiMPWe99vpt_mAEmrZY_8AA6RTr_vmlgepFlD1M-WU/edit?usp=sharing";
 const DRIVE_URL = "https://drive.google.com/drive/folders/1pmNkiCfvW6KICOwHEggRfzgUyBGqU6x22WT8yDG1pKo?usp=sharing";
 
 const INITIAL_FILES: DriveFile[] = [
