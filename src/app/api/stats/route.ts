@@ -204,18 +204,98 @@ function normalizeHeader(h?: string | null): string {
     .replace(/^_+|_+$/g, '');
 }
 
+function getSpreadsheetId(url: string): string | null {
+  const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : null;
+}
+
+const DEFAULT_GIDS: Record<string, { gid: string, name: string }> = {
+  pro_mascotas: { gid: "261864183", name: "ABRIL - PRO MASCOTAS" },
+  viva_calentadores: { gid: "1433734534", name: "MAYO - CLUB HOUSE" },
+  printer_service: { gid: "481549131", name: "ENERO - PRINTER SERVICE" },
+  ingenova: { gid: "0", name: "Hoja 1" }
+};
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const brandId = searchParams.get('brandId') || 'pro_mascotas';
 
-  const sheetUrl = BRAND_SHEETS[brandId];
-  if (!sheetUrl) {
+  const defaultSheetUrl = BRAND_SHEETS[brandId];
+  if (!defaultSheetUrl) {
     return NextResponse.json({ success: false, error: `Invalid brandId: ${brandId}` }, { status: 400 });
   }
 
+  const spreadsheetId = getSpreadsheetId(defaultSheetUrl);
+  let sheetsList: { gid: string, name: string, index: number }[] = [];
+  const defaultInfo = DEFAULT_GIDS[brandId] || { gid: '0', name: 'Hoja 1' };
+
+  if (spreadsheetId) {
+    try {
+      const editUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
+      const editRes = await fetch(editUrl, {
+        next: { revalidate: 300 } // Cache edit page for 5 minutes
+      });
+      if (editRes.ok) {
+        const htmlText = await editRes.text();
+        const regex = /\[([0-9]+),0,\\?"([0-9]+)\\?",\[\\?\{\\?"1\\?":\[\[0,0,\\?"([^"\\]+)\\?"/g;
+        const sheetsMap = new Map<string, { index: number, name: string }>();
+        let match;
+        while ((match = regex.exec(htmlText)) !== null) {
+          const index = parseInt(match[1]);
+          const gid = match[2];
+          const name = match[3];
+          
+          let keep = false;
+          const upperName = name.toUpperCase();
+          if (brandId === 'pro_mascotas' && (upperName.includes('MASCOTAS') || upperName.includes('PRO MASCOTAS') || upperName.includes('PRO-MASCOTAS'))) {
+            keep = true;
+          } else if (brandId === 'viva_calentadores' && (upperName.includes('CLUB HOUSE') || upperName.includes('VIVA') || upperName.includes('CALENTADORES') || upperName.includes('VIVAGAS'))) {
+            keep = true;
+          } else if (brandId === 'printer_service' && (upperName.includes('PRINTER') || upperName.includes('SERVICE') || upperName.includes('PRINTER SERVICE') || upperName.includes('PRINTER_SERVICE'))) {
+            keep = true;
+          } else if (brandId === 'ingenova') {
+            keep = true;
+          }
+
+          if (keep) {
+            if (!sheetsMap.has(gid) || index < sheetsMap.get(gid)!.index) {
+              sheetsMap.set(gid, { index, name });
+            }
+          }
+        }
+        
+        sheetsList = Array.from(sheetsMap.entries())
+          .map(([gid, { index, name }]) => ({ gid, name, index }))
+          .sort((a, b) => a.index - b.index);
+      }
+    } catch (e) {
+      console.warn("Failed to parse sheets list from edit page:", e);
+    }
+  }
+
+  // Ensure default GID is in the list
+  const urlGidMatch = defaultSheetUrl.match(/gid=([0-9]+)/);
+  const defaultGid = urlGidMatch ? urlGidMatch[1] : defaultInfo.gid;
+  
+  if (sheetsList.length === 0) {
+    sheetsList = [{ gid: defaultGid, name: defaultInfo.name, index: 0 }];
+  } else {
+    if (!sheetsList.some(s => s.gid === defaultGid)) {
+      sheetsList.unshift({ gid: defaultGid, name: defaultInfo.name, index: -1 });
+    }
+  }
+
+  // Active GID selection
+  const requestedGid = searchParams.get('gid');
+  const activeGid = (requestedGid && sheetsList.some(s => s.gid === requestedGid))
+    ? requestedGid
+    : sheetsList[0].gid;
+
+  const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${activeGid}`;
+
   try {
-    const response = await fetch(sheetUrl, {
-      next: { revalidate: 60 } // Cache for 60 seconds
+    const response = await fetch(exportUrl, {
+      next: { revalidate: 30 } // Cache for 30 seconds
     });
 
     if (!response.ok) {
@@ -231,6 +311,8 @@ export async function GET(req: Request) {
         brandId, 
         isEmpty: true,
         data: [], 
+        sheets: sheetsList,
+        activeGid,
         message: "El archivo de estadísticas está vacío en Google Sheets." 
       });
     }
@@ -317,7 +399,7 @@ export async function GET(req: Request) {
       result.regiones = result.regiones.filter((r: any) => r.inversion > 0 || r.mensajes > 0);
       result.regiones.sort((a: any, b: any) => b.inversion - a.inversion);
 
-      return NextResponse.json({ success: true, brandId, data: result });
+      return NextResponse.json({ success: true, brandId, data: result, sheets: sheetsList, activeGid });
     }
 
     // Otherwise, parse standard weekly reports layout (ProMascotas, Viva Calentadores, Ingenova)
@@ -331,7 +413,7 @@ export async function GET(req: Request) {
       const joined = row.join(' ').toUpperCase();
       
       // Detect week headers by searching for keywords
-      if ((joined.includes('ABRIL') || joined.includes('MAYO') || joined.includes('SEMANAL') || joined.includes('SEMANA')) && !joined.includes('META') && !joined.includes('CIUDAD') && !joined.includes('PRODUCTO') && !joined.includes('GENERAL')) {
+      if ((joined.includes('ABRIL') || joined.includes('MAYO') || joined.includes('SEMANAL') || joined.includes('SEMANA') || joined.includes('JUNIO') || joined.includes('MARZO')) && !joined.includes('META') && !joined.includes('CIUDAD') && !joined.includes('PRODUCTO') && !joined.includes('GENERAL')) {
         let weekName = row.find(c => c !== '') || '';
         weekName = weekName.replace('PRO-MASCOTAS - REPORTE SEMANAL', '')
                            .replace('CLUB HOUSE — REPORTE SEMANAL', '')
@@ -559,7 +641,7 @@ export async function GET(req: Request) {
       throw new Error("Parsed zero weeks from CSV");
     }
 
-    return NextResponse.json({ success: true, brandId, data: reportWeeks });
+    return NextResponse.json({ success: true, brandId, data: reportWeeks, sheets: sheetsList, activeGid });
   } catch (error: any) {
     console.error(`Error fetching or parsing stats for brand ${brandId}:`, error);
     const fb = FALLBACKS[brandId];
@@ -568,10 +650,12 @@ export async function GET(req: Request) {
         success: true, 
         brandId, 
         data: fb, 
+        sheets: sheetsList,
+        activeGid,
         warning: `Using local fallback data: ${error.message}` 
       });
     }
 
-    return NextResponse.json({ success: true, brandId, isEmpty: true, data: [], error: error.message });
+    return NextResponse.json({ success: true, brandId, isEmpty: true, data: [], sheets: sheetsList, activeGid, error: error.message });
   }
 }

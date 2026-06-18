@@ -100,6 +100,8 @@ export default function BrandStats({ brandId, brandColor, statsSheetUrl, canEdit
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [selectedWeek, setSelectedWeek] = useState<string>('all'); // 'all', or index as string '0', '1'...
+  const [sheets, setSheets] = useState<{ gid: string, name: string }[]>([]);
+  const [activeGid, setActiveGid] = useState<string>('');
   
   const [tooltip, setTooltip] = useState<{
     show: boolean;
@@ -112,13 +114,25 @@ export default function BrandStats({ brandId, brandColor, statsSheetUrl, canEdit
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setSheets([]);
+    setActiveGid('');
+  }, [brandId]);
+
+  useEffect(() => {
     async function fetchStats() {
       setLoading(true);
       try {
-        const response = await fetch(`/api/stats?brandId=${brandId}&r=${refreshKey}`);
+        const gidParam = activeGid ? `&gid=${activeGid}` : '';
+        const response = await fetch(`/api/stats?brandId=${brandId}${gidParam}&r=${refreshKey}`);
         const json = await response.json();
         
         if (json.success) {
+          if (json.sheets) {
+            setSheets(json.sheets);
+          }
+          if (json.activeGid && !activeGid) {
+            setActiveGid(json.activeGid);
+          }
           if (json.isEmpty || !json.data || (Array.isArray(json.data) && json.data.length === 0)) {
             setIsEmpty(true);
           } else if (json.data.isB2B) {
@@ -129,6 +143,7 @@ export default function BrandStats({ brandId, brandColor, statsSheetUrl, canEdit
             setIsB2B(false);
             setB2cData(json.data);
             setIsEmpty(false);
+            setSelectedWeek('all');
           }
         } else {
           setIsEmpty(true);
@@ -141,7 +156,7 @@ export default function BrandStats({ brandId, brandColor, statsSheetUrl, canEdit
       }
     }
     fetchStats();
-  }, [brandId, refreshKey]);
+  }, [brandId, activeGid, refreshKey]);
 
   const handleRefresh = () => {
     setRefreshKey(prev => prev + 1);
@@ -377,6 +392,34 @@ export default function BrandStats({ brandId, brandColor, statsSheetUrl, canEdit
           )}
         </div>
       </div>
+
+      {/* Sheets/Months Tabs Selector */}
+      {sheets.length > 1 && (
+        <div className={styles.sheetTabsContainer}>
+          {sheets.map((sheet) => {
+            const isActive = activeGid === sheet.gid;
+            const cleanedName = sheet.name
+              .replace(/\s*-\s*(CLUB HOUSE|PRO MASCOTAS|PRINTER SERVICE|INGENOVA)/i, '')
+              .trim();
+            return (
+              <button
+                key={sheet.gid}
+                className={`${styles.sheetTabBtn} ${isActive ? styles.sheetTabBtnActive : ''}`}
+                style={isActive ? { borderColor: brandColor, color: brandColor, backgroundColor: `${brandColor}15` } : {}}
+                onClick={() => {
+                  if (activeGid !== sheet.gid) {
+                    setActiveGid(sheet.gid);
+                    setSelectedWeek('all');
+                  }
+                }}
+                disabled={loading}
+              >
+                📅 {cleanedName}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {loading ? (
         <div className={styles.loading}>
