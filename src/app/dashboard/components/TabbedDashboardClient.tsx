@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Navbar from "@/components/Navbar";
 import WhatsAppDashboard from "../whatsapp/WhatsAppDashboard";
-import ProMascotasStats from "./ProMascotasStats";
+import BrandStats from "./BrandStats";
 import { logAction } from '@/lib/audit-client';
 import { 
   FileText, 
@@ -711,7 +711,7 @@ export default function TabbedDashboardClient({
   };
 
   return (
-    <main className={`${styles.main} ${(activeTab !== 'excel' && (activeTab !== 'stats' || brandId === 'pro_mascotas')) ? styles.scrollable : styles.hiddenScroll} ${(shouldHideExcel && activeTab !== 'stats') ? styles.isSergioActive : ''}`}>
+    <main className={`${styles.main} ${activeTab !== 'excel' ? styles.scrollable : styles.hiddenScroll} ${(shouldHideExcel && activeTab !== 'stats') ? styles.isSergioActive : ''}`}>
       <Navbar />
       
       {/* Selector de pestañas */}
@@ -813,20 +813,9 @@ export default function TabbedDashboardClient({
       )}
 
       {activeTab === 'stats' && (isSergio || isSuperUser) && statsSheetUrl && (
-        brandId === 'pro_mascotas' ? (
-          <div className={styles.whatsappWrapper} style={{ marginTop: '20px' }}>
-            <ProMascotasStats />
-          </div>
-        ) : (
-          <div className={styles.iframeWrapper}>
-            <iframe 
-              src={statsSheetUrl}
-              className={styles.iframe}
-              title="Estadísticas"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            />
-          </div>
-        )
+        <div className={styles.whatsappWrapper} style={{ marginTop: '20px', width: '100%' }}>
+          <BrandStats brandId={brandId || 'pro_mascotas'} brandColor={brandColor} statsSheetUrl={statsSheetUrl} />
+        </div>
       )}
 
       {activeTab === 'whatsapp' && (
