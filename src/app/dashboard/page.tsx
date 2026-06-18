@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import styles from "./dashboard.module.css";
 import { Link } from "next-view-transitions";
 import { logAction } from "@/lib/audit-client";
+import ProMascotasStats from "./components/ProMascotasStats";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -26,6 +27,18 @@ export default function DashboardPage() {
   }
 
   const isSergio = session.user?.email === "sergio@ingenova.com.co";
+
+  const allowedAdmins = [
+    "sergio@ingenova.com.co",
+    "thommyenergy@superuser.com",
+    "sebastian@ingenova.com.co",
+    "jessyca@ingenova.com.co",
+    "adrian@ingenova.com.co"
+  ];
+  const isAuthorizedForStats = session.user?.email && (
+    allowedAdmins.includes(session.user.email.toLowerCase()) || 
+    (session.user as any)?.role === 'BOSS'
+  );
 
   const handleLogout = async () => {
     if (session.user) {
@@ -59,7 +72,14 @@ export default function DashboardPage() {
             </button>
           </div>
 
+          {isAuthorizedForStats && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <ProMascotasStats />
+            </div>
+          )}
+
           <div className={styles.grid}>
+
             {!isSergio && (
               <>
                 <div className={styles.card}>
