@@ -77,10 +77,10 @@ export default function Footer() {
             <Image
               src="/energysoft_logo.svg"
               alt="EnergySoft Logo"
-              width={100}
-              height={20}
+              width={110}
+              height={22}
               className={styles.energyLogo}
-              style={{ width: 'auto', height: '20px' }}
+              style={{ width: 'auto', height: '22px' }}
             />
             | Software con Energía! ⚡️
           </a>

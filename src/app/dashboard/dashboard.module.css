@@ -1,14 +1,19 @@
 .main {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   background-color: #f8fafc;
 }
 
 .content {
+  flex: 1;
   padding-top: 8rem;
   max-width: 1200px;
   margin: 0 auto;
   padding-left: 1rem;
   padding-right: 1rem;
+  width: 100%;
 }
 
 .panel {

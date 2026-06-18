@@ -3,10 +3,13 @@ import Footer from '@/components/Footer';
 
 export default function EmpresasLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
-      {children}
+      <div style={{ flex: 1 }}>
+        {children}
+      </div>
       <Footer />
-    </>
+    </div>
   );
 }
+
