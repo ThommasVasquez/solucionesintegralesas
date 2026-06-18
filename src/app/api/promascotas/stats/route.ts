@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 const STATS_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1MwIVYmjvc9IPw_nWepCXlMj19XAugDc6zY37K0HvJ6Y/export?format=csv&gid=261864183";
+
 
 // Fallback data in case the Google Sheet fetch fails
 const FALLBACK_DATA = [
