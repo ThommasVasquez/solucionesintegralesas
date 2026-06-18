@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import styles from "./dashboard.module.css";
 import { Link } from "next-view-transitions";
 import { logAction } from "@/lib/audit-client";
+import Footer from "@/components/Footer";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -140,6 +141,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </main>
   );
 }

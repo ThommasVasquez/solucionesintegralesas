@@ -5,6 +5,7 @@ import Link from "next/link";
 import styles from "./audit-logs.module.css";
 import Navbar from "@/components/Navbar";
 import ClearLogsButton from "./ClearLogsButton";
+import Footer from "@/components/Footer";
 
 // Configuración para el Edge runtime en Cloudflare Pages
 export const runtime = 'edge';
@@ -277,6 +278,7 @@ export default async function AuditLogsPage(props: {
 
         </div>
       </div>
+      <Footer />
     </main>
   );
 }

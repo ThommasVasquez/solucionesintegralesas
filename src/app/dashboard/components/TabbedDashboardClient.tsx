@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import WhatsAppDashboard from "../whatsapp/WhatsAppDashboard";
 import BrandStats from "./BrandStats";
 import { logAction } from '@/lib/audit-client';
+import Footer from '@/components/Footer';
 import { 
   FileText, 
   FileImage, 
@@ -1282,6 +1283,7 @@ export default function TabbedDashboardClient({
           </div>
         </div>
       )}
+      {activeTab !== 'excel' && <Footer />}
     </main>
   );
 }
