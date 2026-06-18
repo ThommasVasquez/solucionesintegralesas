@@ -92,6 +92,12 @@ export default function TabbedDashboardClient({
     (sessionUser as any)?.role === 'BOSS'
   );
   const isSuperUser = !!user?.email && user.email.toLowerCase() === "thommyenergy@superuser.com";
+  const canSeeStats = !!user?.email && (
+    allowedAdmins.includes(user.email.toLowerCase()) || 
+    user.email.toLowerCase() === "sergio@ingenova.com.co" ||
+    (sessionUser as any)?.role === 'BOSS'
+  );
+  const canEditStats = isSuperUser || isSergio;
 
 
   const getEmbedUrl = (url: string) => {
@@ -146,14 +152,14 @@ export default function TabbedDashboardClient({
   const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive' | 'stats'>('whatsapp');
 
   useEffect(() => {
-    if (statsSheetUrl && (isSergio || isSuperUser)) {
+    if (statsSheetUrl && canSeeStats) {
       setActiveTab('stats');
     } else if (!shouldHideExcel) {
       setActiveTab('excel');
     } else {
       setActiveTab('whatsapp');
     }
-  }, [shouldHideExcel, isSergio, isSuperUser, statsSheetUrl]);
+  }, [shouldHideExcel, canSeeStats, statsSheetUrl]);
 
   // Log panel view on load
   useEffect(() => {
@@ -773,7 +779,7 @@ export default function TabbedDashboardClient({
             </button>
           )}
 
-          {(isSergio || isSuperUser) && statsSheetUrl && (
+          {canSeeStats && statsSheetUrl && (
             <button 
               className={`${styles.tabBtn} ${activeTab === 'stats' ? styles.tabBtnActive : ''}`}
               style={activeTab === 'stats' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
@@ -812,9 +818,9 @@ export default function TabbedDashboardClient({
         </div>
       )}
 
-      {activeTab === 'stats' && (isSergio || isSuperUser) && statsSheetUrl && (
+      {activeTab === 'stats' && canSeeStats && statsSheetUrl && (
         <div className={styles.whatsappWrapper} style={{ marginTop: '20px', width: '100%' }}>
-          <BrandStats brandId={brandId || 'pro_mascotas'} brandColor={brandColor} statsSheetUrl={statsSheetUrl} />
+          <BrandStats brandId={brandId || 'pro_mascotas'} brandColor={brandColor} statsSheetUrl={statsSheetUrl} canEdit={canEditStats} />
         </div>
       )}
 

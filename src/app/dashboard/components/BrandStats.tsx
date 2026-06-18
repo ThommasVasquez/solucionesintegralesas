@@ -88,9 +88,10 @@ interface BrandStatsProps {
   brandId: string;
   brandColor: string;
   statsSheetUrl?: string;
+  canEdit?: boolean;
 }
 
-export default function BrandStats({ brandId, brandColor, statsSheetUrl }: BrandStatsProps) {
+export default function BrandStats({ brandId, brandColor, statsSheetUrl, canEdit = false }: BrandStatsProps) {
   const [viewMode, setViewMode] = useState<'charts' | 'spreadsheet'>('charts');
   const [b2cData, setB2cData] = useState<WeekData[]>([]);
   const [b2bData, setB2bData] = useState<B2BData | null>(null);
@@ -345,7 +346,7 @@ export default function BrandStats({ brandId, brandColor, statsSheetUrl }: Brand
             Actualizar
           </button>
 
-          {statsSheetUrl && (
+          {statsSheetUrl && canEdit && (
             <div className={styles.viewToggleContainer}>
               <button 
                 className={`${styles.toggleBtn} ${viewMode === 'charts' ? styles.toggleBtnActive : ''}`}
@@ -390,7 +391,7 @@ export default function BrandStats({ brandId, brandColor, statsSheetUrl }: Brand
             La planilla de Google Sheets está vacía o no tiene el formato esperado. 
             Copia los datos de reporte a la planilla para habilitar el dashboard interactivo de gráficos.
           </p>
-          {statsSheetUrl && (
+          {statsSheetUrl && canEdit && (
             <button 
               className={styles.emptyStateBtn} 
               style={{ backgroundColor: brandColor }}
