@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import Navbar from "@/components/Navbar";
 import WhatsAppDashboard from "../whatsapp/WhatsAppDashboard";
+import ProMascotasStats from "./ProMascotasStats";
 import { logAction } from '@/lib/audit-client';
 import { 
   FileText, 
@@ -145,10 +146,10 @@ export default function TabbedDashboardClient({
   const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive' | 'stats'>('whatsapp');
 
   useEffect(() => {
-    if (!shouldHideExcel) {
-      setActiveTab('excel');
-    } else if ((isSergio || isSuperUser) && statsSheetUrl) {
+    if (statsSheetUrl && (isSergio || isSuperUser)) {
       setActiveTab('stats');
+    } else if (!shouldHideExcel) {
+      setActiveTab('excel');
     } else {
       setActiveTab('whatsapp');
     }
@@ -710,7 +711,7 @@ export default function TabbedDashboardClient({
   };
 
   return (
-    <main className={`${styles.main} ${(activeTab !== 'excel' && activeTab !== 'stats') ? styles.scrollable : styles.hiddenScroll} ${(shouldHideExcel && activeTab !== 'stats') ? styles.isSergioActive : ''}`}>
+    <main className={`${styles.main} ${(activeTab !== 'excel' && (activeTab !== 'stats' || brandId === 'pro_mascotas')) ? styles.scrollable : styles.hiddenScroll} ${(shouldHideExcel && activeTab !== 'stats') ? styles.isSergioActive : ''}`}>
       <Navbar />
       
       {/* Selector de pestañas */}
@@ -812,14 +813,20 @@ export default function TabbedDashboardClient({
       )}
 
       {activeTab === 'stats' && (isSergio || isSuperUser) && statsSheetUrl && (
-        <div className={styles.iframeWrapper}>
-          <iframe 
-            src={statsSheetUrl}
-            className={styles.iframe}
-            title="Estadísticas"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          />
-        </div>
+        brandId === 'pro_mascotas' ? (
+          <div className={styles.whatsappWrapper} style={{ marginTop: '20px' }}>
+            <ProMascotasStats />
+          </div>
+        ) : (
+          <div className={styles.iframeWrapper}>
+            <iframe 
+              src={statsSheetUrl}
+              className={styles.iframe}
+              title="Estadísticas"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            />
+          </div>
+        )
       )}
 
       {activeTab === 'whatsapp' && (
