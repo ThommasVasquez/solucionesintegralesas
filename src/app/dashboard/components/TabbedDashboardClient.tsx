@@ -140,13 +140,17 @@ export default function TabbedDashboardClient({
 
 
 
-  const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive'>('whatsapp');
+  const [activeTab, setActiveTab] = useState<'excel' | 'whatsapp' | 'drive' | 'stats'>('whatsapp');
 
   useEffect(() => {
     if (!shouldHideExcel) {
       setActiveTab('excel');
+    } else if (isSergio || isSuperUser) {
+      setActiveTab('stats');
+    } else {
+      setActiveTab('whatsapp');
     }
-  }, [shouldHideExcel]);
+  }, [shouldHideExcel, isSergio, isSuperUser]);
 
   // Log panel view on load
   useEffect(() => {
@@ -181,7 +185,7 @@ export default function TabbedDashboardClient({
     };
   }, []);
 
-  const handleTabChange = (tab: 'excel' | 'whatsapp' | 'drive') => {
+  const handleTabChange = (tab: 'excel' | 'whatsapp' | 'drive' | 'stats') => {
     setActiveTab(tab);
     setExcelWorkbook(null);
     setViewingFile(null);
@@ -191,11 +195,11 @@ export default function TabbedDashboardClient({
       setCurrentSheetUrl(sheetUrl);
     }
     logAction({
-      userEmail: user.email,
-      userName: user.name,
+      userEmail: user?.email || '',
+      userName: user?.name || '',
       action: 'SWITCH_TAB',
       resource: title,
-      details: { tab, message: `Cambió a la pestaña "${tab === 'excel' ? 'Planilla Excel' : tab === 'whatsapp' ? 'Reportes WhatsApp' : 'Carpeta Drive'}" en el panel ${title}` }
+      details: { tab, message: `Cambió a la pestaña "${tab === 'excel' ? 'Planilla Excel' : tab === 'whatsapp' ? 'Reportes WhatsApp' : tab === 'stats' ? 'Estadísticas' : 'Carpeta Drive'}" en el panel ${title}` }
     });
   };
 
@@ -704,56 +708,56 @@ export default function TabbedDashboardClient({
   };
 
   return (
-    <main className={`${styles.main} ${activeTab !== 'excel' ? styles.scrollable : styles.hiddenScroll} ${shouldHideExcel ? styles.isSergioActive : ''}`}>
+    <main className={`${styles.main} ${(activeTab !== 'excel' && activeTab !== 'stats') ? styles.scrollable : styles.hiddenScroll} ${(shouldHideExcel && activeTab !== 'stats') ? styles.isSergioActive : ''}`}>
       <Navbar />
       
       {/* Selector de pestañas */}
-      {!shouldHideExcel && (
-        <div className={styles.tabContainer}>
-          <div className={styles.tabBar}>
-            {isUserAdmin && (
-              <div className={styles.dropdownContainer} ref={adminDropdownRef}>
-                <button 
-                  className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl !== sheetUrl ? styles.tabBtnActive : ''}`}
-                  style={activeTab === 'excel' && currentSheetUrl !== sheetUrl ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-                  onClick={() => setIsAdminOpen(!isAdminOpen)}
-                >
-                  💼 Administrativo ▾
-                </button>
-                {isAdminOpen && (
-                  <div className={styles.dropdownMenu}>
-                    {sheetsList.map((sheet, index) => (
+      <div className={styles.tabContainer}>
+        <div className={styles.tabBar}>
+          {!shouldHideExcel && isUserAdmin && (
+            <div className={styles.dropdownContainer} ref={adminDropdownRef}>
+              <button 
+                className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl !== sheetUrl ? styles.tabBtnActive : ''}`}
+                style={activeTab === 'excel' && currentSheetUrl !== sheetUrl ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
+                onClick={() => setIsAdminOpen(!isAdminOpen)}
+              >
+                💼 Administrativo ▾
+              </button>
+              {isAdminOpen && (
+                <div className={styles.dropdownMenu}>
+                  {sheetsList.map((sheet, index) => (
+                    <button 
+                      key={index} 
+                      onClick={() => handleAdminSelect(sheet.name, sheet.url)}
+                    >
+                      {sheet.name}
+                    </button>
+                  ))}
+                  {(isSuperUser || (isUserAdmin && !isCustomConfig)) && (
+                    <>
+                      <div className={styles.dropdownDivider} />
                       <button 
-                        key={index} 
-                        onClick={() => handleAdminSelect(sheet.name, sheet.url)}
+                        className={styles.dropdownConfigBtn}
+                        onClick={() => {
+                          const list = [...sheetsList];
+                          while (list.length < 4) {
+                            list.push({ name: `archivo${list.length + 1}`, url: '' });
+                          }
+                          setConfigSheets(list.slice(0, 4));
+                          setIsConfigModalOpen(true);
+                          setIsAdminOpen(false);
+                        }}
                       >
-                        {sheet.name}
+                        ⚙️ Configurar Archivos
                       </button>
-                    ))}
-                    {(isSuperUser || (isUserAdmin && !isCustomConfig)) && (
-                      <>
-                        <div className={styles.dropdownDivider} />
-                        <button 
-                          className={styles.dropdownConfigBtn}
-                          onClick={() => {
-                            const list = [...sheetsList];
-                            while (list.length < 4) {
-                              list.push({ name: `archivo${list.length + 1}`, url: '' });
-                            }
-                            setConfigSheets(list.slice(0, 4));
-                            setIsConfigModalOpen(true);
-                            setIsAdminOpen(false);
-                          }}
-                        >
-                          ⚙️ Configurar Archivos
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
+          {!shouldHideExcel && (
             <button 
               className={`${styles.tabBtn} ${activeTab === 'excel' && currentSheetUrl === sheetUrl ? styles.tabBtnActive : ''}`}
               style={activeTab === 'excel' && currentSheetUrl === sheetUrl ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
@@ -764,23 +768,35 @@ export default function TabbedDashboardClient({
             >
               📄 Planilla Excel
             </button>
+          )}
+
+          {(isSergio || isSuperUser) && (
             <button 
-              className={`${styles.tabBtn} ${activeTab === 'whatsapp' ? styles.tabBtnActive : ''}`}
-              style={activeTab === 'whatsapp' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-              onClick={() => handleTabChange('whatsapp')}
+              className={`${styles.tabBtn} ${activeTab === 'stats' ? styles.tabBtnActive : ''}`}
+              style={activeTab === 'stats' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
+              onClick={() => handleTabChange('stats')}
             >
-              💬 Reportes WhatsApp
+              📈 Estadísticas
             </button>
-            <button 
-              className={`${styles.tabBtn} ${activeTab === 'drive' ? styles.tabBtnActive : ''}`}
-              style={activeTab === 'drive' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
-              onClick={() => handleTabChange('drive')}
-            >
-              📁 Carpeta Drive
-            </button>
-          </div>
+          )}
+
+          <button 
+            className={`${styles.tabBtn} ${activeTab === 'whatsapp' ? styles.tabBtnActive : ''}`}
+            style={activeTab === 'whatsapp' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
+            onClick={() => handleTabChange('whatsapp')}
+          >
+            💬 Reportes WhatsApp
+          </button>
+          
+          <button 
+            className={`${styles.tabBtn} ${activeTab === 'drive' ? styles.tabBtnActive : ''}`}
+            style={activeTab === 'drive' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
+            onClick={() => handleTabChange('drive')}
+          >
+            📁 Carpeta Drive
+          </button>
         </div>
-      )}
+      </div>
 
       {activeTab === 'excel' && !shouldHideExcel && (
         <div className={styles.iframeWrapper}>
@@ -788,6 +804,17 @@ export default function TabbedDashboardClient({
             src={currentSheetUrl}
             className={styles.iframe}
             title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          />
+        </div>
+      )}
+
+      {activeTab === 'stats' && (isSergio || isSuperUser) && (
+        <div className={styles.iframeWrapper}>
+          <iframe 
+            src="https://docs.google.com/spreadsheets/d/1MwIVYmjvc9IPw_nWepCXlMj19XAugDc6zY37K0HvJ6Y/edit?gid=97119614#gid=97119614"
+            className={styles.iframe}
+            title="Estadísticas"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           />
         </div>
