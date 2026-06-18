@@ -14,6 +14,8 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Reglamento_Tecnico_Instalacion_Gaseodomesticos_NTC.pdf", type: "pdf", size: "1.1 MB", date: "15/01/2026", category: "Normativas" }
 ];
 
+const STATS_SHEET_URL = "https://docs.google.com/spreadsheets/d/1OK9fUUn-oHGgs0ZBLtc9rIQda0LEWg0PmpUHSKRsVWo/edit?gid=1433734534#gid=1433734534";
+
 export default function VivaCalentadoresDashboardPage() {
   return (
     <TabbedDashboardClient 
@@ -24,6 +26,7 @@ export default function VivaCalentadoresDashboardPage() {
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={true}
       brandId="viva_calentadores"
+      statsSheetUrl={STATS_SHEET_URL}
     />
   );
 }

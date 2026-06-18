@@ -55,6 +55,7 @@ interface TabbedDashboardClientProps {
   hideExcelForSergio?: boolean;
   brandId?: string;
   adminSheets?: AdminSheet[];
+  statsSheetUrl?: string;
 }
 
 export default function TabbedDashboardClient({
@@ -67,7 +68,8 @@ export default function TabbedDashboardClient({
   initialFiles,
   hideExcelForSergio = false,
   brandId,
-  adminSheets
+  adminSheets,
+  statsSheetUrl
 }: TabbedDashboardClientProps) {
   const { data: session } = useSession();
   const sessionUser = session?.user;
@@ -145,12 +147,12 @@ export default function TabbedDashboardClient({
   useEffect(() => {
     if (!shouldHideExcel) {
       setActiveTab('excel');
-    } else if (isSergio || isSuperUser) {
+    } else if ((isSergio || isSuperUser) && statsSheetUrl) {
       setActiveTab('stats');
     } else {
       setActiveTab('whatsapp');
     }
-  }, [shouldHideExcel, isSergio, isSuperUser]);
+  }, [shouldHideExcel, isSergio, isSuperUser, statsSheetUrl]);
 
   // Log panel view on load
   useEffect(() => {
@@ -770,7 +772,7 @@ export default function TabbedDashboardClient({
             </button>
           )}
 
-          {(isSergio || isSuperUser) && (
+          {(isSergio || isSuperUser) && statsSheetUrl && (
             <button 
               className={`${styles.tabBtn} ${activeTab === 'stats' ? styles.tabBtnActive : ''}`}
               style={activeTab === 'stats' ? { backgroundColor: brandColor, boxShadow: `0 4px 12px ${brandColor}4D` } : {}}
@@ -809,10 +811,10 @@ export default function TabbedDashboardClient({
         </div>
       )}
 
-      {activeTab === 'stats' && (isSergio || isSuperUser) && (
+      {activeTab === 'stats' && (isSergio || isSuperUser) && statsSheetUrl && (
         <div className={styles.iframeWrapper}>
           <iframe 
-            src="https://docs.google.com/spreadsheets/d/1MwIVYmjvc9IPw_nWepCXlMj19XAugDc6zY37K0HvJ6Y/edit?gid=97119614#gid=97119614"
+            src={statsSheetUrl}
             className={styles.iframe}
             title="Estadísticas"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

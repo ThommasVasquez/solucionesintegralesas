@@ -15,6 +15,8 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Manual_Usuario_Calentador_Pentair_MasterTemp.pdf", type: "pdf", size: "3.1 MB", date: "18/02/2026", category: "Manuales" }
 ];
 
+const STATS_SHEET_URL = "https://docs.google.com/spreadsheets/d/1ld2n0EJ59wboefiz6o9AWgdl4Ctz9V8lq5cHpvmEoR8/edit?usp=sharing";
+
 export default function IngenovaPage() {
   return (
     <TabbedDashboardClient 
@@ -25,6 +27,7 @@ export default function IngenovaPage() {
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={true}
       brandId="ingenova"
+      statsSheetUrl={STATS_SHEET_URL}
     />
   );
 }

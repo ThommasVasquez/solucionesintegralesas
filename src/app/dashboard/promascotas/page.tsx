@@ -14,6 +14,8 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Resolucion_Sanitaria_Funcionamiento_Domicilio.pdf", type: "pdf", size: "2.5 MB", date: "10/02/2026", category: "Certificaciones" }
 ];
 
+const STATS_SHEET_URL = "https://docs.google.com/spreadsheets/d/1MwIVYmjvc9IPw_nWepCXlMj19XAugDc6zY37K0HvJ6Y/edit?gid=261864183#gid=261864183";
+
 export default function ProMascotasPage() {
   return (
     <TabbedDashboardClient 
@@ -24,6 +26,7 @@ export default function ProMascotasPage() {
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={false}
       brandId="pro_mascotas"
+      statsSheetUrl={STATS_SHEET_URL}
     />
   );
 }

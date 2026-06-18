@@ -14,6 +14,8 @@ const INITIAL_FILES: DriveFile[] = [
   { name: "Guia_Configuracion_Red_Escaner_SMB.pdf", type: "pdf", size: "850 KB", date: "25/04/2026", category: "Guías" }
 ];
 
+const STATS_SHEET_URL = "https://docs.google.com/spreadsheets/d/1_RBqHwCPl-t3XZmzfj7U_Zx0cMWfD1L6RBC2ey8ituE/edit?gid=481549131#gid=481549131";
+
 export default function PrinterServicePage() {
   return (
     <TabbedDashboardClient 
@@ -24,6 +26,7 @@ export default function PrinterServicePage() {
       initialFiles={INITIAL_FILES}
       hideExcelForSergio={true}
       brandId="printer_service"
+      statsSheetUrl={STATS_SHEET_URL}
     />
   );
 }
