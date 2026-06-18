@@ -67,16 +67,23 @@ export default function Footer() {
           &copy; {new Date().getFullYear()} Soluciones Integrales AS SAS. Todos
           los derechos reservados.
           <span className={styles.separator}> | </span>
-          Powered by all the strength of
-          <Image
-            src="/energysoft_logo.svg"
-            alt="EnergySoft Logo"
-            width={100}
-            height={20}
-            className={styles.energyLogo}
-            style={{ width: 'auto', height: '20px' }}
-          />
-          | Software con Energía! ⚡️
+          <a 
+            href="https://www.energysoftmedia.com" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className={styles.energyLink}
+          >
+            Powered by all the strength of
+            <Image
+              src="/energysoft_logo.svg"
+              alt="EnergySoft Logo"
+              width={100}
+              height={20}
+              className={styles.energyLogo}
+              style={{ width: 'auto', height: '20px' }}
+            />
+            | Software con Energía! ⚡️
+          </a>
         </p>
       </div>
     </footer>
