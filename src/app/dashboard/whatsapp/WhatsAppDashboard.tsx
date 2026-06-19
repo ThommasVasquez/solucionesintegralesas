@@ -368,11 +368,10 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
                 const unreadEl = cell.querySelector('[data-testid="unread-count"], span[aria-label*="unread"], span[aria-label*="leído"], span[class*="badge"], div[class*="unread"]');
                 const hasUnreadBadge = !!unreadEl || !!cell.querySelector('span[class*="badge"]') || !!cell.querySelector('div[class*="badge"]') || !!cell.querySelector('[class*="unread"]');
 
-                // 3. Determinar la dirección del último mensaje (si tiene checkmark, es OUTBOUND)
-                const hasCheckmark = cell.querySelector('[data-testid="msg-status-check"], [data-testid="msg-status-doublecheck"], [data-icon*="check"], [class*="status-check"]');
-                
+                if (!hasUnreadBadge) return; // SOLUCIÓN: Solo capturar si hay mensajes sin leer en la barra lateral
+
                 // Si tiene badge de no leído, definitivamente el cliente nos escribió y no hemos leído
-                const direction = hasUnreadBadge ? 'INBOUND' : (hasCheckmark ? 'OUTBOUND' : 'INBOUND');
+                const direction = 'INBOUND';
 
                 const chatId = chatName.toLowerCase().replace(/\\s+/g, '_');
                 const cleanTimeText = timeText.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -448,6 +447,14 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
 
             if (sentMessageIds.has(msgId)) return;
 
+            // SOLUCIÓN: Si el mensaje tiene más de 30 minutos de antigüedad (historial antiguo), lo descartamos
+            // para evitar sincronizar conversaciones viejas del DOM y alterar las estadísticas históricas
+            const parsedTimestamp = getMessageTimestamp(el);
+            const msgTime = new Date(parsedTimestamp).getTime();
+            if (!isNaN(msgTime) && (Date.now() - msgTime > 30 * 60 * 1000)) {
+                return;
+            }
+
             // Detectar dirección del mensaje usando el prefijo data-id (true_ = OUTBOUND / false_ = INBOUND)
             let isOutbound = false;
             if (msgId.startsWith('true_')) {
@@ -516,7 +523,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
                 chatId: chatName.toLowerCase().replace(/\\s+/g, '_'),
                 sender: sender,
                 content: content,
-                timestamp: getMessageTimestamp(el),
+                timestamp: parsedTimestamp,
                 direction: direction
             };
 
@@ -1057,7 +1064,7 @@ export default function WhatsAppDashboard({ userName, userEmail, brandId }: What
           Distribución de Clientes por Franjas Horarias
         </h3>
         <p className={styles.chartSubtext}>
-          Proporción de clientes únicos que enviaron mensajes en cada franja horaria. Total acumulado de contactos: <strong>{totalClients}</strong>.
+          Proporción de clientes únicos que enviaron mensajes en cada franja horaria. Contactos únicos totales: <strong>{stats.slots.all.count}</strong>.
         </p>
         <div className={styles.slotsChartContainer}>
           {slotsList.map((slot) => {
