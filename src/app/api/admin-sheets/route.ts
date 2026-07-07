@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
       "sebastian@ingenova.com.co",
       "jessyca@ingenova.com.co",
       "adrian@ingenova.com.co",
+      "sergio@ingenova.com.co",
       "thommyenergy@superuser.com"
     ];
 
@@ -103,8 +104,6 @@ export async function POST(req: NextRequest) {
         { status: 403, headers: corsHeaders }
       );
     }
-
-    const isSuper = userEmail.toLowerCase() === 'thommyenergy@superuser.com';
 
     const body = await req.json();
     const { brandId, sheets } = body;
@@ -121,22 +120,6 @@ export async function POST(req: NextRequest) {
     }
 
     const sql = neon(process.env.DATABASE_URL);
-
-    // Si no es superusuario, verificar si la configuración ya ha sido modificada (es custom)
-    if (!isSuper) {
-      const currentConfigs = await sql`
-        SELECT "isCustom"
-        FROM admin_sheet_configs
-        WHERE "brandId" = ${brandId}
-      `;
-      const hasCustom = currentConfigs.some((c: any) => c.isCustom === true);
-      if (hasCustom) {
-        return NextResponse.json(
-          { success: false, error: 'No autorizado. La configuración ya fue guardada previamente y solo el superusuario puede volver a modificarla.' },
-          { status: 403, headers: corsHeaders }
-        );
-      }
-    }
 
     // Eliminar las configuraciones anteriores para esta marca
     await sql`

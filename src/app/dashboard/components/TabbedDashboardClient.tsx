@@ -86,6 +86,7 @@ export default function TabbedDashboardClient({
     "sebastian@ingenova.com.co",
     "jessyca@ingenova.com.co",
     "adrian@ingenova.com.co",
+    "sergio@ingenova.com.co",
     "thommyenergy@superuser.com"
   ];
   const isUserAdmin = !!user?.email && (
@@ -93,6 +94,7 @@ export default function TabbedDashboardClient({
     (sessionUser as any)?.role === 'BOSS'
   );
   const isSuperUser = !!user?.email && user.email.toLowerCase() === "thommyenergy@superuser.com";
+  const canChangeExcelLinks = !!user?.email && allowedAdmins.includes(user.email.toLowerCase());
   const canSeeStats = !!user?.email && (
     allowedAdmins.includes(user.email.toLowerCase()) || 
     user.email.toLowerCase() === "sergio@ingenova.com.co" ||
@@ -743,7 +745,7 @@ export default function TabbedDashboardClient({
                       {sheet.name}
                     </button>
                   ))}
-                  {(isSuperUser || (isUserAdmin && !isCustomConfig)) && (
+                  {canChangeExcelLinks && (
                     <>
                       <div className={styles.dropdownDivider} />
                       <button 
@@ -1182,7 +1184,7 @@ export default function TabbedDashboardClient({
       )}
 
       {/* Modal de Configuración de Archivos Administrativos */}
-      {isConfigModalOpen && (isSuperUser || (isUserAdmin && !isCustomConfig)) && (
+      {isConfigModalOpen && canChangeExcelLinks && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
